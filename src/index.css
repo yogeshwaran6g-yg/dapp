@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+    --color-gold: #d4af37;
+    --color-gold-light: #f9e295;
+    --color-gold-dark: #9a7b2c;
+
+    --color-green-accent: #00ff88;
+    --color-green-dark: #004d2c;
+
+    --color-black-pure: #000000;
+    --color-black-soft: #0a0a0a;
+    --color-black-elevated: #1a1a1a;
+
+    --font-display: "Orbitron", sans-serif;
+
+    --animate-float: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+:root {
+    background-color: var(--color-black-pure);
+    color: white;
+}
