@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { NavLink } from 'react-router-dom';
 
-const Sidebar = ({ activeItem, onItemClick, isOpen, onClose }) => {
+const Sidebar = ({ isOpen, onClose }) => {
     const navItems = [
-        { icon: 'grid_view', label: 'Dashboard' },
-        { icon: 'group', label: 'Referral' },
-        { icon: 'electric_bolt', label: 'Slot Activation' },
-        { icon: 'token', label: 'NFT Royalty' },
-        { icon: 'account_balance_wallet', label: 'Token Wallet' },
-        { icon: 'swap_horiz', label: 'Swap' },
-        { icon: 'lock', label: 'Staking' },
-        { icon: 'download', label: 'Withdraw' },
-        { icon: 'person', label: 'Profile' },
+        { icon: 'grid_view', label: 'Dashboard', path: '/' },
+        { icon: 'group', label: 'Referral', path: '/referral' },
+        { icon: 'electric_bolt', label: 'Slot Activation', path: '/slot-activation' },
+        { icon: 'token', label: 'NFT Royalty', path: '/nft-royalty' },
+        { icon: 'account_balance_wallet', label: 'Token Wallet', path: '/wallet' },
+        { icon: 'swap_horiz', label: 'Swap', path: '/swap' },
+        { icon: 'lock', label: 'Staking', path: '/staking' },
+        { icon: 'north_east', label: 'Withdraw', path: '/withdraw' },
+        { icon: 'person', label: 'Profile', path: '/profile' },
     ];
 
     return (
@@ -47,26 +48,33 @@ const Sidebar = ({ activeItem, onItemClick, isOpen, onClose }) => {
 
                     <nav className="flex-1 space-y-1">
                         {navItems.map((item, idx) => (
-                            <div
+                            <NavLink
                                 key={idx}
+                                to={item.path}
+                                end={item.path === '/'}
                                 onClick={() => {
-                                    onItemClick(item.label);
                                     if (window.innerWidth < 1024) onClose();
                                 }}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all group cursor-pointer ${activeItem === item.label
-                                    ? 'active-nav-bg border-l-2 border-accent-gold'
-                                    : 'hover:bg-white/5'
-                                    }`}
+                                className={({ isActive }) =>
+                                    `flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all group cursor-pointer no-underline ${isActive
+                                        ? 'active-nav-bg border-l-2 border-accent-gold'
+                                        : 'hover:bg-white/5'
+                                    }`
+                                }
                             >
-                                <span className={`material-symbols-outlined text-xl transition-colors ${activeItem === item.label ? 'text-accent-gold' : 'text-gray-500 group-hover:text-accent-gold'
-                                    }`}>
-                                    {item.icon}
-                                </span>
-                                <p className={`text-xs lg:text-sm font-medium ${activeItem === item.label ? 'text-white' : 'text-gray-400 group-hover:text-white'
-                                    }`}>
-                                    {item.label}
-                                </p>
-                            </div>
+                                {({ isActive }) => (
+                                    <>
+                                        <span className={`material-symbols-outlined text-xl transition-colors ${isActive ? 'text-accent-gold' : 'text-gray-500 group-hover:text-accent-gold'
+                                            }`}>
+                                            {item.icon}
+                                        </span>
+                                        <p className={`text-xs lg:text-sm font-medium ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-white'
+                                            }`}>
+                                            {item.label}
+                                        </p>
+                                    </>
+                                )}
+                            </NavLink>
                         ))}
                     </nav>
 

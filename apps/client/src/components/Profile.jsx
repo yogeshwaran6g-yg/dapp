@@ -8,6 +8,7 @@ const Profile = () => {
         phone_number: '',
         dob: '',
         city: '',
+        country: '',
         wallet_address: ''
     });
 
@@ -158,7 +159,25 @@ const Profile = () => {
                             </div>
 
                             <div className="mt-10 w-full space-y-6 pt-8 border-t border-white/5">
-                                <div className="space-y-3">
+                                <div className="grid grid-cols-1 gap-6">
+                                    <ProfileItem
+                                        label="City"
+                                        name="city"
+                                        value={profile.city}
+                                        isEditing={isEditing}
+                                        onChange={handleChange}
+                                        icon="location_on"
+                                    />
+                                    <ProfileItem
+                                        label="Country"
+                                        name="country"
+                                        value={profile.country}
+                                        isEditing={isEditing}
+                                        onChange={handleChange}
+                                        icon="public"
+                                    />
+                                </div>
+                                <div className="space-y-3 pt-6 border-t border-white/5">
                                     <div className="flex items-center justify-between text-[11px] text-gray-500 uppercase font-black tracking-widest">
                                         <span>Wallet Address</span>
                                         <span className="text-accent-gold/60">Encrypted</span>
@@ -222,15 +241,10 @@ const Profile = () => {
                                     onChange={handleChange}
                                     icon="cake"
                                 />
-                                <div className="md:col-span-2">
-                                    <ProfileItem
-                                        label="City"
-                                        name="city"
-                                        value={profile.city}
-                                        isEditing={isEditing}
-                                        onChange={handleChange}
-                                        icon="location_on"
-                                    />
+                                <div className="sm:col-span-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        {/* Row for City and Country if preferred, but keeping standard layout */}
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -1,10 +1,16 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+import axios from 'axios';
+
+const api = axios.create({
+    baseURL: 'http://localhost:5000/api',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
 
 export const fetchProfile = async (userId) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/profile/${userId}`);
-        if (!response.ok) throw new Error('Failed to fetch profile');
-        return await response.json();
+        const { data } = await api.get(`/profile/${userId}`);
+        return data;
     } catch (error) {
         console.error('API Error (fetchProfile):', error);
         throw error;
@@ -13,17 +19,12 @@ export const fetchProfile = async (userId) => {
 
 export const updateProfile = async (userId, profileData) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/profile/${userId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(profileData),
-        });
-        if (!response.ok) throw new Error('Failed to update profile');
-        return await response.json();
+        const { data } = await api.put(`/profile/${userId}`, profileData);
+        return data;
     } catch (error) {
         console.error('API Error (updateProfile):', error);
         throw error;
     }
 };
+
+export default api;

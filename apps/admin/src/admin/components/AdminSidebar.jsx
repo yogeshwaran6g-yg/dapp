@@ -1,6 +1,19 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
-const AdminSidebar = ({ activeItem, onItemClick, isOpen, onClose }) => {
+const AdminSidebar = ({ isOpen, onClose }) => {
+    const navItems = [
+        { name: 'Dashboard', icon: 'dashboard', path: '/' },
+        { name: 'User Management', icon: 'person', path: '/users' },
+        { name: 'Treasury', icon: 'account_balance', path: '/treasury' },
+        { name: 'Slot Control', icon: 'view_cozy', path: '/slots' },
+        { name: 'NFT Management', icon: 'token', path: '/nft' },
+        { name: 'Tokenomics', icon: 'currency_bitcoin', path: '/tokenomics' },
+        { name: 'Staking Config', icon: 'layers', path: '/staking' },
+        { name: 'System Logs', icon: 'terminal', path: '/logs' },
+        { name: 'Settings', icon: 'settings', path: '/settings' },
+    ];
+
     return (
         <>
             {/* Backdrop for mobile */}
@@ -33,38 +46,24 @@ const AdminSidebar = ({ activeItem, onItemClick, isOpen, onClose }) => {
                     </div>
 
                     <nav className="flex-1 px-3 py-1 lg:py-2 space-y-0.5 overflow-y-auto custom-scrollbar">
-                        <div
-                            onClick={() => {
-                                onItemClick('Dashboard');
-                                if (window.innerWidth < 1024) onClose();
-                            }}
-                            className={`flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all group cursor-pointer ${activeItem === 'Dashboard' ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
-                        >
-                            <span className="material-symbols-outlined text-lg lg:text-xl">dashboard</span>
-                            <span className="text-[11px] lg:text-sm font-bold tracking-wide">Dashboard</span>
-                        </div>
-                        {/* Other Items */}
-                        {[
-                            { name: 'User Management', icon: 'person' },
-                            { name: 'Treasury', icon: 'account_balance' },
-                            { name: 'Slot Control', icon: 'view_cozy' },
-                            { name: 'NFT Management', icon: 'token' },
-                            { name: 'Tokenomics', icon: 'currency_bitcoin' },
-                            { name: 'Staking Config', icon: 'layers' },
-                            { name: 'System Logs', icon: 'terminal' },
-                            { name: 'Settings', icon: 'settings' },
-                        ].map((item, idx) => (
-                            <div
+                        {navItems.map((item, idx) => (
+                            <NavLink
                                 key={idx}
+                                to={item.path}
+                                end={item.path === '/'}
                                 onClick={() => {
-                                    onItemClick(item.name);
                                     if (window.innerWidth < 1024) onClose();
                                 }}
-                                className={`flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all group cursor-pointer ${activeItem === item.name ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                                className={({ isActive }) =>
+                                    `flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all group cursor-pointer no-underline ${isActive
+                                        ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20'
+                                        : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                                    }`
+                                }
                             >
                                 <span className="material-symbols-outlined text-lg lg:text-xl">{item.icon}</span>
                                 <span className="text-[11px] lg:text-sm font-bold tracking-wide">{item.name}</span>
-                            </div>
+                            </NavLink>
                         ))}
                     </nav>
 

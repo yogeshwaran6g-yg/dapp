@@ -12,6 +12,8 @@ export default {
                 "background-light": "#f7f7f7",
                 "background-dark": "#0b0b0f",
                 "accent-gold": "#D4AF37",
+                "gold-main": "#D4AF37",
+                "gold-light": "#FFD700",
                 "accent-purple": "#A855F7",
                 "gold-glow": "#D4AF37",
                 "gold-bright": "#FFD700",
