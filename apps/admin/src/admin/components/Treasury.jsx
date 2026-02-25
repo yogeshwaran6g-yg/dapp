@@ -4,7 +4,7 @@ import TransactionHistory from './Treasury/TransactionHistory';
 
 const Treasury = () => {
     return (
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 lg:p-8 custom-scrollbar">
             <TreasuryMetrics />
             <TransactionHistory />
         </div>

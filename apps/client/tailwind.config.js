@@ -15,6 +15,8 @@ export default {
                 "accent-purple": "#A855F7",
                 "gold-glow": "#D4AF37",
                 "gold-bright": "#FFD700",
+                "gold-start": "#D4AF37",
+                "silver": "#C0C0C0",
                 "glass": "rgba(255, 255, 255, 0.03)",
                 "glass-border": "rgba(255, 255, 255, 0.1)",
             },

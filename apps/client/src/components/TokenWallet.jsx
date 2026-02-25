@@ -45,7 +45,7 @@ const transactions = [
 
 const TokenCard = ({ icon, title, subtitle, balance, usdValue, change, actions, highlighted }) => (
     <div
-        className={`glass-card rounded-2xl p-8 relative overflow-hidden group border ${highlighted ? 'border-[#D4AF37]/30' : 'border-[#D4AF37]/10'
+        className={`glass-card rounded-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden group border ${highlighted ? 'border-[#D4AF37]/30' : 'border-[#D4AF37]/10'
             }`}
         style={{ boxShadow: '0 0 20px rgba(212,175,55,0.1)' }}
     >
@@ -57,30 +57,30 @@ const TokenCard = ({ icon, title, subtitle, balance, usdValue, change, actions, 
 
         {/* Header */}
         <div className="flex justify-between items-start relative z-10">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
                 <div
-                    className={`size-14 rounded-xl bg-[#0b0b0f] border flex items-center justify-center ${highlighted
-                            ? 'border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.2)]'
-                            : 'border-[#D4AF37]/30'
+                    className={`size-10 sm:size-14 rounded-xl bg-[#0b0b0f] border flex items-center justify-center ${highlighted
+                        ? 'border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.2)]'
+                        : 'border-[#D4AF37]/30'
                         }`}
                 >
-                    <span className="material-symbols-outlined text-[#D4AF37] text-3xl">{icon}</span>
+                    <span className="material-symbols-outlined text-[#D4AF37] text-2xl sm:text-3xl">{icon}</span>
                 </div>
                 <div>
-                    <h3 className="text-xl font-bold text-white">{title}</h3>
-                    <p className="text-sm text-white/40 font-medium tracking-wide">{subtitle}</p>
+                    <h3 className="text-lg sm:text-xl font-bold text-white">{title}</h3>
+                    <p className="text-xs sm:text-sm text-white/40 font-medium tracking-wide">{subtitle}</p>
                 </div>
             </div>
-            <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded">
+            <span className="text-[10px] sm:text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded">
                 {change}
             </span>
         </div>
 
         {/* Balance */}
-        <div className="mt-8 relative z-10">
-            <p className="text-[10px] text-white/30 uppercase font-bold tracking-[0.2em] mb-1">Available Balance</p>
-            <h4 className="text-4xl font-mono font-bold text-white tracking-tight">{balance}</h4>
-            <p className="text-[#F9E076]/60 font-medium text-lg mt-1">≈ {usdValue}</p>
+        <div className="mt-4 sm:mt-8 relative z-10">
+            <p className="text-[8px] sm:text-[10px] text-white/30 uppercase font-bold tracking-[0.2em] mb-1">Available Balance</p>
+            <h4 className="text-2xl sm:text-4xl font-mono font-bold text-white tracking-tight">{balance}</h4>
+            <p className="text-[#F9E076]/60 font-medium text-base sm:text-lg mt-1">≈ {usdValue}</p>
         </div>
 
         {/* Actions */}
@@ -89,8 +89,8 @@ const TokenCard = ({ icon, title, subtitle, balance, usdValue, change, actions, 
                 <button
                     key={idx}
                     className={`flex-1 min-w-[100px] flex items-center justify-center gap-2 py-3 rounded-lg border transition-all font-bold text-sm ${action.primary
-                            ? 'bg-[#D4AF37] text-[#0b0b0f] border-[#D4AF37] hover:brightness-110'
-                            : 'bg-white/5 hover:bg-[#D4AF37] hover:text-[#0b0b0f] border-white/10 hover:border-[#D4AF37]'
+                        ? 'bg-[#D4AF37] text-[#0b0b0f] border-[#D4AF37] hover:brightness-110'
+                        : 'bg-white/5 hover:bg-[#D4AF37] hover:text-[#0b0b0f] border-white/10 hover:border-[#D4AF37]'
                         }`}
                 >
                     <span className="material-symbols-outlined text-lg">{action.icon}</span>
@@ -162,25 +162,25 @@ const TokenWallet = () => {
                 style={{ border: '1px solid rgba(212,175,55,0.1)' }}
             >
                 {/* Table Header */}
-                <div className="p-6 border-b border-[#D4AF37]/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/[0.02]">
-                    <h3 className="font-bold text-lg flex items-center gap-2">
+                <div className="p-4 sm:p-6 border-b border-[#D4AF37]/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 bg-white/[0.02]">
+                    <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
                         <span className="material-symbols-outlined text-[#D4AF37]">history</span>
                         Recent Transactions
                     </h3>
-                    <div className="flex items-center gap-4">
-                        <div className="relative">
-                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-lg">
+                    <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                        <div className="relative flex-1 sm:flex-initial">
+                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-base sm:text-lg">
                                 search
                             </span>
                             <input
-                                className="bg-[#0b0b0f]/50 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:border-[#D4AF37] focus:outline-none w-64 transition-all text-white placeholder-white/30"
+                                className="bg-[#0b0b0f]/50 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:border-[#D4AF37] focus:outline-none w-full sm:w-64 transition-all text-white placeholder-white/30"
                                 placeholder="Search hash or type..."
                                 type="text"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
-                        <button className="text-sm font-bold text-[#D4AF37] hover:underline whitespace-nowrap">
+                        <button className="text-xs sm:text-sm font-bold text-[#D4AF37] hover:underline whitespace-nowrap">
                             View All
                         </button>
                     </div>

@@ -9,13 +9,13 @@ const ActivityList = () => {
 
     return (
         <div className="glass-panel rounded-xl border border-white/5 overflow-hidden">
-            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
-                <h3 className="text-base font-bold">Recent Activities</h3>
-                <button className="text-xs text-accent-gold font-bold hover:underline">View All</button>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-white/5 flex items-center justify-between">
+                <h3 className="text-sm sm:text-base font-bold">Recent Activities</h3>
+                <button className="text-[10px] sm:text-xs text-accent-gold font-bold hover:underline">View All</button>
             </div>
             <div className="divide-y divide-white/5">
                 {activities.map((activity, idx) => (
-                    <div key={idx} className="px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+                    <div key={idx} className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between hover:bg-white/5 transition-colors">
                         <div className="flex items-center gap-4">
                             <div className={`w-10 h-10 rounded flex items-center justify-center ${activity.iconBg}`}>
                                 <span className="material-symbols-outlined">{activity.icon}</span>

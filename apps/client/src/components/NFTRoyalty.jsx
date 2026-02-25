@@ -98,8 +98,8 @@ const NFTTierCard = ({ tier }) => {
                 <div className="absolute top-4 left-4">
                     <span
                         className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${isActive
-                                ? 'bg-accent-gold text-primary border-accent-gold/30'
-                                : 'bg-white/10 backdrop-blur-md text-white border-white/10'
+                            ? 'bg-accent-gold text-primary border-accent-gold/30'
+                            : 'bg-white/10 backdrop-blur-md text-white border-white/10'
                             }`}
                     >
                         Tier {tier.tier}
@@ -108,7 +108,7 @@ const NFTTierCard = ({ tier }) => {
             </div>
 
             {/* Content */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
                 <div className="flex justify-between items-start mb-4">
                     <div>
                         <h3
@@ -139,14 +139,14 @@ const NFTTierCard = ({ tier }) => {
                     <div className="flex items-center gap-2 py-2">
                         <span
                             className={`size-2 rounded-full ${isActive
-                                    ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]'
-                                    : 'bg-white/20'
+                                ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]'
+                                : 'bg-white/20'
                                 }`}
                         />
                         <span
                             className={`text-xs font-bold uppercase tracking-widest ${isActive
-                                    ? 'text-green-400'
-                                    : 'text-white/40 italic font-medium'
+                                ? 'text-green-400'
+                                : 'text-white/40 italic font-medium'
                                 }`}
                         >
                             {statusLabel}
@@ -164,28 +164,26 @@ const NFTRoyalty = () => {
     return (
         <div className="w-full">
             {/* Hero Header */}
-            <div className="mb-12">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-gold/10 border border-accent-gold/20 mb-4">
-                    <span className="material-symbols-outlined text-accent-gold text-sm">
+            <div className="mb-6 sm:mb-12">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-gold/10 border border-accent-gold/20 mb-3">
+                    <span className="material-symbols-outlined text-accent-gold text-[10px] sm:text-xs">
                         verified
                     </span>
-                    <span className="text-accent-gold text-xs font-bold uppercase tracking-widest">
-                        Ecosystem Rewards Active
+                    <span className="text-accent-gold text-[8px] sm:text-[10px] font-bold uppercase tracking-widest">
+                        Rewards Active
                     </span>
                 </div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
-                    NFT <span className="gold-gradient-text">Royalty</span> Program
+                <h1 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight mb-2 sm:mb-4">
+                    NFT <span className="gold-gradient-text">Royalty</span>
                 </h1>
-                <p className="text-white/50 text-base max-w-2xl leading-relaxed">
-                    Activate premium tier NFTs to secure your share of the global
-                    ecosystem revenue. Rewards are distributed every 72 hours directly
-                    to your connected wallet.
+                <p className="text-white/50 text-xs sm:text-base max-w-2xl leading-relaxed">
+                    Activate premium tier NFTs to secure ecosystem revenue. Distributed every 72 hours.
                 </p>
             </div>
 
             {/* Royalty Pool Overview */}
-            <section className="mb-14">
-                <div className="glass-card rounded-xl p-8 relative overflow-hidden nft-gold-border">
+            <section className="mb-8 sm:mb-14">
+                <div className="glass-card rounded-xl p-4 sm:p-8 relative overflow-hidden nft-gold-border">
                     <div className="absolute top-0 right-0 -mt-10 -mr-10 size-40 bg-accent-gold/10 blur-[80px] rounded-full" />
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
                         {/* Total Pool */}
@@ -198,7 +196,7 @@ const NFTRoyalty = () => {
                                     Total Royalty Pool
                                 </span>
                             </div>
-                            <div className="text-3xl font-black text-white">
+                            <div className="text-xl sm:text-3xl font-black text-white">
                                 $1,250,400.00
                             </div>
                             <div className="flex items-center gap-1 text-green-400 text-sm font-medium">
@@ -219,7 +217,7 @@ const NFTRoyalty = () => {
                                     Next Distribution
                                 </span>
                             </div>
-                            <div className="text-3xl font-black gold-gradient-text tabular-nums">
+                            <div className="text-xl sm:text-3xl font-black gold-gradient-text tabular-nums">
                                 02d 14h 55m
                             </div>
                             <div className="text-white/40 text-sm font-medium">
@@ -237,7 +235,7 @@ const NFTRoyalty = () => {
                                     Your Estimated Share
                                 </span>
                             </div>
-                            <div className="text-3xl font-black text-white">$452.20</div>
+                            <div className="text-xl sm:text-3xl font-black text-white">$452.20</div>
                             <div className="flex items-center gap-1 text-accent-gold text-sm font-medium">
                                 <span className="material-symbols-outlined text-sm">
                                     bolt
@@ -251,18 +249,18 @@ const NFTRoyalty = () => {
 
             {/* NFT Tiers Grid */}
             <section>
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-bold tracking-tight">
+                <div className="flex items-center justify-between mb-4 sm:mb-8">
+                    <h2 className="text-lg sm:text-2xl font-bold tracking-tight">
                         Select Your NFT Tier
                     </h2>
                     <div className="flex gap-2">
                         <button className="p-2 glass-card rounded hover:bg-white/10 transition-colors">
-                            <span className="material-symbols-outlined">filter_list</span>
+                            <span className="material-symbols-outlined text-lg sm:text-xl">filter_list</span>
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8">
                     {nftTiers.map((tier) => (
                         <NFTTierCard key={tier.tier} tier={tier} />
                     ))}
@@ -270,13 +268,13 @@ const NFTRoyalty = () => {
             </section>
 
             {/* Bottom Note */}
-            <div className="mt-16 p-6 glass-card rounded-xl flex items-center gap-4">
-                <div className="size-12 rounded-full bg-accent-gold/10 flex items-center justify-center text-accent-gold flex-shrink-0">
-                    <span className="material-symbols-outlined">info</span>
+            <div className="mt-8 sm:mt-16 p-4 sm:p-6 glass-card rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                <div className="size-10 sm:size-12 rounded-full bg-accent-gold/10 flex items-center justify-center text-accent-gold flex-shrink-0">
+                    <span className="material-symbols-outlined text-lg sm:text-xl">info</span>
                 </div>
                 <div>
-                    <h4 className="font-bold">Royalty Calculation Note</h4>
-                    <p className="text-sm text-white/50">
+                    <h4 className="font-bold text-sm sm:text-base">Royalty Calculation Note</h4>
+                    <p className="text-xs sm:text-sm text-white/50">
                         Rewards are calculated based on the 24-hour volume of the Aether
                         Decentralized Exchange and NFT Marketplace. APY is dynamic and
                         may vary based on total active participants.

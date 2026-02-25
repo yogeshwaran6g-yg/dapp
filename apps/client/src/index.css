@@ -67,6 +67,7 @@ body {
 .gold-gradient-text {
     background: linear-gradient(to right, #D4AF37, #FFD700);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -163,4 +164,77 @@ body {
 .staking-button-gold:hover {
     box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
     transform: translateY(-1px);
+}
+
+/* Orbital Visualization Styles */
+.orbit-container {
+    perspective: 1000px;
+}
+
+.orbit-ring {
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.planet-glow {
+    box-shadow: 0 0 15px rgba(192, 192, 192, 0.2);
+    transition: all 0.3s ease;
+}
+
+.planet-glow:hover {
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+    transform: scale(1.1);
+}
+
+.sun-glow {
+    box-shadow: 0 0 50px rgba(212, 175, 55, 0.3), inset 0 0 20px rgba(212, 175, 55, 0.2);
+    animation: sun-pulse 4s ease-in-out infinite;
+}
+
+@keyframes sun-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+@keyframes rotate-clockwise {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotate-counter-clockwise {
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+.orbit-rotate-slow {
+    animation: rotate-clockwise 40s linear infinite;
+}
+
+.orbit-rotate-medium {
+    animation: rotate-counter-clockwise 30s linear infinite;
+}
+
+.orbit-rotate-fast {
+    animation: rotate-clockwise 20s linear infinite;
 }

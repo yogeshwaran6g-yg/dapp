@@ -12,7 +12,7 @@ const StatsGrid = () => {
     ];
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-7 gap-4">
             {stats.map((stat, idx) => (
                 <div key={idx} className="glass-panel gold-glow-border p-4 rounded-xl flex flex-col gap-1">
                     <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider">{stat.label}</p>

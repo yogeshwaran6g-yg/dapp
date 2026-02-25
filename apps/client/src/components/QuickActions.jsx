@@ -14,15 +14,15 @@ const QuickActions = () => {
             {actions.map((action, idx) => (
                 <button
                     key={idx}
-                    className={`flex flex-col items-center justify-center gap-2 p-6 rounded-xl transition-all border ${action.primary
-                            ? 'action-gradient-gold text-primary font-bold hover:shadow-[0_8px_25px_rgba(212,175,55,0.4)] border-transparent'
-                            : 'glass-panel text-white font-bold hover:border-accent-gold/50 border-white/10'
+                    className={`flex flex-col items-center justify-center gap-2 p-4 sm:p-5 rounded-xl transition-all border ${action.primary
+                        ? 'action-gradient-gold text-primary font-bold hover:shadow-[0_8px_25px_rgba(212,175,55,0.4)] border-transparent'
+                        : 'glass-panel text-white font-bold hover:border-accent-gold/50 border-white/10'
                         }`}
                 >
-                    <span className={`material-symbols-outlined text-3xl ${!action.primary && 'text-accent-gold'}`}>
+                    <span className={`material-symbols-outlined text-2xl sm:text-3xl ${!action.primary && 'text-accent-gold'}`}>
                         {action.icon}
                     </span>
-                    <span className="text-xs uppercase tracking-widest">{action.label}</span>
+                    <span className="text-[10px] sm:text-xs uppercase tracking-widest">{action.label}</span>
                 </button>
             ))}
         </div>

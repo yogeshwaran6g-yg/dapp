@@ -124,17 +124,17 @@ const TokenSwap = () => {
     return (
         <div className="space-y-10">
             {/* Header */}
-            <div className="flex justify-between items-end">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight mb-1">Swap Tokens</h2>
-                    <p className="text-white/50 text-sm">Institutional grade liquidity for your digital assets.</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1">Swap Tokens</h2>
+                    <p className="text-white/50 text-xs sm:text-sm">Institutional grade liquidity for your digital assets.</p>
                 </div>
-                <div className="flex gap-3">
-                    <button className="p-2.5 rounded-lg glass-card hover:bg-white/10 text-white/60 hover:text-white transition-all">
-                        <span className="material-symbols-outlined text-[20px]">refresh</span>
+                <div className="flex gap-2 sm:gap-3">
+                    <button className="p-2 sm:p-2.5 rounded-lg glass-card hover:bg-white/10 text-white/60 hover:text-white transition-all">
+                        <span className="material-symbols-outlined text-[18px] sm:text-[20px]">refresh</span>
                     </button>
-                    <button className="p-2.5 rounded-lg glass-card hover:bg-white/10 text-white/60 hover:text-white transition-all">
-                        <span className="material-symbols-outlined text-[20px]">settings</span>
+                    <button className="p-2 sm:p-2.5 rounded-lg glass-card hover:bg-white/10 text-white/60 hover:text-white transition-all">
+                        <span className="material-symbols-outlined text-[18px] sm:text-[20px]">settings</span>
                     </button>
                 </div>
             </div>
@@ -162,7 +162,7 @@ const TokenSwap = () => {
                         <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between hover:border-[#D4AF37]/30 transition-all">
                             <div className="flex flex-col flex-1 min-w-0">
                                 <input
-                                    className="bg-transparent border-none focus:ring-0 text-2xl font-bold p-0 text-white placeholder-white/20 w-full focus:outline-none"
+                                    className="bg-transparent border-none focus:ring-0 text-xl sm:text-2xl font-bold p-0 text-white placeholder-white/20 w-full focus:outline-none"
                                     placeholder="0.00"
                                     type="text"
                                     value={fromAmount}
@@ -173,14 +173,16 @@ const TokenSwap = () => {
                                 />
                                 <span className="text-[10px] text-white/30 font-medium mt-1">{fromUSD}</span>
                             </div>
-                            <button className="flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-all px-3 py-2 rounded-xl border border-white/5 ml-3 flex-shrink-0">
+                            <button className="flex items-center gap-1.5 sm:gap-2 bg-white/5 hover:bg-white/10 transition-all px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border border-white/5 ml-2 sm:ml-3 flex-shrink-0">
                                 <TokenIcon
                                     icon={fromToken.icon}
                                     iconStyle={fromToken.iconStyle}
                                     iconClass={fromToken.iconClass}
+                                    size="w-5 h-5 sm:w-6 sm:h-6"
+                                    textSize="text-[10px] sm:text-[14px]"
                                 />
-                                <span className="text-sm font-bold">{fromToken.symbol}</span>
-                                <span className="material-symbols-outlined text-[18px] text-white/40">expand_more</span>
+                                <span className="text-xs sm:text-sm font-bold">{fromToken.symbol}</span>
+                                <span className="material-symbols-outlined text-[16px] sm:text-[18px] text-white/40">expand_more</span>
                             </button>
                         </div>
                     </div>
@@ -215,7 +217,7 @@ const TokenSwap = () => {
                         <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between hover:border-[#D4AF37]/30 transition-all">
                             <div className="flex flex-col flex-1 min-w-0">
                                 <input
-                                    className="bg-transparent border-none focus:ring-0 text-2xl font-bold p-0 text-white placeholder-white/20 w-full focus:outline-none cursor-not-allowed opacity-80"
+                                    className="bg-transparent border-none focus:ring-0 text-xl sm:text-2xl font-bold p-0 text-white placeholder-white/20 w-full focus:outline-none cursor-not-allowed opacity-80"
                                     placeholder="0.00"
                                     type="text"
                                     value={toAmount}
@@ -223,14 +225,16 @@ const TokenSwap = () => {
                                 />
                                 <span className="text-[10px] text-white/30 font-medium mt-1">{toUSD}</span>
                             </div>
-                            <button className="flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-all px-3 py-2 rounded-xl border border-white/5 ml-3 flex-shrink-0">
+                            <button className="flex items-center gap-1.5 sm:gap-2 bg-white/5 hover:bg-white/10 transition-all px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border border-white/5 ml-2 sm:ml-3 flex-shrink-0">
                                 <TokenIcon
                                     icon={toToken.icon}
                                     iconStyle={toToken.iconStyle}
                                     iconClass={toToken.iconClass}
+                                    size="w-5 h-5 sm:w-6 sm:h-6"
+                                    textSize="text-[10px] sm:text-[14px]"
                                 />
-                                <span className="text-sm font-bold">{toToken.symbol}</span>
-                                <span className="material-symbols-outlined text-[18px] text-white/40">expand_more</span>
+                                <span className="text-xs sm:text-sm font-bold">{toToken.symbol}</span>
+                                <span className="material-symbols-outlined text-[16px] sm:text-[18px] text-white/40">expand_more</span>
                             </button>
                         </div>
                     </div>
@@ -281,7 +285,7 @@ const TokenSwap = () => {
 
                 <div className="glass-card rounded-2xl overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left">
+                        <table className="w-full text-left min-w-[500px]">
                             <thead>
                                 <tr className="border-b border-white/5 bg-white/[0.03]">
                                     <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-white/40">Asset Pair</th>

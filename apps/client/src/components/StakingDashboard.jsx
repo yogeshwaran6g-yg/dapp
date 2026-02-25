@@ -24,56 +24,56 @@ const StakingDashboard = () => {
     return (
         <div className="space-y-8">
             {/* Hero Title */}
-            <div>
-                <h2 className="text-4xl md:text-5xl font-black mb-3">Staking Dashboard</h2>
-                <p className="text-white/50 max-w-xl">
-                    Maximize your ecosystem yield with institutional-grade security and real-time gold-backed reward distribution.
+            <div className="mb-2">
+                <h2 className="text-2xl sm:text-3xl md:text-5xl font-black mb-1">Staking Dashboard</h2>
+                <p className="text-white/50 text-xs sm:text-sm max-w-xl">
+                    Maximize yield with institutional security and real-time distribution.
                 </p>
             </div>
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Total Value Locked */}
-                <div className="glass-panel p-6 rounded-xl border-l-4 border-l-accent-gold staking-gold-border-glow">
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-white/60 text-sm font-medium">Total Value Locked</span>
-                        <span className="material-symbols-outlined text-accent-gold">lock_open</span>
+                <div className="glass-panel p-4 sm:p-6 rounded-xl border-l-4 border-l-accent-gold staking-gold-border-glow">
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                        <span className="text-white/60 text-xs sm:text-sm font-medium">Total Value Locked</span>
+                        <span className="material-symbols-outlined text-accent-gold text-lg sm:text-xl">lock_open</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-3xl font-black tracking-tight">$42,890,124.00</span>
-                        <span className="text-green-400 text-xs mt-1 font-bold flex items-center gap-1">
-                            <span className="material-symbols-outlined text-xs">trending_up</span> +12.4% Monthly
+                        <span className="text-2xl sm:text-3xl font-black tracking-tight">$42,890,124.00</span>
+                        <span className="text-green-400 text-[10px] sm:text-xs mt-1 font-bold flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[10px] sm:text-xs">trending_up</span> +12.4% Monthly
                         </span>
                     </div>
                 </div>
 
                 {/* Daily ROI */}
-                <div className="glass-panel p-6 rounded-xl border-l-4 border-l-accent-gold/40">
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-white/60 text-sm font-medium">Daily ROI %</span>
-                        <span className="material-symbols-outlined text-accent-gold/60">monitoring</span>
+                <div className="glass-panel p-4 sm:p-6 rounded-xl border-l-4 border-l-accent-gold/40">
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                        <span className="text-white/60 text-xs sm:text-sm font-medium">Daily ROI %</span>
+                        <span className="material-symbols-outlined text-accent-gold/60 text-lg sm:text-xl">monitoring</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-3xl font-black tracking-tight">1.82%</span>
-                        <span className="text-accent-gold text-xs mt-1 font-bold">Estimated 664% APR</span>
+                        <span className="text-2xl sm:text-3xl font-black tracking-tight">1.82%</span>
+                        <span className="text-accent-gold text-[10px] sm:text-xs mt-1 font-bold">Estimated 664% APR</span>
                     </div>
                 </div>
 
                 {/* Live Rewards Counter */}
-                <div className="glass-panel p-6 rounded-xl border border-accent-gold/20 relative overflow-hidden group">
+                <div className="glass-panel p-4 sm:p-6 rounded-xl border border-accent-gold/20 relative overflow-hidden group">
                     <div className="absolute -right-4 -top-4 w-24 h-24 bg-accent-gold/10 blur-3xl rounded-full"></div>
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-white/60 text-sm font-medium">Accumulated Rewards</span>
-                        <span className="material-symbols-outlined text-accent-gold animate-pulse">stars</span>
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                        <span className="text-white/60 text-xs sm:text-sm font-medium">Accumulated Rewards</span>
+                        <span className="material-symbols-outlined text-accent-gold animate-pulse text-lg sm:text-xl">stars</span>
                     </div>
                     <div className="flex flex-col">
                         <span
                             ref={rewardRef}
-                            className="text-3xl font-black tracking-tight text-accent-gold staking-gold-glow font-mono"
+                            className="text-2xl sm:text-3xl font-black tracking-tight text-accent-gold staking-gold-glow font-mono"
                         >
                             {rewardCount.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
                         </span>
-                        <span className="text-white/40 text-xs mt-1 font-medium italic">Ticking live...</span>
+                        <span className="text-white/40 text-[10px] sm:text-xs mt-1 font-medium italic">Ticking live...</span>
                     </div>
                 </div>
             </div>
@@ -87,8 +87,8 @@ const StakingDashboard = () => {
                             <button
                                 onClick={() => setActiveTab('stake')}
                                 className={`flex-1 py-4 text-sm font-bold transition-colors ${activeTab === 'stake'
-                                        ? 'border-b-2 border-accent-gold text-accent-gold'
-                                        : 'text-white/40 hover:text-white'
+                                    ? 'border-b-2 border-accent-gold text-accent-gold'
+                                    : 'text-white/40 hover:text-white'
                                     }`}
                             >
                                 Stake Tokens
@@ -96,14 +96,14 @@ const StakingDashboard = () => {
                             <button
                                 onClick={() => setActiveTab('unstake')}
                                 className={`flex-1 py-4 text-sm font-bold transition-colors ${activeTab === 'unstake'
-                                        ? 'border-b-2 border-accent-gold text-accent-gold'
-                                        : 'text-white/40 hover:text-white'
+                                    ? 'border-b-2 border-accent-gold text-accent-gold'
+                                    : 'text-white/40 hover:text-white'
                                     }`}
                             >
                                 Unstake Tokens
                             </button>
                         </div>
-                        <div className="p-8">
+                        <div className="p-4 sm:p-8">
                             <div className="flex justify-between items-end mb-4">
                                 <label className="text-xs font-bold text-white/40 uppercase tracking-widest">
                                     {activeTab === 'stake' ? 'Amount to Stake' : 'Amount to Unstake'}
@@ -144,19 +144,19 @@ const StakingDashboard = () => {
                     </div>
 
                     {/* Rewards Card */}
-                    <div className="glass-panel rounded-xl p-8 flex flex-col sm:flex-row items-center justify-between border border-accent-gold/20 gap-4">
-                        <div className="flex items-center gap-6">
-                            <div className="w-14 h-14 rounded-full bg-accent-gold/10 flex items-center justify-center text-accent-gold flex-shrink-0">
-                                <span className="material-symbols-outlined text-3xl">payments</span>
+                    <div className="glass-panel rounded-xl p-4 sm:p-6 lg:p-8 flex flex-col sm:flex-row items-center justify-between border border-accent-gold/20 gap-4">
+                        <div className="flex items-center gap-4 sm:gap-6">
+                            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-accent-gold/10 flex items-center justify-center text-accent-gold flex-shrink-0">
+                                <span className="material-symbols-outlined text-2xl sm:text-3xl">payments</span>
                             </div>
                             <div>
-                                <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-1">Ready to Claim</p>
-                                <h3 className="text-2xl font-black text-white">
-                                    $452.12 <span className="text-accent-gold text-sm ml-1">GOLD</span>
+                                <p className="text-white/50 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1">Ready to Claim</p>
+                                <h3 className="text-xl sm:text-2xl font-black text-white">
+                                    $452.12 <span className="text-accent-gold text-xs sm:text-sm ml-1">GOLD</span>
                                 </h3>
                             </div>
                         </div>
-                        <button className="px-8 py-3 bg-white/5 border border-white/10 hover:bg-accent-gold/10 hover:border-accent-gold/40 transition-all rounded-lg text-sm font-bold text-white">
+                        <button className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-white/5 border border-white/10 hover:bg-accent-gold/10 hover:border-accent-gold/40 transition-all rounded-lg text-sm font-bold text-white">
                             Claim Rewards
                         </button>
                     </div>

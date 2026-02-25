@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 
-const Header = () => {
+const Header = ({ onMenuClick }) => {
     const [connected, setConnected] = useState(false);
 
     return (
-        <header className="h-20 glass-panel border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-40">
-            <div className="flex items-center gap-6">
-                <div className="flex flex-col">
+        <header className="h-16 glass-panel border-b border-white/5 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
+            <div className="flex items-center gap-3 sm:gap-6">
+                <button
+                    onClick={onMenuClick}
+                    className="lg:hidden p-2 rounded-lg bg-white/5 text-white hover:bg-white/10 transition-colors"
+                >
+                    <span className="material-symbols-outlined">menu</span>
+                </button>
+                <div className="flex flex-col hidden sm:flex">
                     <span className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Status</span>
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-mono text-accent-gold-light bg-accent-gold/10 px-2 py-0.5 rounded border border-accent-gold/20">
@@ -14,31 +20,31 @@ const Header = () => {
                         </span>
                     </div>
                 </div>
-                <div className="h-8 w-px bg-white/10"></div>
-                <div className="flex gap-4">
+                <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
+                <div className="flex gap-3 sm:gap-4">
                     <div className="flex flex-col">
-                        <span className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Energy</span>
-                        <span className="text-sm font-bold text-white">450.00</span>
+                        <span className="text-[10px] text-gray-500 uppercase font-bold tracking-tight hidden xs:block">Energy</span>
+                        <span className="text-xs sm:text-sm font-bold text-white">450.00 <span className="xs:hidden text-[8px] text-gray-500">NRJ</span></span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">LUXE Token</span>
-                        <span className="text-sm font-bold text-white">1,250.00</span>
+                        <span className="text-[10px] text-gray-500 uppercase font-bold tracking-tight hidden xs:block">LUXE Token</span>
+                        <span className="text-xs sm:text-sm font-bold text-white">1,250.00 <span className="xs:hidden text-[8px] text-gray-500">LX</span></span>
                     </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
                 <button className="flex items-center justify-center p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all relative">
                     <span className="material-symbols-outlined">notifications</span>
                     <span className="absolute top-2 right-2 w-2 h-2 bg-accent-gold rounded-full"></span>
                 </button>
                 <button
                     onClick={() => setConnected(!connected)}
-                    className="h-10 px-6 rounded-lg action-gradient-gold text-primary font-bold text-sm tracking-wide shadow-[0_4px_15px_rgba(212,175,55,0.3)] hover:scale-[1.02] transition-transform"
+                    className="h-10 px-3 sm:px-6 rounded-lg action-gradient-gold text-primary font-bold text-xs sm:text-sm tracking-wide shadow-[0_4px_15px_rgba(212,175,55,0.3)] hover:scale-[1.02] transition-transform"
                 >
-                    {connected ? 'Disconnect' : 'Connect Wallet'}
+                    {connected ? 'Disconnect' : 'Connect'}
                 </button>
-                <div className="w-10 h-10 rounded-lg bg-white/10 border border-white/10 overflow-hidden">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/10 border border-white/10 overflow-hidden">
                     <img
                         className="w-full h-full object-cover"
                         alt="User profile"
