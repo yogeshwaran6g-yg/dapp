@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
+    "seed": "node db_setup.js",
     "dev": "nodemon index.js"
   },
   "dependencies": {
