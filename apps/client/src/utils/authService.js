@@ -1,36 +1,27 @@
+import axios from 'axios';
 import { ethers } from 'ethers';
 
-const API_BASE_URL = 'http://localhost:5000/api/users'; // Adjust based on your server config
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/users`;
 
 export const authService = {
-    async connectWallet() {
-        if (!window.ethereum) {
-            throw new Error('MetaMask is not installed');
-        }
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        return accounts[0];
-    },
-
     async getNonce(address) {
-        const response = await fetch(`${API_BASE_URL}/auth/nonce`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ address }),
-        });
-        if (!response.ok) throw new Error('Failed to get nonce');
-        const data = await response.json();
-        return data.nonce;
+        try {
+            const response = await axios.post(`${API_BASE_URL}/auth/nonce`, { address });
+            return response.data.nonce;
+        } catch (error) {
+            console.error('Error fetching nonce:', error);
+            throw new Error(error.response?.data?.message || 'Failed to get nonce');
+        }
     },
 
     async verifySignature(address, signature) {
-        const response = await fetch(`${API_BASE_URL}/auth/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ address, signature }),
-        });
-        if (!response.ok) throw new Error('Verification failed');
-        const data = await response.json();
-        return data; // Returns { token, user }
+        try {
+            const response = await axios.post(`${API_BASE_URL}/auth/verify`, { address, signature });
+            return response.data; // Returns { token, user }
+        } catch (error) {
+            console.error('Verification error:', error);
+            throw new Error(error.response?.data?.message || 'Verification failed');
+        }
     },
 
     async login() {
