@@ -1,20 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-    --color-gold: #d4af37;
-    --color-gold-light: #f9e295;
-    --color-gold-dark: #9a7b2c;
+    --color-gold: #c6a34f;
+    --color-gold-light: #e6c785;
+    --color-gold-dark: #8b6e2f;
+    --color-gold-accent: #f9e295;
 
     --color-green-accent: #00ff88;
     --color-green-dark: #004d2c;
 
     --color-black-pure: #000000;
-    --color-black-soft: #0a0a0a;
-    --color-black-elevated: #1a1a1a;
+    --color-black-soft: #050505;
+    --color-black-elevated: #0d0d0d;
 
     --font-display: "Orbitron", sans-serif;
+    --font-heading: "Orbitron", sans-serif;
+    --font-sans: "Inter", sans-serif;
 
-    --animate-float: float 3s ease-in-out infinite;
+    --animate-float: float 6s ease-in-out infinite;
+    --animate-gradient: gradient 8s linear infinite;
+    --animate-spin-slow: spin 10s linear infinite;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 @keyframes float {
@@ -25,7 +44,7 @@
     }
 
     50% {
-        transform: translateY(-10px);
+        transform: translateY(-20px);
     }
 }
 
