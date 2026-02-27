@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 
 const Sidebar = ({ isOpen, onClose }) => {
     const navItems = [
-        { icon: 'grid_view', label: 'Dashboard', path: '/' },
+        { icon: 'grid_view', label: 'Dashboard', path: '/dashboard' },
         { icon: 'group', label: 'Referral', path: '/referral' },
         { icon: 'electric_bolt', label: 'Slot Activation', path: '/slot-activation' },
         { icon: 'token', label: 'NFT Royalty', path: '/nft-royalty' },
