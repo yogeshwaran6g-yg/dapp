@@ -24,3 +24,31 @@ CREATE TABLE IF NOT EXISTS profile (
     country VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE user_wallets (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    energy_balance DECIMAL(18, 6) DEFAULT 0,
+    reward_token_balance DECIMAL(18, 6) DEFAULT 0,
+    locked_balance DECIMAL(18, 6) DEFAULT 0,
+    version INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_wallet_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+
+
+CREATE TABLE user_nfts (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    contract_address VARCHAR(42) NOT NULL,
+    token_id VARCHAR(100) NOT NULL,
+    metadata_uri TEXT NULL,
+    is_staked BOOLEAN DEFAULT FALSE,
+    staked_at DATETIME NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_user_nft (contract_address, token_id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
