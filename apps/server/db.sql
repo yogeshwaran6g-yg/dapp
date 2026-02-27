@@ -16,12 +16,24 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS profile (
     id SERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL UNIQUE,
     username VARCHAR(100),
     email VARCHAR(255) UNIQUE,
     phone_number VARCHAR(20),
     dob DATE,
     city VARCHAR(100),
     country VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_profile_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS levels (
+    id bigint NOT NULL PRIMARY KEY,
+    current_level_id INT NOT NULL DEFAULT 1,
+    total_xp BIGINT NOT NULL DEFAULT 0,
+    last_leveled_up  TIMESTAMP NULL,
+    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+);
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { fetchProfile as apiFetchProfile, updateProfile as apiUpdateProfile } from '../utils/api';
+import { useGetProfile, useUpdateProfile } from '../hooks/useProfile';
 
 const Profile = () => {
+    const userId = JSON.parse(localStorage.getItem('user'))?.id;
+
+    const { data: queryData, isLoading } = useGetProfile(userId);
+    const { mutate: saveProfile, isPending: isSaving } = useUpdateProfile(userId);
+
     const [profile, setProfile] = useState({
         username: '',
         email: '',
@@ -11,33 +16,18 @@ const Profile = () => {
         country: '',
         wallet_address: ''
     });
-
-    const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [message, setMessage] = useState('');
 
+    // Sync local edit buffer when remote data arrives
     useEffect(() => {
-        loadProfile();
-    }, []);
-
-    const loadProfile = async () => {
-        try {
-            setLoading(true);
-            const data = await apiFetchProfile(1);
-
-            // Format date for input field (YYYY-MM-DD)
-            if (data.dob) {
-                data.dob = new Date(data.dob).toISOString().split('T')[0];
+        if (queryData?.data) {
+            const remote = { ...queryData.data };
+            if (remote.dob) {
+                remote.dob = new Date(remote.dob).toISOString().split('T')[0];
             }
-
-            setProfile(data);
-        } catch (err) {
-            console.error('Error loading profile:', err);
-            setMessage(`Failed to load profile data: ${err.message || 'Server unreachable'}`);
-        } finally {
-            setLoading(false);
+            setProfile(remote);
         }
-    };
+    }, [queryData]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -47,19 +37,13 @@ const Profile = () => {
         }));
     };
 
-    const handleSave = async () => {
-        try {
-            const result = await apiUpdateProfile(1, profile);
-            setMessage('Profile updated successfully!');
-            setIsEditing(false);
-            setTimeout(() => setMessage(''), 3000);
-        } catch (err) {
-            console.error('Error updating profile:', err);
-            setMessage('Failed to update profile');
-        }
+    const handleSave = () => {
+        saveProfile(profile, {
+            onSuccess: () => setIsEditing(false),
+        });
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-primary">
                 <div className="relative">
@@ -86,17 +70,6 @@ const Profile = () => {
                             Personal Profile
                         </h1>
                         <p className="text-gray-400 mt-1 sm:mt-2 text-xs sm:text-base md:text-lg">Manage your digital identity and account settings</p>
-                        {message && (
-                            <div className={`mt-2 sm:mt-4 px-4 py-2 rounded-lg inline-flex items-center gap-2 ${message.includes('success')
-                                ? 'bg-green-500/10 text-green-500 border border-green-500/20'
-                                : 'bg-red-500/10 text-red-500 border border-red-500/20'
-                                }`}>
-                                <span className="material-symbols-outlined text-sm">
-                                    {message.includes('success') ? 'check_circle' : 'error'}
-                                </span>
-                                <span className="text-sm font-medium">{message}</span>
-                            </div>
-                        )}
                     </div>
 
                     <div className="flex flex-wrap items-center justify-center lg:justify-end gap-3 sm:gap-4">
@@ -118,9 +91,10 @@ const Profile = () => {
                                 </button>
                                 <button
                                     onClick={handleSave}
-                                    className="px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-2xl action-gradient-gold text-primary font-bold shadow-xl shadow-accent-gold/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 order-1 sm:order-2 text-sm sm:text-base"
+                                    disabled={isSaving}
+                                    className="px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-2xl action-gradient-gold text-primary font-bold shadow-xl shadow-accent-gold/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 order-1 sm:order-2 text-sm sm:text-base disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
                                 >
-                                    Save Changes
+                                    {isSaving ? 'Saving...' : 'Save Changes'}
                                 </button>
                             </div>
                         )}
