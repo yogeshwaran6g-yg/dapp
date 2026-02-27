@@ -14,9 +14,9 @@ const router = express.Router();
 // --- Authentication Routes ---
 
 // 1. Request Nonce
-router.post('/auth/nonce', async (req, res) => {
+router.get('/auth/nonce', async (req, res) => {
     try {
-        const { address } = req.body;
+        const { address } = req.query;
         if (!address) {
             return res.status(400).json({ message: 'Wallet address is required' });
         }
@@ -63,18 +63,29 @@ router.post('/auth/verify', async (req, res) => {
         }
 
         const user = userResult[0];
-        const msg = `Sign this message to authenticate: ${user.nonce}`;
+
+        // Match the client-side template exactly
+        // Example: Sign this message to authenticate with our dApp.\n\nURI: http://localhost:5173\nNonce: 123456
+        const origin = req.get('origin') || 'http://localhost:5173';
+        const msg = `Sign this message to authenticate with our dApp.\n\nURI: ${origin}\nNonce: ${user.nonce}`;
 
         // Recover address from signature
         const recoveredAddress = ethers.verifyMessage(msg, signature);
 
         if (recoveredAddress.toLowerCase() !== wallet_address) {
+            console.log('Address mismatch:', recoveredAddress.toLowerCase(), wallet_address);
             return res.status(401).json({ message: 'Invalid signature' });
         }
 
         // Authentication successful: Rotate nonce
         const newNonce = Math.floor(Math.random() * 1000000).toString();
         await queryRunner('UPDATE users SET nonce = $1, last_login_at = CURRENT_TIMESTAMP WHERE id = $2', [newNonce, user.id]);
+
+        // Ensure profile exists
+        const profileResult = await queryRunner('SELECT * FROM profile WHERE user_id = $1', [user.id]);
+        if (profileResult.length === 0) {
+            await queryRunner('INSERT INTO profile (user_id) VALUES ($1)', [user.id]);
+        }
 
         // Generate JWT
         const token = jwt.sign(
@@ -93,10 +104,10 @@ router.post('/auth/verify', async (req, res) => {
 // --- Protected Routes ---
 
 // Get Profile
-router.get('/profile/:id', authMiddleware, async (req, res) => {
+router.get('/profile', authMiddleware, async (req, res) => {
     try {
-        const { id } = req.params;
-        const result = await queryRunner('SELECT * FROM profile WHERE id = $1', [id]);
+        const userId = req.user.id;
+        const result = await queryRunner('SELECT * FROM profile WHERE user_id = $1', [userId]);
         if (result.length === 0) {
             return res.status(404).json({ message: 'Profile not found' });
         }
@@ -108,14 +119,14 @@ router.get('/profile/:id', authMiddleware, async (req, res) => {
 });
 
 // Update Profile
-router.put('/profile/:id', authMiddleware, async (req, res) => {
+router.put('/profile', authMiddleware, async (req, res) => {
     try {
-        const { id } = req.params;
+        const userId = req.user.id;
         const { username, email, phone_number, dob, city, country } = req.body;
 
         await queryRunner(
-            'UPDATE profile SET username = $1, email = $2, phone_number = $3, dob = $4, city = $5, country = $6 WHERE id = $7',
-            [username, email, phone_number, dob, city, country, id]
+            'UPDATE profile SET username = $1, email = $2, phone_number = $3, dob = $4, city = $5, country = $6, updated_at = CURRENT_TIMESTAMP WHERE user_id = $7',
+            [username, email, phone_number, dob, city, country, userId]
         );
 
         res.json({ message: 'Profile updated successfully' });
@@ -125,15 +136,17 @@ router.put('/profile/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// Get all users (maybe also protect this or keep it public for now)
+// Get all users (Administrative or directory)
 router.get('/', authMiddleware, async (req, res) => {
     try {
-        const allProfiles = await queryRunner('SELECT * FROM profile');
+        // Only return public profile info for others, or check roles
+        const allProfiles = await queryRunner('SELECT p.*, u.wallet_address FROM profile p JOIN users u ON p.user_id = u.id');
         res.json(allProfiles);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
 });
+
 
 export default router;

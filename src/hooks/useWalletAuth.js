@@ -34,18 +34,19 @@ export function useWalletAuth() {
         try {
             setIsAuthenticating(true);
 
-            const nonceRes = await fetch(`${API_URL}/auth/nonce?address=${address}`);
+            const nonceRes = await fetch(`${API_URL}/api/users/auth/nonce?address=${address}`);
             if (!nonceRes.ok) throw new Error('Failed to fetch nonce');
             const { nonce } = await nonceRes.json();
 
             const message = `Sign this message to authenticate with our dApp.\n\nURI: ${window.location.origin}\nNonce: ${nonce}`;
             const signature = await signMessageAsync({ message });
 
-            const verifyRes = await fetch(`${API_URL}/auth/verify`, {
+            const verifyRes = await fetch(`${API_URL}/api/users/auth/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ address, signature, message })
             });
+
 
             if (!verifyRes.ok) throw new Error('Signature verification failed');
             const { token } = await verifyRes.json();
