@@ -20,6 +20,8 @@
     --animate-float: float 6s ease-in-out infinite;
     --animate-gradient: gradient 8s linear infinite;
     --animate-spin-slow: spin 10s linear infinite;
+
+    --z-100: 100;
 }
 
 @keyframes gradient {

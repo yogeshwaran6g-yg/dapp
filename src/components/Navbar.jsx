@@ -72,7 +72,7 @@ export default function Navbar() {
                                 className="ml-4 bg-transparent border border-gold/50 hover:border-gold hover:bg-gold/10 text-gold px-6 py-2.5 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
                             >
                                 <Wallet size={16} />
-                                {isConnected ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect Wallet'}
+                                {isConnected ? `${address?.slice(0, 6)}...${address?.slice(-4)}` : 'Connect Wallet'}
                             </motion.button>
                         </div>
                     </div>
@@ -116,7 +116,7 @@ export default function Navbar() {
                             className="w-full text-center bg-gold/10 border border-gold/30 text-gold px-3 py-3 rounded-lg text-base font-semibold mt-3 flex items-center justify-center gap-2"
                         >
                             <Wallet size={18} />
-                            {isConnected ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect Wallet'}
+                            {isConnected ? `${address?.slice(0, 6)}...${address?.slice(-4)}` : 'Connect Wallet'}
                         </button>
                     </div>
                 </motion.div>
