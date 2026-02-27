@@ -4,9 +4,12 @@ import { authApiService } from '../services/authApiService';
 export const useNonce = (address) => {
     return useQuery({
         queryKey: ['nonce', address],
-        queryFn: () => authApiService.getNonce(address),
+        queryFn: async () => {
+            const nonce = await authApiService.getNonce(address);
+            return nonce;
+        },
         enabled: !!address,
-        staleTime: 0, // Always get a fresh nonce
+        staleTime: 0,
         retry: false
     });
 };

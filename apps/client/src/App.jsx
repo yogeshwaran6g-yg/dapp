@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import Layout from './components/Layout';
 import QuickActions from './components/QuickActions';
 import StatsGrid from './components/StatsGrid';
@@ -28,7 +29,17 @@ const Dashboard = () => (
 
 function App() {
     return (
-        <Routes>
+        <>
+            <ToastContainer 
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                pauseOnHover
+                theme="dark"
+            />
+            <Routes>
             <Route path="/" element={<LandingPage />} />
             
             <Route element={<ProtectedRoute />}>
@@ -46,7 +57,8 @@ function App() {
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            </Routes>
+        </>
     );
 }
 

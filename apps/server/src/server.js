@@ -50,6 +50,8 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "ngrok-skip-browser-warning"],
+    optionsSuccessStatus: 200,
   })
 );
 
@@ -81,4 +83,5 @@ app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📡 CORS Origin allowed: ${process.env.CLIENT_URL || "http://localhost:5173"}`);
 });

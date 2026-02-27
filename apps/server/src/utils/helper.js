@@ -8,6 +8,7 @@ export const rtnRes = (res, code, msg = null, data = null) => {
             200: { success: true, defaultMsg: "OK" },
             201: { success: true, defaultMsg: "Created" },
             202: { success: true, defaultMsg: "Accepted" },
+            204: { success: true, defaultMsg: "No Content" },
             400: { success: false, defaultMsg: "Bad Request" },
             401: { success: false, defaultMsg: "Unauthorized" },
             403: { success: false, defaultMsg: "Forbidden" },
@@ -16,6 +17,10 @@ export const rtnRes = (res, code, msg = null, data = null) => {
         };
 
         const response = responses[code] || responses[500];
+
+        if (code === 204) {
+            return res.status(204).send();
+        }
 
         return res.status(code).json({
             success: response.success,

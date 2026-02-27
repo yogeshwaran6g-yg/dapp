@@ -8,6 +8,8 @@ export function WalletAuthListener() {
 
     const authAttemptedRef = useRef(false);
     const previousAddressRef = useRef(null);
+    const retryCountRef = useRef(0);
+    const MAX_RETRIES = 2;
 
     useEffect(() => {
         if (!isConnected) {
@@ -17,6 +19,7 @@ export function WalletAuthListener() {
             }
             authAttemptedRef.current = false;
             previousAddressRef.current = null;
+            retryCountRef.current = 0;
             return;
         }
 
@@ -24,6 +27,7 @@ export function WalletAuthListener() {
         if (address && previousAddressRef.current && previousAddressRef.current.toLowerCase() !== address.toLowerCase()) {
             authAttemptedRef.current = false;
             previousAddressRef.current = address;
+            retryCountRef.current = 0;
             logout();
         }
 
@@ -33,10 +37,28 @@ export function WalletAuthListener() {
 
         // Check if we need to login
         if (isConnected && !isAuthenticated && !isLoggingIn && !authAttemptedRef.current) {
+            if (retryCountRef.current >= MAX_RETRIES) {
+                console.warn('[Auth] Max retries reached. Stopping automatic login.');
+                authAttemptedRef.current = true; // Mark as attempted to stop loop
+                return;
+            }
+
             authAttemptedRef.current = true;
-            login().catch(() => {
-                // If login fails, allow retrying on next change
-                authAttemptedRef.current = false;
+            retryCountRef.current += 1;
+            
+            console.log(`[Auth] Attempting automatic login (attempt ${retryCountRef.current}/${MAX_RETRIES})...`);
+            
+            login().catch((err) => {
+                console.error('[Auth] Login failed:', err);
+                // If it's a user rejection, don't retry automatically
+                if (err.code === 4001 || err.message?.includes('User rejected')) {
+                    console.log('[Auth] User rejected request. Stopping retries.');
+                } else {
+                    // For other errors, allow one more retry after a short delay
+                    setTimeout(() => {
+                        authAttemptedRef.current = false;
+                    }, 3000);
+                }
             });
         }
     }, [isConnected, address, isAuthenticated, isLoggingIn, login, logout]);

@@ -15,7 +15,9 @@ export const authApiService = {
   
     async verifySignature(address, signature) {
         try {
-            const data = await api.post(API_ENDPOINTS.AUTH.VERIFY, { address, signature });
+            const data = await api.post(API_ENDPOINTS.AUTH.VERIFY, { address, signature }, {
+                showSuccessToast: true
+            });
             return data;
         } catch (error) {
             return handleServiceError(error, 'AuthApiService.verifySignature');

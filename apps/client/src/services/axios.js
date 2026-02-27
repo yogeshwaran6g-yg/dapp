@@ -1,6 +1,7 @@
 // src/services/http.js
 import axios from "axios";
 import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 /**
@@ -77,6 +78,13 @@ http.interceptors.response.use(
 
     // Log error for debugging
     console.error(`[API Error] ${error.config?.url}:`, message);
+
+    // Show error toast if enabled
+    if (error.config?.showErrorToast !== false) {
+      toast.error(message, {
+        autoClose: 4000,
+      });
+    }
 
     return Promise.reject(normalizedError);
   }
