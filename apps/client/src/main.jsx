@@ -6,13 +6,16 @@ import App from './App.jsx'
 import './index.css'
 
 import { Web3Provider } from './components/Web3Provider'
+import { AuthProvider } from './context/AuthContext'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <Web3Provider>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
+            <AuthProvider>
+                <BrowserRouter>
+                    <App />
+                </BrowserRouter>
+            </AuthProvider>
         </Web3Provider>
     </React.StrictMode>,
 )

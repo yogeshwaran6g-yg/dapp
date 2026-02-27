@@ -1,37 +1,45 @@
 import { useEffect, useRef } from 'react';
 import { useAccount } from 'wagmi';
-import { useWalletAuth } from '../hooks/useWalletAuth';
+import { useAuthContext } from '../context/AuthContext';
 
 export function WalletAuthListener() {
     const { isConnected, address } = useAccount();
-    const { isAuthenticated, isAuthenticating, login, logout } = useWalletAuth();
+    const { isAuthenticated, isLoggingIn, login, logout } = useAuthContext();
 
     const authAttemptedRef = useRef(false);
     const previousAddressRef = useRef(null);
 
     useEffect(() => {
         if (!isConnected) {
-            logout();
+            // Only trigger logout if we were previously authenticated
+            if (isAuthenticated) {
+                logout();
+            }
             authAttemptedRef.current = false;
             previousAddressRef.current = null;
             return;
         }
 
-        if (previousAddressRef.current !== address) {
+        // If address changed, we need a new session
+        if (address && previousAddressRef.current && previousAddressRef.current.toLowerCase() !== address.toLowerCase()) {
             authAttemptedRef.current = false;
             previousAddressRef.current = address;
             logout();
         }
 
-        const token = localStorage.getItem('jwt_token');
-        const storedAddress = localStorage.getItem('wallet_address');
-        const hasValidSession = token && storedAddress === address;
-
-        if (isConnected && !hasValidSession && !isAuthenticating && !authAttemptedRef.current) {
-            authAttemptedRef.current = true;
-            login();
+        if (!previousAddressRef.current) {
+            previousAddressRef.current = address;
         }
-    }, [isConnected, address, isAuthenticated, isAuthenticating, login, logout]);
+
+        // Check if we need to login
+        if (isConnected && !isAuthenticated && !isLoggingIn && !authAttemptedRef.current) {
+            authAttemptedRef.current = true;
+            login().catch(() => {
+                // If login fails, allow retrying on next change
+                authAttemptedRef.current = false;
+            });
+        }
+    }, [isConnected, address, isAuthenticated, isLoggingIn, login, logout]);
 
     return null;
 }

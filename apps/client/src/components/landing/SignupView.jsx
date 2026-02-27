@@ -14,6 +14,18 @@ export default function SignupView({ isOpen, onClose, onConnect }) {
         }
     }, [isOpen]);
 
+    // Disable background scroll when modal is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     return (
@@ -23,7 +35,7 @@ export default function SignupView({ isOpen, onClose, onConnect }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-100 flex items-center justify-center bg-black/95 backdrop-blur-3xl overflow-y-auto"
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-3xl overflow-y-auto top-0 left-0 right-0 bottom-0"
                 >
                     <div className="w-full h-full min-h-screen grid grid-cols-1 lg:grid-cols-2 relative">
                         {/* Close Button */}
