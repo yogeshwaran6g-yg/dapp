@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { useGetSlotActivation, useUpdateSlotActivation } from '../hooks/useSlotActivation';
 
 const SlotActivation = () => {
+    const { data: slotActivation, isLoading, error } = useGetSlotActivation();
+    const { mutate: updateSlotActivation } = useUpdateSlotActivation();
+    
     return (
         <div className="flex-1 -m-4 sm:-m-8 flex flex-col overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-background-dark to-background-dark">
             {/* Header / Sub-header for Slot Activation */}
