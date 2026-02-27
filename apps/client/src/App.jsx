@@ -5,7 +5,7 @@ import QuickActions from './components/QuickActions';
 import StatsGrid from './components/StatsGrid';
 import Charts from './components/Charts';
 import ActivityList from './components/ActivityList';
-import ReferralDashboard from './components/ReferralDashboard';
+import ReferralDashboard from './components/ReferralDashboard/index';
 import TokenWallet from './components/TokenWallet';
 import TokenSwap from './components/TokenSwap';
 import NFTRoyalty from './components/NFTRoyalty';
