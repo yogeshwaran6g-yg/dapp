@@ -33,6 +33,7 @@ const Profile = () => {
             setProfile(data);
         } catch (err) {
             console.error('Error loading profile:', err);
+            console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
             setMessage(`Failed to load profile data: ${err.message || 'Server unreachable'}`);
         } finally {
             setLoading(false);
