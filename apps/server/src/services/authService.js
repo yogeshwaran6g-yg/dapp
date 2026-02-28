@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { serviceResponse } from '../utils/helper.js';
-import {JWT_CONFIG} from "../config/constants.js";
+import { JWT_CONFIG } from "../config/constants.js";
 
 dotenv.config();
 
@@ -18,9 +18,9 @@ export const generateNonce = async (address) => {
 
         // Check if user exists
         const userResult = await queryRunner(
-                    'SELECT * FROM users WHERE wallet_address = $1',
-                     [wallet_address]
-                    );
+            'SELECT * FROM users WHERE wallet_address = $1',
+            [wallet_address]
+        );
 
         if (userResult.length === 0) {
             console.log(`[AuthService] New user detected: ${wallet_address}. Creating...`);
@@ -64,7 +64,7 @@ export const verifySignature = async (address, signature, origin) => {
         const recoveredAddress = ethers.verifyMessage(msg, signature);
 
         if (recoveredAddress.toLowerCase() !== wallet_address) {
-            console.warn(`[AuthService] Signature mismatch for ${wallet_address}. Recovered: ${recoveredAddress}`);            
+            console.warn(`[AuthService] Signature mismatch for ${wallet_address}. Recovered: ${recoveredAddress}`);
             return serviceResponse(false, 401, 'Invalid signature or address mismatch');
         }
 
@@ -75,9 +75,20 @@ export const verifySignature = async (address, signature, origin) => {
         // Ensure profile exists
         const profileResult = await queryRunner('SELECT * FROM profile WHERE user_id = $1', [user.id]);
         if (profileResult.length === 0) {
-            console.log(`[AuthService] Creating initial profile for user ID ${user.id}`);
+            console.log(`[AuthService] Creating initial profile and levels for user ID ${user.id}`);
             await queryRunner('INSERT INTO profile (user_id) VALUES ($1)', [user.id]);
+            await queryRunner('INSERT INTO levels (id, current_level_id) VALUES ($1, 1)', [user.id]);
+        } else {
+            // Ensure levels entry exists even if profile exists (for older users)
+            const levelsResult = await queryRunner('SELECT * FROM levels WHERE id = $1', [user.id]);
+            if (levelsResult.length === 0) {
+                console.log(`[AuthService] Creating missing levels entry for user ID ${user.id}`);
+                await queryRunner('INSERT INTO levels (id, current_level_id) VALUES ($1, 1)', [user.id]);
+            }
         }
+
+        console.log(`[AuthService] Generating JWT for user ${user.id}`);
+        console.log(`[AuthService] JWT Secret: ${JWT_SECRET}`);
 
         // Generate JWT
         const token = jwt.sign(
@@ -99,5 +110,55 @@ export const verifySignature = async (address, signature, origin) => {
     } catch (err) {
         console.error(`[AuthService] Error in verifySignature: ${err.message}`);
         return serviceResponse(false, 500, 'Error during verification', null, err.message);
+    }
+};
+
+export const devLogin = async (address) => {
+    try {
+        const wallet_address = address.toLowerCase();
+
+        let userResult = await queryRunner('SELECT * FROM users WHERE wallet_address = $1', [wallet_address]);
+
+        let user;
+        if (userResult.length === 0) {
+            const referral_code = `DEV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+            const nonce = Math.floor(Math.random() * 1000000).toString();
+            await queryRunner(
+                'INSERT INTO users (wallet_address, nonce, referral_code, role) VALUES ($1, $2, $3, $4)',
+                [wallet_address, nonce, referral_code, "USER"]
+            );
+            userResult = await queryRunner('SELECT * FROM users WHERE wallet_address = $1', [wallet_address]);
+        }
+
+        user = userResult[0];
+
+        // Ensure profile and levels exist
+        const profileResult = await queryRunner('SELECT * FROM profile WHERE user_id = $1', [user.id]);
+        if (profileResult.length === 0) {
+            await queryRunner('INSERT INTO profile (user_id) VALUES ($1)', [user.id]);
+            await queryRunner('INSERT INTO levels (id, current_level_id) VALUES ($1, 1)', [user.id]);
+        }
+
+        console.log(`[AuthService] Generating JWT for user ${user.id}`);
+        console.log(`[AuthService] JWT Secret: ${JWT_SECRET}`);
+
+        // Generate JWT
+        const token = jwt.sign(
+            { id: user.id, wallet_address: user.wallet_address, role: user.role },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        return serviceResponse(true, 200, 'Dev login successful', {
+            token,
+            user: {
+                id: user.id,
+                wallet_address: user.wallet_address,
+                role: user.role
+            }
+        });
+    } catch (err) {
+        console.error(`[AuthService] Error in devLogin: ${err.message}`);
+        return serviceResponse(false, 500, 'Error during dev login', null, err.message);
     }
 };

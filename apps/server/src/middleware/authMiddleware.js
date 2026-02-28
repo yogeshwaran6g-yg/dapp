@@ -1,9 +1,7 @@
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import { JWT_CONFIG } from '../config/constants.js';
 
-dotenv.config();
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your_default_secret';
+const JWT_SECRET = JWT_CONFIG.JWT_SECRET;
 
 const authMiddleware = (req, res, next) => {
     const token = req.header('Authorization')?.split(' ')[1];
@@ -17,6 +15,7 @@ const authMiddleware = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (err) {
+        console.error('Token verification failed:', err);
         res.status(401).json({ message: 'Token is not valid' });
     }
 };

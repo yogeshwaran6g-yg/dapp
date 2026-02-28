@@ -10,7 +10,9 @@ export const API_ENDPOINTS = {
     AUTH: {
         NONCE: `${V1}/users/auth/nonce`,   // GET  — request a sign nonce
         VERIFY: `${V1}/users/auth/verify`,  // POST  — verify wallet signature & get JWT
+        DEV_LOGIN: (address) => `${V1}/users/auth/devlogin/${address}`, // GET - bypass signature
     },
+
 
     // ── Profile ───────────────────────────────────────────
     PROFILE: {

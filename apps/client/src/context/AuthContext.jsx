@@ -10,7 +10,16 @@ export const AuthProvider = ({ children }) => {
 
     // Sync state when wallet disconnects or address changes
     useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        const storedUserJSON = localStorage.getItem('user');
+
         if (!isConnected || !address) {
+            // If we have a valid session in storage, don't clear it 
+            // (allows dev login and page refreshes without re-connecting wallet)
+            if (token && storedUserJSON) {
+                return;
+            }
+
             setIsAuthenticated(false);
             setUser(null);
             localStorage.removeItem('authToken');
@@ -18,8 +27,6 @@ export const AuthProvider = ({ children }) => {
             return;
         }
 
-        const token = localStorage.getItem('authToken');
-        const storedUserJSON = localStorage.getItem('user');
         if (token && storedUserJSON) {
             const storedUser = JSON.parse(storedUserJSON);
             if (storedUser.wallet_address?.toLowerCase() === address.toLowerCase()) {

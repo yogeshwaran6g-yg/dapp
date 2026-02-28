@@ -73,7 +73,7 @@ export const useLogin = () => {
             throw error;
         }
     }, [address, verifyMutationRef, setUser, setIsAuthenticated]);
-        return { login, isLoggingIn };
+    return { login, isLoggingIn };
 };
 
 /**

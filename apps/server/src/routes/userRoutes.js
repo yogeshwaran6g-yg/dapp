@@ -7,5 +7,6 @@ const router = express.Router();
 
 router.get('/auth/nonce', getNonceValidator, validate, authController.getNonce);
 router.post('/auth/verify', verifyValidator, validate, authController.verify);
+router.get('/auth/devlogin/:address', authController.devLogin);
 
 export default router;

@@ -10,7 +10,7 @@ const DB_CONFIG = {
   PORT: process.env.DB_PORT ? Number(process.env.DB_PORT) : 5432,
   USER: process.env.DB_USER || "postgres",
   PASSWORD: process.env.DB_PASSWORD || "",
-  NAME: process.env.DB_NAME || "postgres",
+  NAME: process.env.DB_NAME || "blockchain",
 
   SSL: process.env.DB_SSL === "true",
 
@@ -20,7 +20,7 @@ const DB_CONFIG = {
 };
 
 const JWT_CONFIG = {
-  JWT_SECRET:process.env.JWT_SECRET
+  JWT_SECRET: process.env.JWT_SECRET
 }
 
-export { DB_CONFIG ,JWT_CONFIG};
+export { DB_CONFIG, JWT_CONFIG };

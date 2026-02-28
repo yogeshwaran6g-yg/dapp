@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 import pool from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
+import slotActivationRoutes from "./routes/slotActivationRoutes.js";
 import errorHandler from "./middleware/errorMiddleware.js";
 
 dotenv.config();
@@ -79,6 +80,7 @@ app.get("/api/health", async (req, res) => {
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/profile", profileRoutes);
+app.use("/api/v1/slot-activation", slotActivationRoutes);
 
 app.use(errorHandler);
 
