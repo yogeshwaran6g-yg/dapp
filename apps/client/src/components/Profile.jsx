@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useGetProfile, useUpdateProfile } from '../hooks/useProfile';
 
 const Profile = () => {
-    const userId = JSON.parse(localStorage.getItem('user'))?.id;
+    const storedUser = localStorage.getItem('user');
+    const userId = (storedUser && storedUser !== 'undefined' && storedUser !== 'null')
+        ? JSON.parse(storedUser)?.id
+        : null;
 
     const { data: queryData, isLoading, isError, error } = useGetProfile(userId);
     const { mutate: saveProfile, isPending: isSaving } = useUpdateProfile(userId);

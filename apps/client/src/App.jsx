@@ -46,7 +46,7 @@ const DevLoginHandler = () => {
 
                 const { token, user } = result.data;
 
-                localStorage.setItem('accessToken', token);
+                localStorage.setItem('authToken', token);
                 if (user) {
                     localStorage.setItem('user', JSON.stringify(user));
                     setUser(user);
@@ -54,7 +54,7 @@ const DevLoginHandler = () => {
                 setIsAuthenticated(true);
 
                 toast.success('Developer login successful!');
-                navigate('/profile');
+                navigate('/slot-activation');
             } catch (err) {
                 console.error("Dev login failed", err);
                 toast.error("Dev login failed. Check console.");

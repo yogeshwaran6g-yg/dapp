@@ -18,9 +18,10 @@ export const AuthProvider = ({ children }) => {
         return null;
     });
 
-    const [isAuthenticated, setIsAuthenticated] = useState(() => 
-        !!localStorage.getItem('authToken')
-    );
+    const [isAuthenticated, setIsAuthenticated] = useState(() => {
+        const token = localStorage.getItem('authToken');
+        return !!token && token !== 'undefined' && token !== 'null';
+    });
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');

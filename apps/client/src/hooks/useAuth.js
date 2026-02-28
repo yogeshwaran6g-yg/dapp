@@ -24,8 +24,8 @@ export const useVerifySignature = () => {
     return useMutation({
         mutationFn: ({ address, signature }) => authApiService.verifySignature(address, signature),
         onSuccess: (data) => {
-            localStorage.setItem('authToken', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('authToken', data.data.token);
+            localStorage.setItem('user', JSON.stringify(data.data.user));
             queryClient.invalidateQueries();
         },
     });
@@ -62,7 +62,7 @@ export const useLogin = () => {
             // Then verify...
             const result = await verifyMutationRef.current.mutateAsync({ address, signature });
 
-            setUser(result.user);
+            setUser(result.data.user);
             setIsAuthenticated(true);
             toast.success('Successfully authenticated!');
             return result;

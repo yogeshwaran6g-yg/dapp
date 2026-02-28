@@ -59,7 +59,10 @@ const LEVELS = [
 ];
 
 const SlotActivation = () => {
-    const userId = JSON.parse(localStorage.getItem('user'))?.id;
+    const storedUser = localStorage.getItem('user');
+    const userId = (storedUser && storedUser !== 'undefined' && storedUser !== 'null')
+        ? JSON.parse(storedUser)?.id
+        : null;
     const { data: slotActivation, isLoading, error } = useGetSlotActivation(userId);
     const { mutate: updateSlotActivation } = useUpdateSlotActivation(userId);
 

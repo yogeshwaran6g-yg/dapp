@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, Wallet, Loader2, PenLine } from 'lucide-react'
 import { useAccount } from 'wagmi'
@@ -10,6 +11,7 @@ import { useNonce, useLogin } from '../../hooks/useAuth'
 
 export default function Hero() {
     const { open } = useAppKit()
+    const navigate = useNavigate()
     const { address, isConnected } = useAccount()
     const { isAuthenticated } = useAuthContext()
     const { login, isLoggingIn } = useLogin()
@@ -28,7 +30,9 @@ export default function Hero() {
                 const result = await fetchNonce()
                 resolvedNonce = result.data
             }
-            login(resolvedNonce).catch(() => {})
+            login(resolvedNonce).then(() => {
+                navigate('/slot-activation')
+            }).catch(() => { })
         } else {
             open()
         }
