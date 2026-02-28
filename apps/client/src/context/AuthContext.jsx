@@ -5,7 +5,19 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const { address, isConnected } = useAccount();
-    const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'));
+
+    const [user, setUser] = useState(() => {
+        try {
+            const stored = localStorage.getItem('user');
+            if (stored && stored !== 'undefined') {
+                return JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error('Initial parse error for user', e);
+        }
+        return null;
+    });
+
     const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('authToken'));
 
     // Sync state when wallet disconnects or address changes
@@ -20,13 +32,22 @@ export const AuthProvider = ({ children }) => {
 
         const token = localStorage.getItem('authToken');
         const storedUserJSON = localStorage.getItem('user');
-        if (token && storedUserJSON) {
-            const storedUser = JSON.parse(storedUserJSON);
-            if (storedUser.wallet_address?.toLowerCase() === address.toLowerCase()) {
-                setIsAuthenticated(true);
-                setUser(prev => prev?.id === storedUser.id ? prev : storedUser);
-            } else {
-                // Different address — clear stale session
+
+        if (token && storedUserJSON && storedUserJSON !== 'undefined') {
+            try {
+                const storedUser = JSON.parse(storedUserJSON);
+                if (storedUser && storedUser.wallet_address?.toLowerCase() === address.toLowerCase()) {
+                    setIsAuthenticated(true);
+                    setUser(prev => prev?.id === storedUser.id ? prev : storedUser);
+                } else {
+                    // Different address or invalid user object — clear stale session
+                    setIsAuthenticated(false);
+                    setUser(null);
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                }
+            } catch (e) {
+                console.error('Effect parse error for user', e);
                 setIsAuthenticated(false);
                 setUser(null);
                 localStorage.removeItem('authToken');
