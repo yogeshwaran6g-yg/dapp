@@ -24,4 +24,27 @@ export const updateProfile = async (profileData) => {
     }
 };
 
+export const fetchSlotActivation = async (userId) => {
+    try {
+        const data = await api.get(API_ENDPOINTS.SLOT_ACTIVATION.GET_BY_USER(userId));
+        return data;
+    } catch (error) {
+        console.error('API Error (fetchSlotActivation):', error);
+        throw error;
+    }
+};
+
+export const updateSlotActivation = async (slotActivationData) => {
+    try {
+        const data = await api.put(API_ENDPOINTS.SLOT_ACTIVATION.UPDATE, slotActivationData, {
+            showSuccessToast: true,
+            showErrorToast: true
+        });
+        return data;
+    } catch (error) {
+        console.error('API Error (updateSlotActivation):', error);
+        throw error;
+    }
+};
+
 export default api;
