@@ -50,7 +50,20 @@ if (!isProduction) {
 
 app.use(
   cors({
-    origin: [process.env.CLIENT_URL || "http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5174"],
+    origin: (origin, callback) => {
+      const allowedRoots = [
+        "localhost:5173",
+        "localhost:5174",
+        "127.0.0.1:5174",
+        "localhost:3000",
+        ".csb.app"
+      ];
+      if (!origin || allowedRoots.some(root => origin.includes(root))) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization", "ngrok-skip-browser-warning"],
     optionsSuccessStatus: 200,

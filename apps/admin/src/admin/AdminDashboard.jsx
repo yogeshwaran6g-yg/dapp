@@ -20,11 +20,11 @@ const DashboardHome = () => {
     const recentActivities = dashboardData?.recentActivities || [];
 
     const statCards = [
-        { label: 'Total Users', value: stats.total_users?.toLocaleString() || '0', trend: `+${stats.users_24h || 0} last 24h`, icon: 'group' },
-        { label: 'Active Users', value: stats.active_users?.toLocaleString() || '0', trend: `${(stats.total_users > 0 ? (stats.active_users / stats.total_users * 100).toFixed(1) : 0)}% rate`, icon: 'token' },
-        { label: 'Total XP', value: stats.total_xp?.toLocaleString() || '0', trend: 'Global Progress', icon: 'workspace_premium' },
-        { label: 'Blocked Users', value: stats.blocked_users?.toLocaleString() || '0', trend: 'Safety Monitoring', icon: 'block', down: true },
-        { label: 'Growth rate', value: stats.users_24h?.toLocaleString() || '0', trend: 'New Registrations', icon: 'trending_up' },
+        { label: 'Total Users', value: Number(stats.total_users || 0).toLocaleString(), trend: `+${stats.users_24h || 0} last 24h`, icon: 'group' },
+        { label: 'Active Users', value: Number(stats.active_users || 0).toLocaleString(), trend: `${(Number(stats.total_users) > 0 ? (Number(stats.active_users) / Number(stats.total_users) * 100).toFixed(1) : 0)}% rate`, icon: 'token' },
+        { label: 'Total XP', value: Number(stats.total_xp || 0).toLocaleString(), trend: 'Global Progress', icon: 'workspace_premium' },
+        { label: 'Blocked Users', value: Number(stats.blocked_users || 0).toLocaleString(), trend: 'Safety Monitoring', icon: 'block', down: true },
+        { label: 'Growth rate', value: Number(stats.users_24h || 0).toLocaleString(), trend: 'New Registrations', icon: 'trending_up' },
     ].slice(0, 5); // Matching the grid layout
 
     return (
