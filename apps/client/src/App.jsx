@@ -14,6 +14,7 @@ import StakingDashboard from './components/StakingDashboard';
 import SlotActivation from './components/SlotActivation';
 import Profile from './components/Profile';
 import WithdrawPortal from './components/WithdrawPortal';
+import PageHeading from './components/PageHeading';
 
 import LandingPage from './components/landing/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -21,12 +22,17 @@ import { authApiService } from './services/authApiService';
 import { useAuthContext } from './context/AuthContext';
 
 const Dashboard = () => (
-    <>
+    <div className="space-y-8">
+        <PageHeading
+            highlight="SYSTEM"
+            title="OVERVIEW"
+            subtitle="Real-time analytics and protocol management interface."
+        />
         <QuickActions />
         <StatsGrid />
         <Charts />
         <ActivityList />
-    </>
+    </div>
 );
 
 const DevLoginHandler = () => {
@@ -46,7 +52,7 @@ const DevLoginHandler = () => {
 
                 const { token, user } = result.data;
 
-                localStorage.setItem('accessToken', token);
+                localStorage.setItem('authToken', token);
                 if (user) {
                     localStorage.setItem('user', JSON.stringify(user));
                     setUser(user);

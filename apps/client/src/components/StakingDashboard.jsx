@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import PageHeading from './PageHeading';
 
 const StakingDashboard = () => {
     const [activeTab, setActiveTab] = useState('stake');
@@ -23,13 +24,11 @@ const StakingDashboard = () => {
 
     return (
         <div className="space-y-8">
-            {/* Hero Title */}
-            <div className="mb-2">
-                <h2 className="text-2xl sm:text-3xl md:text-5xl font-black mb-1">Staking Dashboard</h2>
-                <p className="text-white/50 text-xs sm:text-sm max-w-xl">
-                    Maximize yield with institutional security and real-time distribution.
-                </p>
-            </div>
+            <PageHeading
+                highlight="STAKING"
+                title="DASHBOARD"
+                subtitle="Maximize yield with institutional security and real-time distribution."
+            />
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -146,7 +145,7 @@ const StakingDashboard = () => {
                     {/* Rewards Card */}
                     <div className="glass-panel rounded-xl p-4 sm:p-6 lg:p-8 flex flex-col sm:flex-row items-center justify-between border border-accent-gold/20 gap-4">
                         <div className="flex items-center gap-4 sm:gap-6">
-                            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-accent-gold/10 flex items-center justify-center text-accent-gold flex-shrink-0">
+                            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-accent-gold/10 flex items-center justify-center text-accent-gold shrink-0">
                                 <span className="material-symbols-outlined text-2xl sm:text-3xl">payments</span>
                             </div>
                             <div>
@@ -197,8 +196,8 @@ const StakingDashboard = () => {
                     </div>
 
                     {/* Security Badge */}
-                    <div className="p-6 rounded-xl bg-gradient-to-br from-yellow-500/10 to-transparent border border-white/5 flex items-start gap-4">
-                        <span className="material-symbols-outlined text-accent-gold p-2 bg-accent-gold/10 rounded-lg flex-shrink-0">verified_user</span>
+                    <div className="p-6 rounded-xl bg-linear-to-br from-yellow-500/10 to-transparent border border-white/5 flex items-start gap-4">
+                        <span className="material-symbols-outlined text-accent-gold p-2 bg-accent-gold/10 rounded-lg shrink-0">verified_user</span>
                         <div>
                             <p className="font-bold text-sm mb-1">Audited Protocol</p>
                             <p className="text-xs text-white/40 leading-relaxed">

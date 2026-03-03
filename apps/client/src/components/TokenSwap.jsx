@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PageHeading from './PageHeading';
 
 const TOKENS = [
     {
@@ -124,12 +125,13 @@ const TokenSwap = () => {
     return (
         <div className="space-y-10">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-                <div>
-                    <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1">Swap Tokens</h2>
-                    <p className="text-white/50 text-xs sm:text-sm">Institutional grade liquidity for your digital assets.</p>
-                </div>
-                <div className="flex gap-2 sm:gap-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 w-full">
+                <PageHeading
+                    highlight="SWAP"
+                    title="TOKENS"
+                    subtitle="Institutional grade liquidity for your digital assets."
+                />
+                <div className="flex gap-2 sm:gap-3 mb-12">
                     <button className="p-2 sm:p-2.5 rounded-lg glass-card hover:bg-white/10 text-white/60 hover:text-white transition-all">
                         <span className="material-symbols-outlined text-[18px] sm:text-[20px]">refresh</span>
                     </button>
@@ -173,7 +175,7 @@ const TokenSwap = () => {
                                 />
                                 <span className="text-[10px] text-white/30 font-medium mt-1">{fromUSD}</span>
                             </div>
-                            <button className="flex items-center gap-1.5 sm:gap-2 bg-white/5 hover:bg-white/10 transition-all px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border border-white/5 ml-2 sm:ml-3 flex-shrink-0">
+                            <button className="flex items-center gap-1.5 sm:gap-2 bg-white/5 hover:bg-white/10 transition-all px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border border-white/5 ml-2 sm:ml-3 shrink-0">
                                 <TokenIcon
                                     icon={fromToken.icon}
                                     iconStyle={fromToken.iconStyle}
@@ -225,7 +227,7 @@ const TokenSwap = () => {
                                 />
                                 <span className="text-[10px] text-white/30 font-medium mt-1">{toUSD}</span>
                             </div>
-                            <button className="flex items-center gap-1.5 sm:gap-2 bg-white/5 hover:bg-white/10 transition-all px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border border-white/5 ml-2 sm:ml-3 flex-shrink-0">
+                            <button className="flex items-center gap-1.5 sm:gap-2 bg-white/5 hover:bg-white/10 transition-all px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border border-white/5 ml-2 sm:ml-3 shrink-0">
                                 <TokenIcon
                                     icon={toToken.icon}
                                     iconStyle={toToken.iconStyle}
@@ -262,7 +264,7 @@ const TokenSwap = () => {
 
                     {/* CTA */}
                     <button
-                        className="w-full py-4 rounded-2xl text-[#0b0b0f] font-black text-sm uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all"
+                        className="w-full py-4 rounded-2xl text-background-dark font-black text-sm uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all"
                         style={{
                             background: 'linear-gradient(135deg, #D4AF37 0%, #B8860B 100%)',
                             boxShadow: '0 10px 30px -10px rgba(212,175,55,0.4)',
@@ -287,7 +289,7 @@ const TokenSwap = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left min-w-[500px]">
                             <thead>
-                                <tr className="border-b border-white/5 bg-white/[0.03]">
+                                <tr className="border-b border-white/5 bg-white/3">
                                     <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-white/40">Asset Pair</th>
                                     <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-white/40">Amount</th>
                                     <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-white/40">Status</th>

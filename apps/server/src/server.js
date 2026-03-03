@@ -1,3 +1,13 @@
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Ensure .env is loaded from the apps/server directory
+dotenv.config({ path: path.join(__dirname, "../.env") });
+
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
@@ -5,15 +15,13 @@ import helmet from "helmet";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
-import dotenv from "dotenv";
 
 import pool from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import slotActivationRoutes from "./routes/slotActivationRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js";
 import errorHandler from "./middleware/errorMiddleware.js";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -81,6 +89,7 @@ app.get("/api/health", async (req, res) => {
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/slot-activation", slotActivationRoutes);
+app.use("/api/v1/wallet", walletRoutes);
 
 app.use(errorHandler);
 

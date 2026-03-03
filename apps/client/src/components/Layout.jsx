@@ -11,7 +11,7 @@ const Layout = () => {
     const closeSidebar = () => setIsSidebarOpen(false);
 
     return (
-        <div className="flex min-h-screen bg-background-light dark:bg-background-dark font-sans text-white selection:bg-accent-gold/30">
+        <div className="flex min-h-screen bg-background-dark font-sans text-white selection:bg-accent-gold/30">
             <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
             <main className="flex-1 lg:ml-64 min-h-screen flex flex-col transition-all duration-300">
                 <Header onMenuClick={toggleSidebar} />

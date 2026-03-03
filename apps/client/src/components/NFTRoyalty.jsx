@@ -1,4 +1,5 @@
 import React from 'react';
+import PageHeading from './PageHeading';
 
 const nftTiers = [
     {
@@ -89,12 +90,12 @@ const NFTTierCard = ({ tier }) => {
             )}
 
             {/* Image */}
-            <div className="aspect-[4/5] relative overflow-hidden">
+            <div className="aspect-4/5 relative overflow-hidden">
                 <div
                     className="absolute inset-0 bg-center bg-cover transition-transform duration-500 group-hover:scale-110"
                     style={{ backgroundImage: `url('${tier.imageUrl}')` }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0f] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-background-dark via-transparent to-transparent" />
                 <div className="absolute top-4 left-4">
                     <span
                         className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${isActive
@@ -164,22 +165,12 @@ const NFTRoyalty = () => {
     return (
         <div className="w-full">
             {/* Hero Header */}
-            <div className="mb-6 sm:mb-12">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-gold/10 border border-accent-gold/20 mb-3">
-                    <span className="material-symbols-outlined text-accent-gold text-[10px] sm:text-xs">
-                        verified
-                    </span>
-                    <span className="text-accent-gold text-[8px] sm:text-[10px] font-bold uppercase tracking-widest">
-                        Rewards Active
-                    </span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight mb-2 sm:mb-4">
-                    NFT <span className="gold-gradient-text">Royalty</span>
-                </h1>
-                <p className="text-white/50 text-xs sm:text-base max-w-2xl leading-relaxed">
-                    Activate premium tier NFTs to secure ecosystem revenue. Distributed every 72 hours.
-                </p>
-            </div>
+            <PageHeading
+                badge="REWARDS ACTIVE"
+                highlight="NFT"
+                title="ROYALTY"
+                subtitle="Activate premium tier NFTs to secure ecosystem revenue. Distributed every 72 hours."
+            />
 
             {/* Royalty Pool Overview */}
             <section className="mb-8 sm:mb-14">
@@ -269,7 +260,7 @@ const NFTRoyalty = () => {
 
             {/* Bottom Note */}
             <div className="mt-8 sm:mt-16 p-4 sm:p-6 glass-card rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                <div className="size-10 sm:size-12 rounded-full bg-accent-gold/10 flex items-center justify-center text-accent-gold flex-shrink-0">
+                <div className="size-10 sm:size-12 rounded-full bg-accent-gold/10 flex items-center justify-center text-accent-gold shrink-0">
                     <span className="material-symbols-outlined text-lg sm:text-xl">info</span>
                 </div>
                 <div>

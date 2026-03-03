@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, ChevronDown, Menu } from 'lucide-react';
+import { Bell, ChevronDown, Menu, LogOut } from 'lucide-react';
+import { useLogout } from '../hooks/useAuth';
+import { useWalletBalance } from '../hooks/useWallet';
+import { API_ENDPOINTS } from '../utils/endpoints';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Header = ({ onMenuClick }) => {
     const [address, setAddress] = useState('');
+    const logout = useLogout();
+    const queryClient = useQueryClient();
+    const { data: walletData, isLoading: isBalanceLoading } = useWalletBalance();
+    const [faucetAmount, setFaucetAmount] = useState('10');
 
     useEffect(() => {
         try {
@@ -22,7 +30,7 @@ const Header = ({ onMenuClick }) => {
     };
 
     return (
-        <header className="h-20 bg-[#0b0b0f]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 sm:px-10 sticky top-0 z-40 transition-all duration-300">
+        <header className="h-20 bg-background-dark/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 sm:px-10 sticky top-0 z-40 transition-all duration-300">
             <div className="flex items-center gap-6 sm:gap-12">
                 <button
                     onClick={onMenuClick}
@@ -52,17 +60,61 @@ const Header = ({ onMenuClick }) => {
 
             <div className="flex items-center gap-4 sm:gap-6">
                 {/* Status Pill */}
-                <div className="hidden sm:flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-accent-gold/30 cursor-pointer transition-all duration-300 group shadow-lg">
-                    <span className={`w-2 h-2 rounded-full transition-shadow duration-300 ${address ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-accent-gold shadow-[0_0_10px_#D4AF37]'}`}></span>
-                    <span className="text-[10px] font-black text-accent-gold uppercase tracking-[0.15em]">
-                        {address ? formatAddress(address) : 'Disconnected'}
-                    </span>
+                <div className="hidden sm:flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-accent-gold/30 cursor-pointer transition-all duration-300 group shadow-lg">
+                        <span className={`w-2 h-2 rounded-full transition-shadow duration-300 ${address ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-accent-gold shadow-[0_0_10px_#D4AF37]'}`}></span>
+                        <span className="text-[10px] font-black text-accent-gold uppercase tracking-[0.15em]">
+                            {address ? formatAddress(address) : 'Disconnected'}
+                        </span>
+                    </div>
+                    {address && (
+                        <div className="flex items-center gap-3 px-2">
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Test Balance:</span>
+                                <span className="text-[10px] font-black text-white italic">
+                                    {isBalanceLoading ? '...' : `$${walletData?.ethBalance || '0.00'}`}
+                                </span>
+                            </div>
+                            <div className="flex items-center bg-white/5 border border-white/10 rounded-md overflow-hidden">
+                                <input
+                                    type="number"
+                                    value={faucetAmount}
+                                    onChange={(e) => setFaucetAmount(e.target.value)}
+                                    className="w-12 bg-transparent text-[9px] font-black text-white px-2 py-0.5 outline-none border-r border-white/10"
+                                    placeholder="Amount"
+                                />
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            const { default: axios } = await import('../services/axios');
+                                            await axios.post(API_ENDPOINTS.WALLET.FAUCET, { amount: parseFloat(faucetAmount) });
+                                            queryClient.invalidateQueries({ queryKey: ['walletBalance'] });
+                                        } catch (e) {
+                                            console.error('Faucet error', e);
+                                        }
+                                    }}
+                                    className="px-2 py-0.5 text-[8px] font-black text-accent-gold hover:bg-white/5 transition-all uppercase"
+                                >
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Notifications */}
                 <button className="flex items-center justify-center p-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all relative">
-                    <Bell size={18} />
-                    <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-accent-gold rounded-full border border-[#0b0b0f]"></span>
+                    < Bell size={18} />
+                    <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-accent-gold rounded-full border border-background-dark"></span>
+                </button>
+
+                {/* Logout Button */}
+                <button
+                    onClick={logout}
+                    className="flex items-center justify-center p-2.5 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/70 hover:text-red-500 hover:bg-red-500/10 transition-all group"
+                    title="Logout"
+                >
+                    <LogOut size={18} />
                 </button>
 
                 {/* Profile */}

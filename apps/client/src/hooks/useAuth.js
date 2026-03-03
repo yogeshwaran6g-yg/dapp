@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSignMessage, useAccount } from 'wagmi';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import { authApiService } from '../services/authApiService';
 import { useAuthContext } from '../context/AuthContext';
 
@@ -12,10 +13,10 @@ export const useNonce = (address) =>
         queryKey: ['nonce', address],
         queryFn: () => authApiService.getNonce(address),
         enabled: !!address,
-        staleTime: Infinity,
+        staleTime: 0,
         retry: false,
         refetchOnWindowFocus: false,
-        refetchOnMount: false,
+        refetchOnMount: true,
         refetchOnReconnect: false,
     });
 
@@ -23,9 +24,13 @@ export const useVerifySignature = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ address, signature }) => authApiService.verifySignature(address, signature),
-        onSuccess: (data) => {
-            localStorage.setItem('authToken', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+        onSuccess: (response) => {
+            const token = response.data?.token || response.token;
+            const user = response.data?.user || response.user;
+
+            if (token) localStorage.setItem('authToken', token);
+            if (user) localStorage.setItem('user', JSON.stringify(user));
+
             queryClient.invalidateQueries();
         },
     });
@@ -60,12 +65,13 @@ export const useLogin = () => {
             const signature = await signMessageAsync({ message });
 
             // Then verify...
-            const result = await verifyMutationRef.current.mutateAsync({ address, signature });
+            const response = await verifyMutationRef.current.mutateAsync({ address, signature });
+            const userData = response.data?.user || response.user;
 
-            setUser(result.user);
+            setUser(userData);
             setIsAuthenticated(true);
             toast.success('Successfully authenticated!');
-            return result;
+            return response;
         } catch (error) {
             if (error.code !== 4001 && !error.message?.includes('User rejected')) {
                 toast.error(error.message || 'Authentication failed');
@@ -81,6 +87,7 @@ export const useLogin = () => {
  */
 export const useLogout = () => {
     const { setUser, setIsAuthenticated } = useAuthContext();
+    const navigate = useNavigate();
 
     return useCallback(() => {
         localStorage.removeItem('authToken');
@@ -88,5 +95,6 @@ export const useLogout = () => {
         setIsAuthenticated(false);
         setUser(null);
         toast.success('Logged out');
-    }, [setUser, setIsAuthenticated]);
+        navigate('/');
+    }, [setUser, setIsAuthenticated, navigate]);
 };

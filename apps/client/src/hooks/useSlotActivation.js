@@ -26,6 +26,7 @@ export const useUpdateSlotActivation = (userId) => {
         mutationFn: (slotActivationData) => slotApiService.updateSlotActivation(slotActivationData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['slotActivation', userId] });
+            queryClient.invalidateQueries({ queryKey: ['walletBalance'] });
         },
     });
 };

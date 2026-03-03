@@ -16,7 +16,7 @@ const StatsGrid = () => {
             {stats.map((stat, idx) => (
                 <div key={idx} className="glass-panel gold-glow-border p-4 rounded-xl flex flex-col gap-1">
                     <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider">{stat.label}</p>
-                    <p className="text-xl font-bold text-white tracking-tight">{stat.value}</p>
+                    <p className="text-lg font-bold text-white tracking-tight">{stat.value}</p>
                     {stat.trend && (
                         <p className={`text-[10px] font-bold flex items-center gap-1 ${stat.trendColor}`}>
                             {stat.trendIcon && <span className="material-symbols-outlined text-xs">{stat.trendIcon}</span>}

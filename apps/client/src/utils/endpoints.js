@@ -25,4 +25,10 @@ export const API_ENDPOINTS = {
         GET_BY_USER: (userId) => `${V1}/slot-activation/${userId}`, // GET  — fetch slot activation by user_id
         UPDATE: `${V1}/slot-activation`,                         // PUT  — update own slot activation
     },
+
+    // ── Wallet ──────────────────────────────────────────
+    WALLET: {
+        BALANCE: `${V1}/wallet/balance`, // GET — fetch fake eth balance
+        FAUCET: `${V1}/wallet/faucet`,   // POST — request test eth
+    },
 };

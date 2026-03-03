@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGetProfile, useUpdateProfile } from '../hooks/useProfile';
+import PageHeading from './PageHeading';
 
 const Profile = () => {
     let userId = null;
@@ -95,20 +96,19 @@ const Profile = () => {
     }
 
     return (
-        <div className="min-h-screen bg-primary text-white relative overflow-hidden pb-20">
+        <div className="min-h-screen bg-background-dark text-white relative overflow-hidden pb-20">
             {/* Background Decorations */}
             <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-accent-gold/5 blur-[120px] rounded-full pointer-events-none"></div>
             <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[30%] bg-accent-gold/5 blur-[100px] rounded-full pointer-events-none"></div>
 
             <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-12 pt-2 sm:pt-4 md:pt-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {/* Header Section */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-4 mb-4 sm:mb-6 md:mb-8">
-                    <div className="text-center lg:text-left">
-                        <h1 className="text-xl sm:text-2xl md:text-5xl font-black gold-gradient-text tracking-tight">
-                            Personal Profile
-                        </h1>
-                        <p className="text-gray-400 mt-1 sm:mt-2 text-xs sm:text-base md:text-lg">Manage your digital identity and account settings</p>
-                    </div>
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-4 mb-4 sm:mb-6 md:mb-8 w-full">
+                    <PageHeading
+                        highlight="PERSONAL"
+                        title="PROFILE"
+                        subtitle="Manage your digital identity and account settings"
+                    />
 
                     <div className="flex flex-wrap items-center justify-center lg:justify-end gap-3 sm:gap-4">
                         {!isEditing ? (

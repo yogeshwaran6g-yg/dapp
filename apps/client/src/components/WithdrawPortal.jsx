@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PageHeading from './PageHeading';
 
 const WithdrawPortal = () => {
     const [asset, setAsset] = useState('OWN Token');
@@ -21,10 +22,11 @@ const WithdrawPortal = () => {
     return (
         <div className="p-4 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
             {/* Header Section */}
-            <div className="flex flex-col gap-2">
-                <h3 className="text-3xl lg:text-4xl font-black text-white tracking-tight">Withdraw Funds</h3>
-                <p className="text-gray-400 text-base lg:text-lg">Manage your assets and claim rewards across the ecosystem.</p>
-            </div>
+            <PageHeading
+                highlight="WITHDRAW"
+                title="FUNDS"
+                subtitle="Manage your assets and claim rewards across the ecosystem."
+            />
 
             {/* Balances Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -170,7 +172,7 @@ const WithdrawPortal = () => {
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {recentWithdrawals.map((tx, idx) => (
-                                    <tr key={idx} className="hover:bg-white/[0.02] transition-colors group">
+                                    <tr key={idx} className="hover:bg-white/2 transition-colors group">
                                         <td className="px-8 py-4 whitespace-nowrap">
                                             <div className="text-sm text-white font-medium">{tx.date}</div>
                                             <div className="text-[10px] text-silver/40 uppercase">{tx.time}</div>

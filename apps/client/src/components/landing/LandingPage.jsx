@@ -10,22 +10,42 @@ import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
 import { WalletAuthListener } from '../WalletAuthListener'
 import SignupView from './SignupView'
+import { useAuthContext } from '../../context/AuthContext'
+import { useLogin, useNonce } from '../../hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 
 function LandingPage() {
     const { open } = useAppKit()
-    const { isConnected } = useAccount()
+    const navigate = useNavigate()
+    const { address, isConnected } = useAccount()
+    const { isAuthenticated } = useAuthContext()
+    const { login } = useLogin()
+    const { data: nonce, refetch: fetchNonce } = useNonce(
+        isConnected && !isAuthenticated ? address : null
+    )
     const [isSignupViewOpen, setIsSignupViewOpen] = React.useState(false)
 
-    const handleConnectClick = () => {
-        if (isConnected) {
-            open()
-        } else {
+    const handleConnectClick = async () => {
+        if (!isConnected) {
             setIsSignupViewOpen(true)
+        } else if (!isAuthenticated) {
+            // Ensure we have a fresh nonce before signing
+            let resolvedNonce = nonce
+            if (!resolvedNonce) {
+                const result = await fetchNonce()
+                resolvedNonce = result.data
+            }
+            const loginResult = await login(resolvedNonce)
+            if (loginResult) {
+                navigate('/dashboard')
+            }
+        } else {
+            navigate('/dashboard')
         }
     }
 
     return (
-        <div className="bg-black-pure min-h-screen selection:bg-gold/30 selection:text-gold-light font-sans">
+        <div className="min-h-screen bg-black-pure text-white font-sans selection:bg-gold selection:text-black-pure overflow-x-hidden bg-linear-to-b from-black-pure via-black-soft to-black-pure">
             <WalletAuthListener />
             <Navbar onConnectClick={handleConnectClick} />
             <main>
@@ -34,7 +54,7 @@ function LandingPage() {
                 <Roadmap />
 
                 {/* Call to Action Section */}
-                <section className="py-28 bg-gradient-to-b from-black-soft to-black-pure relative overflow-hidden">
+                <section className="py-28 bg-linear-to-b from-black-soft to-black-pure relative overflow-hidden">
                     {/* Background glow */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gold/5 rounded-full blur-[150px] pointer-events-none" />
 

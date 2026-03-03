@@ -19,10 +19,11 @@ export const verify = async (req, res) => {
     try {
 
         const { address, signature } = req.body;
-        if (!address, !signature) {
-            return rtnRes(res, 404, "address and signature are required");
+        if (!address || !signature) {
+            return rtnRes(res, 400, "address and signature are required");
         }
-        const origin = req.get('origin') || 'http://localhost:5173';
+        const origin = req.get('origin') || process.env.CLIENT_URL || 'http://localhost:3000';
+        console.log(`[AuthController] Verifying for origin: ${origin}`);
 
         const result = await authService.verifySignature(address, signature, origin);
         return rtnRes(res, result.status, result.message, result.data);

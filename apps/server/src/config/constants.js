@@ -1,6 +1,12 @@
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Ensure .env is loaded from the apps/server directory
+dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 
 const DB_CONFIG = {
@@ -20,7 +26,9 @@ const DB_CONFIG = {
 };
 
 const JWT_CONFIG = {
-  JWT_SECRET: process.env.JWT_SECRET
-}
+  get JWT_SECRET() {
+    return process.env.JWT_SECRET;
+  }
+};
 
 export { DB_CONFIG, JWT_CONFIG };

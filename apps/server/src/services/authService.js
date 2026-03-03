@@ -4,10 +4,15 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { serviceResponse } from '../utils/helper.js';
 import { JWT_CONFIG } from "../config/constants.js";
+import { getWalletBalance, calculateEligibleLevel } from './blockchainService.js';
 
-dotenv.config();
+// No longer need dotenv.config() here as it's at the top of server.js
 
-const JWT_SECRET = JWT_CONFIG.JWT_SECRET;
+export const signToken = (payload) => {
+    const JWT_SECRET = JWT_CONFIG.JWT_SECRET;
+    console.log(`[AuthService] Signing token. Secret present: ${!!JWT_SECRET}`);
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+};
 
 export const generateNonce = async (address) => {
     try {
@@ -64,7 +69,10 @@ export const verifySignature = async (address, signature, origin) => {
         const recoveredAddress = ethers.verifyMessage(msg, signature);
 
         if (recoveredAddress.toLowerCase() !== wallet_address) {
-            console.warn(`[AuthService] Signature mismatch for ${wallet_address}. Recovered: ${recoveredAddress}`);
+            console.warn(`[AuthService] Signature mismatch!`);
+            console.warn(`[AuthService] Expected: ${wallet_address}`);
+            console.warn(`[AuthService] Recovered: ${recoveredAddress}`);
+            console.warn(`[AuthService] Message used:\n"${msg}"`);
             return serviceResponse(false, 401, 'Invalid signature or address mismatch');
         }
 
@@ -72,32 +80,30 @@ export const verifySignature = async (address, signature, origin) => {
         const newNonce = Math.floor(Math.random() * 1000000).toString();
         await queryRunner('UPDATE users SET nonce = $1, last_login_at = CURRENT_TIMESTAMP WHERE id = $2', [newNonce, user.id]);
 
-        // Ensure profile exists
+        // --- Handle Slot Activation based on Balance ---
+        const balance = await getWalletBalance(wallet_address);
+        const eligibleLevel = calculateEligibleLevel(balance);
+        console.log(`[AuthService] User ${wallet_address} eligible for level ${eligibleLevel} (Balance: ${balance} ETH)`);
+
+        // Ensure profile and levels exist
         const profileResult = await queryRunner('SELECT * FROM profile WHERE user_id = $1', [user.id]);
         if (profileResult.length === 0) {
-            console.log(`[AuthService] Creating initial profile and levels for user ID ${user.id}`);
             await queryRunner('INSERT INTO profile (user_id) VALUES ($1)', [user.id]);
-            await queryRunner('INSERT INTO levels (id, current_level_id) VALUES ($1, 1)', [user.id]);
+        }
+
+        const levelsResult = await queryRunner('SELECT * FROM levels WHERE id = $1', [user.id]);
+        if (levelsResult.length === 0) {
+            console.log(`[AuthService] Creating missing levels entry for user ID ${user.id} with level ${eligibleLevel}`);
+            await queryRunner('INSERT INTO levels (id, current_level_id) VALUES ($1, $2)', [user.id, eligibleLevel]);
         } else {
-            // Ensure levels entry exists even if profile exists (for older users)
-            const levelsResult = await queryRunner('SELECT * FROM levels WHERE id = $1', [user.id]);
-            if (levelsResult.length === 0) {
-                console.log(`[AuthService] Creating missing levels entry for user ID ${user.id}`);
-                await queryRunner('INSERT INTO levels (id, current_level_id) VALUES ($1, 1)', [user.id]);
-            }
+            console.log(`[AuthService] Updating levels for user ID ${user.id} to level ${eligibleLevel}`);
+            await queryRunner('UPDATE levels SET current_level_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [eligibleLevel, user.id]);
         }
 
         console.log(`[AuthService] Generating JWT for user ${user.id}`);
-        console.log(`[AuthService] JWT Secret: ${JWT_SECRET}`);
 
         // Generate JWT
-        const token = jwt.sign(
-            { id: user.id, wallet_address: user.wallet_address, role: user.role },
-            JWT_SECRET,
-            { expiresIn: '24h' }
-        );
-
-        console.log(`[AuthService] Successfully authenticated user ${user.id}`);
+        const token = signToken({ id: user.id, wallet_address: user.wallet_address, role: user.role });
 
         return serviceResponse(true, 200, 'Authentication successful', {
             token,
@@ -116,38 +122,42 @@ export const verifySignature = async (address, signature, origin) => {
 export const devLogin = async (address) => {
     try {
         const wallet_address = address.toLowerCase();
+        console.log(`[AuthService] Dev login for ${wallet_address}`);
 
+        // Get or create user
         let userResult = await queryRunner('SELECT * FROM users WHERE wallet_address = $1', [wallet_address]);
-
-        let user;
         if (userResult.length === 0) {
-            const referral_code = `DEV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-            const nonce = Math.floor(Math.random() * 1000000).toString();
+            const referral_code = `REF-DEV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
             await queryRunner(
-                'INSERT INTO users (wallet_address, nonce, referral_code, role) VALUES ($1, $2, $3, $4)',
-                [wallet_address, nonce, referral_code, "USER"]
+                'INSERT INTO users (wallet_address, role, referral_code) VALUES ($1, $2, $3)',
+                [wallet_address, 'USER', referral_code]
             );
             userResult = await queryRunner('SELECT * FROM users WHERE wallet_address = $1', [wallet_address]);
         }
 
-        user = userResult[0];
+        const user = userResult[0];
 
-        // Ensure profile and levels exist
+        // Ensure profile exists
         const profileResult = await queryRunner('SELECT * FROM profile WHERE user_id = $1', [user.id]);
         if (profileResult.length === 0) {
             await queryRunner('INSERT INTO profile (user_id) VALUES ($1)', [user.id]);
-            await queryRunner('INSERT INTO levels (id, current_level_id) VALUES ($1, 1)', [user.id]);
         }
 
-        console.log(`[AuthService] Generating JWT for user ${user.id}`);
-        console.log(`[AuthService] JWT Secret: ${JWT_SECRET}`);
+        // --- Handle Slot Activation based on Balance (Dev mode check) ---
+        const balance = await getWalletBalance(wallet_address);
+        const eligibleLevel = calculateEligibleLevel(balance);
+
+        const levelsResult = await queryRunner('SELECT * FROM levels WHERE id = $1', [user.id]);
+        if (levelsResult.length === 0) {
+            await queryRunner('INSERT INTO levels (id, current_level_id) VALUES ($1, $2)', [user.id, eligibleLevel]);
+        } else {
+            await queryRunner('UPDATE levels SET current_level_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [eligibleLevel, user.id]);
+        }
+
+        console.log(`[AuthService] Generating JWT for dev user ${user.id}`);
 
         // Generate JWT
-        const token = jwt.sign(
-            { id: user.id, wallet_address: user.wallet_address, role: user.role },
-            JWT_SECRET,
-            { expiresIn: '24h' }
-        );
+        const token = signToken({ id: user.id, wallet_address: user.wallet_address, role: user.role });
 
         return serviceResponse(true, 200, 'Dev login successful', {
             token,

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PageHeading from './PageHeading';
 
 const transactions = [
     {
@@ -59,7 +60,7 @@ const TokenCard = ({ icon, title, subtitle, balance, usdValue, change, actions, 
         <div className="flex justify-between items-start relative z-10">
             <div className="flex items-center gap-3 sm:gap-4">
                 <div
-                    className={`size-10 sm:size-14 rounded-xl bg-[#0b0b0f] border flex items-center justify-center ${highlighted
+                    className={`size-10 sm:size-14 rounded-xl bg-background-dark border flex items-center justify-center ${highlighted
                         ? 'border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.2)]'
                         : 'border-[#D4AF37]/30'
                         }`}
@@ -89,8 +90,8 @@ const TokenCard = ({ icon, title, subtitle, balance, usdValue, change, actions, 
                 <button
                     key={idx}
                     className={`flex-1 min-w-[100px] flex items-center justify-center gap-2 py-3 rounded-lg border transition-all font-bold text-sm ${action.primary
-                        ? 'bg-[#D4AF37] text-[#0b0b0f] border-[#D4AF37] hover:brightness-110'
-                        : 'bg-white/5 hover:bg-[#D4AF37] hover:text-[#0b0b0f] border-white/10 hover:border-[#D4AF37]'
+                        ? 'bg-[#D4AF37] text-background-dark border-[#D4AF37] hover:brightness-110'
+                        : 'bg-white/5 hover:bg-[#D4AF37] hover:text-background-dark border-white/10 hover:border-[#D4AF37]'
                         }`}
                 >
                     <span className="material-symbols-outlined text-lg">{action.icon}</span>
@@ -125,6 +126,11 @@ const TokenWallet = () => {
 
     return (
         <div className="space-y-8">
+            <PageHeading
+                highlight="TOKEN"
+                title="WALLET"
+                subtitle="Manage your assets with multi-chain security and real-time tracking."
+            />
             {/* Hero Balance Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <TokenCard
@@ -162,7 +168,7 @@ const TokenWallet = () => {
                 style={{ border: '1px solid rgba(212,175,55,0.1)' }}
             >
                 {/* Table Header */}
-                <div className="p-4 sm:p-6 border-b border-[#D4AF37]/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 bg-white/[0.02]">
+                <div className="p-4 sm:p-6 border-b border-[#D4AF37]/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 bg-white/2">
                     <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
                         <span className="material-symbols-outlined text-[#D4AF37]">history</span>
                         Recent Transactions
@@ -173,7 +179,7 @@ const TokenWallet = () => {
                                 search
                             </span>
                             <input
-                                className="bg-[#0b0b0f]/50 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:border-[#D4AF37] focus:outline-none w-full sm:w-64 transition-all text-white placeholder-white/30"
+                                className="bg-background-dark/50 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:border-[#D4AF37] focus:outline-none w-full sm:w-64 transition-all text-white placeholder-white/30"
                                 placeholder="Search hash or type..."
                                 type="text"
                                 value={search}
@@ -190,7 +196,7 @@ const TokenWallet = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-[#0b0b0f]/30">
+                            <tr className="bg-background-dark/30">
                                 <th className="px-6 py-4 text-[10px] font-bold text-white/40 uppercase tracking-widest">Type</th>
                                 <th className="px-6 py-4 text-[10px] font-bold text-white/40 uppercase tracking-widest">Amount</th>
                                 <th className="px-6 py-4 text-[10px] font-bold text-white/40 uppercase tracking-widest">Date</th>
@@ -244,7 +250,7 @@ const TokenWallet = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="p-4 bg-[#0b0b0f]/30 border-t border-[#D4AF37]/10 flex items-center justify-center gap-2">
+                <div className="p-4 bg-background-dark/30 border-t border-[#D4AF37]/10 flex items-center justify-center gap-2">
                     <button
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         disabled={page === 1}

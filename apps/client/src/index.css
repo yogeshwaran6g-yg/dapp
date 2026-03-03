@@ -15,9 +15,10 @@
     --color-black-elevated: #0d0d0d;
 
     /* Dashboard Colors */
-    --color-primary: #0b0b0f;
-    --color-background-light: #f7f7f7;
+    --color-primary: #070709;
     --color-background-dark: #0b0b0f;
+    --color-sidebar-bg: #0d0d0d;
+    --color-card-bg: #141416;
     --color-accent-gold: #D4AF37;
     --color-accent-gold-light: #FFD700;
     --color-gold-main: #D4AF37;
@@ -28,7 +29,7 @@
     --color-gold-start: #D4AF37;
     --color-silver: #C0C0C0;
     --color-glass: rgba(255, 255, 255, 0.03);
-    --color-glass-border: rgba(255, 255, 255, 0.1);
+    --color-glass-border: rgba(255, 255, 255, 0.08);
 
     /* Fonts */
     --font-display: "Orbitron", "Inter", sans-serif;
@@ -44,14 +45,29 @@
 }
 
 @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
 }
 
 :root {
@@ -59,10 +75,11 @@
 }
 
 body {
-    @apply bg-background-dark font-sans text-white selection:bg-gold/30 antialiased min-h-screen;
+    @apply bg-background-dark font-sans text-white selection:bg-accent-gold/30 antialiased min-h-screen;
     background-image:
-        radial-gradient(circle at 10% 20%, rgba(20, 20, 25, 1) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(15, 15, 20, 1) 0%, transparent 40%);
+        radial-gradient(circle at 0% 0%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.02) 0%, transparent 50%);
+    background-attachment: fixed;
 }
 
 .glass-panel {
