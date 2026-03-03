@@ -2,20 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useWallet } from '../../context/WalletContext';
 
 const StatsCards = () => {
-    const { stakedAmount, usdtBalance } = useWallet();
-    const [rewardCount, setRewardCount] = useState(0.0000);
+    const { stakedAmount, usdtBalance, accumulatedRewards } = useWallet();
     const rewardRef = useRef(null);
-
-    // Live ticking rewards counter
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setRewardCount(prev => {
-                const increment = (Math.random() * 0.0002 + 0.0001);
-                return parseFloat((prev + increment).toFixed(4));
-            });
-        }, 1000);
-        return () => clearInterval(interval);
-    }, []);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -57,7 +45,7 @@ const StatsCards = () => {
                         ref={rewardRef}
                         className="text-2xl sm:text-3xl font-black tracking-tight text-accent-gold staking-gold-glow font-mono"
                     >
-                        {rewardCount.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+                        {accumulatedRewards.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
                     </span>
                     <span className="text-white/40 text-[10px] sm:text-xs mt-1 font-medium italic">Ticking live...</span>
                 </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useWallet } from '../../context/WalletContext';
 
 const YieldAndActivity = () => {
-    const { usdtBalance, stakedAmount } = useWallet();
+    const { usdtBalance, stakedAmount, totalEarned } = useWallet();
 
     return (
         <div className="lg:col-span-5 flex flex-col gap-6">
@@ -33,7 +33,7 @@ const YieldAndActivity = () => {
                     </div>
                     <div className="flex justify-between items-center text-sm">
                         <span className="text-white/40">Total Earned</span>
-                        <span className="font-bold text-accent-gold">0.00 USDT</span>
+                        <span className="font-bold text-accent-gold">{totalEarned.toFixed(4)} GOLD</span>
                     </div>
                 </div>
             </div>

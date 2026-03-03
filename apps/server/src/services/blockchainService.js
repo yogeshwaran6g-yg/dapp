@@ -1,28 +1,23 @@
-import { queryRunner } from '../config/db.js';
+import { ethers } from 'ethers';
+
+const RPC_URL = 'https://polygon-rpc.com';
+const provider = new ethers.JsonRpcProvider(RPC_URL);
 
 /**
- * Service to interact with the blockchain (Now simulated with Database)
+ * Service to interact with the blockchain (Real on-chain balance)
  */
 export const getWalletBalance = async (address) => {
     try {
         const wallet_address = address.toLowerCase();
 
-        // Fetch simulated balance from DB
-        const userResult = await queryRunner(
-            'SELECT fake_eth_balance FROM users WHERE wallet_address = $1',
-            [wallet_address]
-        );
+        const balanceWei = await provider.getBalance(wallet_address);
+        const balance = parseFloat(ethers.formatEther(balanceWei));
 
-        if (userResult.length === 0) {
-            return 0;
-        }
-
-        const balance = parseFloat(userResult[0].fake_eth_balance || '0');
-        console.log(`[BlockchainService] Simulated Balance for ${wallet_address}: ${balance} ETH`);
+        console.log(`[BlockchainService] Real Balance for ${wallet_address}: ${balance} POL`);
 
         return balance;
     } catch (err) {
-        console.error(`[BlockchainService] Error fetching simulated balance for ${address}: ${err.message}`);
+        console.error(`[BlockchainService] Error fetching real balance for ${address}: ${err.message}`);
         return 0;
     }
 };

@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { useWallet } from '../../context/WalletContext';
 
 const StakingPanel = () => {
-    const { usdtBalance, stakeUSDT, isLoading } = useWallet();
+    const { usdtBalance, stakedAmount, stakeUSDT, unstakeUSDT, claimRewards, isLoading, accumulatedRewards } = useWallet();
     const [activeTab, setActiveTab] = useState('stake');
     const [stakeAmount, setStakeAmount] = useState('');
 
     const handleMaxClick = () => {
-        setStakeAmount(usdtBalance);
+        if (activeTab === 'stake') {
+            setStakeAmount(usdtBalance);
+        } else {
+            setStakeAmount(stakedAmount.toString());
+        }
     };
 
     const handleAction = () => {
@@ -17,8 +21,15 @@ const StakingPanel = () => {
                 setStakeAmount('');
             }
         } else {
-            // Unstake logic could be added here
+            const success = unstakeUSDT(stakeAmount);
+            if (success) {
+                setStakeAmount('');
+            }
         }
+    };
+
+    const handleClaim = () => {
+        claimRewards();
     };
 
     return (
@@ -99,11 +110,14 @@ const StakingPanel = () => {
                     <div>
                         <p className="text-white/50 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1">Ready to Claim</p>
                         <h3 className="text-xl sm:text-2xl font-black text-white">
-                            $452.12 <span className="text-accent-gold text-xs sm:text-sm ml-1">GOLD</span>
+                            {accumulatedRewards.toFixed(4)} <span className="text-accent-gold text-xs sm:text-sm ml-1">GOLD</span>
                         </h3>
                     </div>
                 </div>
-                <button className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-white/5 border border-white/10 hover:bg-accent-gold/10 hover:border-accent-gold/40 transition-all rounded-lg text-sm font-bold text-white">
+                <button
+                    onClick={handleClaim}
+                    className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-white/5 border border-white/10 hover:bg-accent-gold/10 hover:border-accent-gold/40 transition-all rounded-lg text-sm font-bold text-white"
+                >
                     Claim Rewards
                 </button>
             </div>
