@@ -17,7 +17,7 @@ const AdminLayout = () => {
                     isOpen={isSidebarOpen}
                     onClose={closeSidebar}
                 />
-                <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative transition-all duration-300">
+                <main className={`flex-1 flex flex-col min-w-0 overflow-hidden relative transition-all duration-300 ${isSidebarOpen ? 'lg:pl-64' : ''}`}>
                     <AdminHeader onMenuClick={toggleSidebar} />
                     <div className="flex-1 overflow-y-auto">
                         <div className="max-w-[1600px] mx-auto w-full">

@@ -1,18 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AdminHeader = ({ onMenuClick }) => {
+    const [searchValue, setSearchValue] = useState('');
+    const navigate = useNavigate();
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && searchValue.trim()) {
+            navigate(`/users/${searchValue.trim()}`);
+            setSearchValue(''); // Clear after searching
+        }
+    };
+
     return (
         <header className="h-16 flex items-center justify-between px-4 lg:px-10 bg-background-dark/80 backdrop-blur-md border-b border-white/5 z-10">
             <div className="flex items-center gap-4 lg:gap-8 flex-1">
                 <button
                     onClick={onMenuClick}
-                    className="lg:hidden p-2 rounded-lg bg-white/5 text-white hover:bg-white/10 transition-colors"
+                    className="p-2 rounded-lg bg-white/5 text-white hover:bg-white/10 transition-colors"
                 >
                     <span className="material-symbols-outlined text-xl">menu</span>
                 </button>
                 <div className="relative w-full max-w-xs lg:max-w-lg hidden sm:block">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xl">search</span>
-                    <input className="w-full bg-card-dark border border-white/10 rounded-xl pl-12 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400/50 text-white placeholder:text-slate-500 transition-all font-medium" placeholder="Search wallet, txn hash, or proposal..." type="text" />
+                    <input
+                        className="w-full bg-card-dark border border-white/10 rounded-xl pl-12 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400/50 text-white placeholder:text-slate-500 transition-all font-medium"
+                        placeholder="Search wallet, txn hash, or proposal..."
+                        type="text"
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                    />
                 </div>
                 <div className="flex items-center gap-4 lg:gap-6">
                     <div className="flex items-center gap-2">

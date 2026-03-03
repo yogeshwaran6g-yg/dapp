@@ -1,18 +1,39 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 
 const TransactionHistory = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = 10;
+
     const { data: logsData, isLoading } = useQuery({
-        queryKey: ['treasuryLogs'],
+        queryKey: ['treasuryLogs', page],
         queryFn: async () => {
-            const response = await fetch('/api/v1/admin/treasury/logs');
+            const params = new URLSearchParams({
+                page: page.toString(),
+                limit: limit.toString()
+            });
+            const response = await fetch(`/api/v1/admin/treasury/logs?${params}`);
             if (!response.ok) throw new Error('Failed to fetch treasury logs');
             const data = await response.json();
             return data.data;
         }
     });
 
-    const logs = logsData || [];
+    const logs = logsData?.logs || [];
+    const totalLogs = logsData?.total || 0;
+    const totalPages = Math.ceil(totalLogs / limit);
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setSearchParams(prev => {
+                const params = new URLSearchParams(prev);
+                params.set('page', newPage.toString());
+                return params;
+            });
+        }
+    };
 
     return (
         <div className="bg-card-dark border border-white/5 rounded-xl overflow-hidden shadow-2xl mt-4 lg:mt-8">
@@ -46,8 +67,8 @@ const TransactionHistory = () => {
                                     <td className="px-4 lg:px-6 py-2 lg:py-3">
                                         <div className="flex items-center gap-2">
                                             <div className={`size-5 lg:size-6 rounded-full flex items-center justify-center ${log.type === 'INFLOW' ? 'bg-green-500/10 text-green-500' :
-                                                    log.type === 'PAYOUT' ? 'bg-red-500/10 text-red-500' :
-                                                        'bg-blue-500/10 text-blue-500'
+                                                log.type === 'PAYOUT' ? 'bg-red-500/10 text-red-500' :
+                                                    'bg-blue-500/10 text-blue-500'
                                                 }`}>
                                                 <span className="material-symbols-outlined text-[10px] lg:text-xs">
                                                     {log.type === 'INFLOW' ? 'south_west' : 'north_east'}
@@ -91,10 +112,38 @@ const TransactionHistory = () => {
                     </tbody>
                 </table>
             </div>
+            {/* Pagination */}
             <div className="p-3 lg:p-4 bg-background-dark/30 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-2">
                 <span className="text-[9px] lg:text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                    Showing {logs.length} logs
+                    Showing {logs.length} of {totalLogs} logs
                 </span>
+                <div className="flex gap-1 lg:gap-2">
+                    <button
+                        onClick={() => handlePageChange(page - 1)}
+                        className="size-7 lg:size-8 flex items-center justify-center rounded border border-white/5 bg-white/5 text-gray-500 hover:text-white transition-colors disabled:opacity-30"
+                        disabled={page <= 1}
+                    >
+                        <span className="material-symbols-outlined text-base lg:text-lg">chevron_left</span>
+                    </button>
+                    <div className="flex items-center gap-0.5 lg:gap-1">
+                        {[...Array(totalPages)].map((_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => handlePageChange(i + 1)}
+                                className={`size-7 lg:size-8 rounded text-[10px] lg:text-xs font-bold transition-all ${page === i + 1 ? 'bg-yellow-400 text-black shadow-[0_0_10px_rgba(250,204,21,0.5)]' : 'bg-white/5 text-gray-500 hover:text-white hover:bg-white/10'}`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                    </div>
+                    <button
+                        onClick={() => handlePageChange(page + 1)}
+                        className="size-7 lg:size-8 flex items-center justify-center rounded border border-white/5 bg-white/5 text-gray-400 hover:text-white transition-colors disabled:opacity-30"
+                        disabled={page >= totalPages}
+                    >
+                        <span className="material-symbols-outlined text-base lg:text-lg">chevron_right</span>
+                    </button>
+                </div>
             </div>
         </div>
     );

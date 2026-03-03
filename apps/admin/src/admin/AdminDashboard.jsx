@@ -1,15 +1,23 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import AdminLayout from './components/AdminLayout';
 import UserManagement from './components/UserManagement';
 import Treasury from './components/Treasury';
 
 const DashboardHome = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = 10;
+
     const { data: dashboardData, isLoading } = useQuery({
-        queryKey: ['adminStats'],
+        queryKey: ['adminStats', page],
         queryFn: async () => {
-            const response = await fetch('/api/v1/admin/stats');
+            const params = new URLSearchParams({
+                page: page.toString(),
+                limit: limit.toString()
+            });
+            const response = await fetch(`/api/v1/admin/stats?${params}`);
             if (!response.ok) throw new Error('Failed to fetch stats');
             const data = await response.json();
             return data.data;
@@ -18,6 +26,18 @@ const DashboardHome = () => {
 
     const stats = dashboardData?.stats || {};
     const recentActivities = dashboardData?.recentActivities || [];
+    const totalActivities = dashboardData?.totalActivities || 0;
+    const totalPages = Math.ceil(totalActivities / limit);
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setSearchParams(prev => {
+                const params = new URLSearchParams(prev);
+                params.set('page', newPage.toString());
+                return params;
+            });
+        }
+    };
 
     const statCards = [
         { label: 'Total Users', value: Number(stats.total_users || 0).toLocaleString(), trend: `+${stats.users_24h || 0} last 24h`, icon: 'group' },
@@ -26,6 +46,13 @@ const DashboardHome = () => {
         { label: 'Blocked Users', value: Number(stats.blocked_users || 0).toLocaleString(), trend: 'Safety Monitoring', icon: 'block', down: true },
         { label: 'Growth rate', value: Number(stats.users_24h || 0).toLocaleString(), trend: 'New Registrations', icon: 'trending_up' },
     ].slice(0, 5); // Matching the grid layout
+
+    const handleCopy = (text) => {
+        navigator.clipboard.writeText(text);
+        import('react-hot-toast').then(({ toast }) => {
+            toast.success('Address copied!');
+        });
+    };
 
     return (
         <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6">
@@ -137,8 +164,14 @@ const DashboardHome = () => {
                                 ) : (
                                     recentActivities.map((row, i) => (
                                         <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
-                                            <td className="px-10 py-6 font-mono text-yellow-400 font-black tracking-widest">
-                                                {row.wallet_address.slice(0, 7)}...{row.wallet_address.slice(-6)}
+                                            <td className="px-10 py-6 font-mono text-yellow-400 font-black tracking-widest flex items-center gap-3">
+                                                <span>{row.wallet_address.slice(0, 7)}...{row.wallet_address.slice(-6)}</span>
+                                                <button
+                                                    onClick={() => handleCopy(row.wallet_address)}
+                                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/5 rounded"
+                                                >
+                                                    <span className="material-symbols-outlined text-[16px] text-yellow-400">content_copy</span>
+                                                </button>
                                             </td>
                                             <td className="px-10 py-6 text-slate-200 font-bold tracking-wide">{row.action}</td>
                                             <td className="px-10 py-6 text-slate-500 text-[12px] font-black tracking-tight">
@@ -154,6 +187,39 @@ const DashboardHome = () => {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+                    {/* Activity Pagination */}
+                    <div className="p-4 bg-background-dark/30 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-2">
+                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                            Showing {recentActivities.length} of {totalActivities} entries
+                        </span>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handlePageChange(page - 1)}
+                                className="size-8 flex items-center justify-center rounded border border-white/5 bg-white/5 text-gray-500 hover:text-white transition-colors disabled:opacity-30"
+                                disabled={page <= 1}
+                            >
+                                <span className="material-symbols-outlined text-lg">chevron_left</span>
+                            </button>
+                            <div className="flex items-center gap-1">
+                                {[...Array(totalPages)].map((_, i) => (
+                                    <button
+                                        key={i + 1}
+                                        onClick={() => handlePageChange(i + 1)}
+                                        className={`size-8 rounded text-[10px] font-bold transition-all ${page === i + 1 ? 'bg-yellow-400 text-black shadow-[0_0_10px_rgba(250,204,21,0.5)]' : 'bg-white/5 text-gray-500 hover:text-white hover:bg-white/10'}`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => handlePageChange(page + 1)}
+                                className="size-8 flex items-center justify-center rounded border border-white/5 bg-white/5 text-gray-400 hover:text-white transition-colors disabled:opacity-30"
+                                disabled={page >= totalPages}
+                            >
+                                <span className="material-symbols-outlined text-lg">chevron_right</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -196,6 +262,7 @@ const AdminDashboard = () => {
             <Route element={<AdminLayout />}>
                 <Route index element={<DashboardHome />} />
                 <Route path="users" element={<UserManagement />} />
+                <Route path="users/:query" element={<UserManagement />} />
                 <Route path="treasury" element={<Treasury />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

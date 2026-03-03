@@ -25,9 +25,27 @@ export const findUserByAddress = async (address) => {
     }
 };
 
-export const getAllUsersForAdmin = async () => {
+export const getAllUsersForAdmin = async (search = '', page = 1, limit = 10) => {
     try {
-        const query = `
+        const offset = (page - 1) * limit;
+        const queryParams = [];
+        let whereClause = '';
+
+        if (search) {
+            // Check if search is a valid numeric ID (integer)
+            const isNumericId = /^\d+$/.test(search);
+            if (isNumericId) {
+                // Search by exact numeric ID only
+                whereClause = `WHERE u.id = $1`;
+                queryParams.push(parseInt(search, 10));
+            } else {
+                // Search by partial match on wallet address or username
+                whereClause = `WHERE u.wallet_address ILIKE $1 OR p.username ILIKE $1`;
+                queryParams.push(`%${search}%`);
+            }
+        }
+
+        const dataQuery = `
             SELECT 
                 u.id, 
                 u.wallet_address, 
@@ -43,10 +61,29 @@ export const getAllUsersForAdmin = async () => {
             LEFT JOIN profile p ON u.id = p.user_id
             LEFT JOIN levels l ON u.id = l.id
             LEFT JOIN users r ON u.referred_by = r.id
+            ${whereClause}
             ORDER BY u.created_at DESC
+            LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
         `;
-        const result = await queryRunner(query);
-        return serviceResponse(true, 200, 'Users fetched successfully', result);
+
+        const countQuery = `
+            SELECT COUNT(*) as total
+            FROM users u
+            LEFT JOIN profile p ON u.id = p.user_id
+            ${whereClause}
+        `;
+
+        const [data, countResult] = await Promise.all([
+            queryRunner(dataQuery, [...queryParams, limit, offset]),
+            queryRunner(countQuery, queryParams)
+        ]);
+
+        return serviceResponse(true, 200, 'Users fetched successfully', {
+            users: data,
+            total: parseInt(countResult[0]?.total || 0),
+            page,
+            limit
+        });
     } catch (err) {
         return serviceResponse(false, 500, 'Error fetching users for admin', null, err.message);
     }
@@ -100,6 +137,21 @@ export const getTreasuryMetrics = async () => {
         return serviceResponse(true, 200, 'Treasury metrics fetched successfully', result[0]);
     } catch (err) {
         return serviceResponse(false, 500, 'Error fetching treasury metrics', null, err.message);
+    }
+};
+
+export const blockUser = async (userId, blocked) => {
+    try {
+        const result = await queryRunner(
+            'UPDATE users SET is_blocked = $1 WHERE id = $2 RETURNING id, is_blocked',
+            [blocked, userId]
+        );
+        if (result.length === 0) {
+            return serviceResponse(false, 404, 'User not found');
+        }
+        return serviceResponse(true, 200, blocked ? 'User blocked successfully' : 'User unblocked successfully', result[0]);
+    } catch (err) {
+        return serviceResponse(false, 500, 'Error updating user block status', null, err.message);
     }
 };
 
