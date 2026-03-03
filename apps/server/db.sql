@@ -69,6 +69,29 @@ CREATE TABLE IF NOT EXISTS system_funds (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS treasury_logs (
+    id BIGSERIAL PRIMARY KEY,
+    type VARCHAR(50) NOT NULL CHECK (type IN ('INFLOW', 'PAYOUT', 'TRANSFER')),
+    asset VARCHAR(50) NOT NULL,
+    amount DECIMAL(18, 6) NOT NULL,
+    usd_value DECIMAL(18, 2) NOT NULL,
+    tx_hash VARCHAR(255),
+    status VARCHAR(50) NOT NULL DEFAULT 'CONFIRMED',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE user_nfts (
+--     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+--     user_id BIGINT UNSIGNED NOT NULL,
+--     contract_address VARCHAR(42) NOT NULL,
+--     token_id VARCHAR(100) NOT NULL,
+--     metadata_uri TEXT NULL,
+--     is_staked BOOLEAN DEFAULT FALSE,
+--     staked_at DATETIME NULL,
+--     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+--     UNIQUE KEY uq_user_nft (contract_address, token_id),
+--     FOREIGN KEY (user_id) REFERENCES users(id)
+-- );
 -- Initial seeding for system funds
 INSERT INTO system_funds (fund_name) VALUES 
 ('ROYALTY'), ('PRODUCT'), ('DEVELOPERS'), ('EXPENSE'), ('DEVELOPMENT')

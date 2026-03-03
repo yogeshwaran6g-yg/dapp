@@ -1,6 +1,40 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 
 const TransactionHistory = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = 10;
+
+    const { data: logsData, isLoading } = useQuery({
+        queryKey: ['treasuryLogs', page],
+        queryFn: async () => {
+            const params = new URLSearchParams({
+                page: page.toString(),
+                limit: limit.toString()
+            });
+            const response = await fetch(`/api/v1/admin/treasury/logs?${params}`);
+            if (!response.ok) throw new Error('Failed to fetch treasury logs');
+            const data = await response.json();
+            return data.data;
+        }
+    });
+
+    const logs = logsData?.logs || [];
+    const totalLogs = logsData?.total || 0;
+    const totalPages = Math.ceil(totalLogs / limit);
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setSearchParams(prev => {
+                const params = new URLSearchParams(prev);
+                params.set('page', newPage.toString());
+                return params;
+            });
+        }
+    };
+
     return (
         <div className="bg-card-dark border border-white/5 rounded-xl overflow-hidden shadow-2xl mt-4 lg:mt-8">
             <div className="p-3 lg:p-6 border-b border-white/5 flex flex-wrap items-center justify-between gap-3">
@@ -8,13 +42,7 @@ const TransactionHistory = () => {
                     <h3 className="text-sm lg:text-lg font-bold text-white tracking-tight">Logs</h3>
                     <div className="flex gap-0.5 lg:gap-1 bg-background-dark p-0.5 lg:p-1 rounded-lg border border-white/5">
                         <button className="px-2 lg:px-3 py-1 lg:py-1.5 text-[8px] lg:text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white rounded shadow-sm">All</button>
-                        <button className="px-2 lg:px-3 py-1 lg:py-1.5 text-[8px] lg:text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors">Inflows</button>
-                        <button className="px-2 lg:px-3 py-1 lg:py-1.5 text-[8px] lg:text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors">Outflows</button>
                     </div>
-                </div>
-                <div className="relative">
-                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-xs lg:text-sm text-slate-500">search</span>
-                    <input className="bg-background-dark border border-white/5 rounded-lg pl-8 lg:pl-9 pr-4 py-1.5 lg:py-2 text-[10px] lg:text-xs text-white focus:ring-1 focus:ring-yellow-400/50 outline-none w-48 lg:w-64 transition-all" placeholder="Tx Hash..." type="text" />
                 </div>
             </div>
             <div className="overflow-x-auto">
@@ -29,84 +57,91 @@ const TransactionHistory = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                        {/* Tx Item 1 */}
-                        <tr className="hover:bg-white/[0.02] transition-colors group">
-                            <td className="px-4 lg:px-6 py-2 lg:py-3">
-                                <div className="flex items-center gap-2">
-                                    <div className="size-5 lg:size-6 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
-                                        <span className="material-symbols-outlined text-[10px] lg:text-xs">south_west</span>
-                                    </div>
-                                    <span className="text-[9px] lg:text-[10px] font-bold text-white">Inflow</span>
-                                </div>
-                            </td>
-                            <td className="px-4 lg:px-6 py-2 lg:py-3">
-                                <div className="flex items-center gap-2 text-slate-200">
-                                    <div className="size-4 lg:size-5 rounded-full bg-background-dark flex items-center justify-center overflow-hidden border border-white/5">
-                                        <div className="w-full h-full bg-blue-500/20 flex items-center justify-center text-[8px] font-bold text-blue-400">Ξ</div>
-                                    </div>
-                                    <span className="text-[9px] lg:text-[10px] font-medium">ETH</span>
-                                </div>
-                            </td>
-                            <td className="px-4 lg:px-6 py-2 lg:py-3">
-                                <span className="text-[9px] lg:text-[10px] font-bold text-white tracking-tight">+12.50</span>
-                                <p className="text-[7px] lg:text-[8px] text-slate-500 font-bold">$33,450</p>
-                            </td>
-                            <td className="px-4 lg:px-6 py-2 lg:py-3">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[9px] lg:text-[10px] font-mono text-slate-400 font-bold">0x8a9...3fc</span>
-                                </div>
-                            </td>
-                            <td className="px-4 lg:px-6 py-2 lg:py-3 text-right">
-                                <p className="text-[9px] lg:text-[10px] font-medium text-white">2m ago</p>
-                            </td>
-                        </tr>
-                        {/* Tx Item 2 */}
-                        <tr className="hover:bg-white/[0.02] transition-colors group">
-                            <td className="px-4 lg:px-6 py-2 lg:py-3">
-                                <div className="flex items-center gap-2">
-                                    <div className="size-5 lg:size-6 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
-                                        <span className="material-symbols-outlined text-[10px] lg:text-sm">north_east</span>
-                                    </div>
-                                    <span className="text-[9px] lg:text-[10px] font-bold text-white">Payout</span>
-                                </div>
-                            </td>
-                            <td className="px-4 lg:px-6 py-2 lg:py-3">
-                                <div className="flex items-center gap-2 text-slate-200">
-                                    <div className="size-4 lg:size-5 rounded-full bg-background-dark flex items-center justify-center overflow-hidden border border-white/5">
-                                        <div className="w-full h-full bg-green-500/20 flex items-center justify-center text-[8px] font-bold text-green-400">$</div>
-                                    </div>
-                                    <span className="text-[9px] lg:text-[10px] font-medium">USDC</span>
-                                </div>
-                            </td>
-                            <td className="px-4 lg:px-6 py-2 lg:py-3">
-                                <span className="text-[9px] lg:text-[10px] font-bold text-white tracking-tight">-5,000.00 USDC</span>
-                                <p className="text-[7px] lg:text-[8px] text-slate-500 font-bold">$5,000.00</p>
-                            </td>
-                            <td className="px-4 lg:px-6 py-2 lg:py-3">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[9px] lg:text-[10px] font-mono text-slate-400 font-bold">0x14b9...f822</span>
-                                    <span className="material-symbols-outlined text-xs text-slate-500 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">open_in_new</span>
-                                </div>
-                            </td>
-                            <td className="px-4 lg:px-6 py-2 lg:py-3 text-right">
-                                <p className="text-[9px] lg:text-[10px] font-medium text-white">15 mins ago</p>
-                                <p className="text-[7px] lg:text-[8px] text-slate-500 font-bold">Oct 24, 2023 14:09:45</p>
-                            </td>
-                        </tr>
+                        {isLoading ? (
+                            <tr><td colSpan="5" className="py-20 text-center text-slate-500 font-black uppercase tracking-widest">Loading logs...</td></tr>
+                        ) : logs.length === 0 ? (
+                            <tr><td colSpan="5" className="py-20 text-center text-slate-500 font-black uppercase tracking-widest">No transaction logs</td></tr>
+                        ) : (
+                            logs.map((log, i) => (
+                                <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
+                                    <td className="px-4 lg:px-6 py-2 lg:py-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`size-5 lg:size-6 rounded-full flex items-center justify-center ${log.type === 'INFLOW' ? 'bg-green-500/10 text-green-500' :
+                                                log.type === 'PAYOUT' ? 'bg-red-500/10 text-red-500' :
+                                                    'bg-blue-500/10 text-blue-500'
+                                                }`}>
+                                                <span className="material-symbols-outlined text-[10px] lg:text-xs">
+                                                    {log.type === 'INFLOW' ? 'south_west' : 'north_east'}
+                                                </span>
+                                            </div>
+                                            <span className="text-[9px] lg:text-[10px] font-bold text-white">{log.type}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 lg:px-6 py-2 lg:py-3">
+                                        <div className="flex items-center gap-2 text-slate-200">
+                                            <div className="size-4 lg:size-5 rounded-full bg-background-dark flex items-center justify-center overflow-hidden border border-white/5 font-bold text-[8px]">
+                                                {log.asset === 'ETH' ? 'Ξ' : '$'}
+                                            </div>
+                                            <span className="text-[9px] lg:text-[10px] font-medium">{log.asset}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 lg:px-6 py-2 lg:py-3">
+                                        <span className={`text-[9px] lg:text-[10px] font-bold tracking-tight ${log.type === 'INFLOW' ? 'text-green-400' : 'text-red-400'}`}>
+                                            {log.type === 'INFLOW' ? '+' : '-'}{parseFloat(log.amount).toLocaleString()}
+                                        </span>
+                                        <p className="text-[7px] lg:text-[8px] text-slate-500 font-bold">${parseFloat(log.usd_value).toLocaleString()}</p>
+                                    </td>
+                                    <td className="px-4 lg:px-6 py-2 lg:py-3">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[9px] lg:text-[10px] font-mono text-slate-400 font-bold">
+                                                {log.tx_hash.slice(0, 6)}...{log.tx_hash.slice(-4)}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 lg:px-6 py-2 lg:py-3 text-right">
+                                        <p className="text-[9px] lg:text-[10px] font-medium text-white">
+                                            {new Date(log.created_at).toLocaleDateString()}
+                                        </p>
+                                        <p className="text-[7px] lg:text-[8px] text-slate-500 font-bold">
+                                            {new Date(log.created_at).toLocaleTimeString()}
+                                        </p>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
+            {/* Pagination */}
             <div className="p-3 lg:p-4 bg-background-dark/30 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-2">
-                <span className="text-[9px] lg:text-[10px] text-slate-500 font-bold uppercase tracking-widest">Showing 1-10 of 4,821 logs</span>
+                <span className="text-[9px] lg:text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                    Showing {logs.length} of {totalLogs} logs
+                </span>
                 <div className="flex gap-1 lg:gap-2">
-                    <button className="w-7 h-7 lg:w-8 lg:h-8 rounded border border-white/5 flex items-center justify-center hover:bg-white/5 transition-colors">
-                        <span className="material-symbols-outlined text-xs lg:text-sm text-slate-500">chevron_left</span>
+                    <button
+                        onClick={() => handlePageChange(page - 1)}
+                        className="size-7 lg:size-8 flex items-center justify-center rounded border border-white/5 bg-white/5 text-gray-500 hover:text-white transition-colors disabled:opacity-30"
+                        disabled={page <= 1}
+                    >
+                        <span className="material-symbols-outlined text-base lg:text-lg">chevron_left</span>
                     </button>
-                    <button className="w-7 h-7 lg:w-8 lg:h-8 rounded border border-white/5 flex items-center justify-center bg-white/10 text-[10px] lg:text-xs font-bold text-white">1</button>
-                    <button className="w-7 h-7 lg:w-8 lg:h-8 rounded border border-white/5 flex items-center justify-center text-[10px] lg:text-xs font-bold text-slate-400 hover:bg-white/5 transition-colors">2</button>
-                    <button className="w-7 h-7 lg:w-8 lg:h-8 rounded border border-white/5 flex items-center justify-center text-[10px] lg:text-xs font-bold text-slate-400 hover:bg-white/5 transition-colors">3</button>
-                    <button className="w-7 h-7 lg:w-8 lg:h-8 rounded border border-white/5 flex items-center justify-center hover:bg-white/5 transition-colors">
-                        <span className="material-symbols-outlined text-xs lg:text-sm text-slate-500">chevron_right</span>
+                    <div className="flex items-center gap-0.5 lg:gap-1">
+                        {[...Array(totalPages)].map((_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => handlePageChange(i + 1)}
+                                className={`size-7 lg:size-8 rounded text-[10px] lg:text-xs font-bold transition-all ${page === i + 1 ? 'bg-yellow-400 text-black shadow-[0_0_10px_rgba(250,204,21,0.5)]' : 'bg-white/5 text-gray-500 hover:text-white hover:bg-white/10'}`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                    </div>
+                    <button
+                        onClick={() => handlePageChange(page + 1)}
+                        className="size-7 lg:size-8 flex items-center justify-center rounded border border-white/5 bg-white/5 text-gray-400 hover:text-white transition-colors disabled:opacity-30"
+                        disabled={page >= totalPages}
+                    >
+                        <span className="material-symbols-outlined text-base lg:text-lg">chevron_right</span>
                     </button>
                 </div>
             </div>

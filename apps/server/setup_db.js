@@ -96,6 +96,28 @@ const setupDatabase = async () => {
             console.log('✓ NFTs already exist.');
         }
 
+        // Step 5: Seed Treasury Logs
+        console.log('Step 5: Seeding treasury logs...');
+        const treasuryCount = await pool.query('SELECT COUNT(*) FROM treasury_logs');
+        if (parseInt(treasuryCount.rows[0].count) === 0) {
+            const logs = [
+                ['INFLOW', 'ETH', 12.50, 33450.00, '0x8a9c...3fc', 'CONFIRMED'],
+                ['PAYOUT', 'USDC', 5000.00, 5000.00, '0x14b9...f822', 'CONFIRMED'],
+                ['INFLOW', 'USDT', 2500.00, 2500.00, '0x77d2...e1a2', 'CONFIRMED'],
+                ['TRANSFER', 'ETH', 1.20, 3200.00, '0x33b1...a91d', 'CONFIRMED']
+            ];
+
+            for (const log of logs) {
+                await pool.query(`
+                    INSERT INTO treasury_logs (type, asset, amount, usd_value, tx_hash, status)
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                `, log);
+            }
+            console.log('✓ Treasury logs seeded.');
+        } else {
+            console.log('✓ Treasury logs already exist, skipping seed.');
+        }
+
         console.log('--- Database Setup Successful ---');
         process.exit(0);
     } catch (err) {

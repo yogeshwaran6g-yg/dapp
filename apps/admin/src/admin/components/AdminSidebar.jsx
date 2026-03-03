@@ -24,7 +24,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
                 />
             )}
 
-            <aside className={`w-64 flex-shrink-0 bg-background-dark border-r border-white/5 fixed lg:static h-full z-50 transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <aside className={`w-64 flex-shrink-0 bg-background-dark border-r border-white/5 fixed h-full z-50 transition-all duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="flex flex-col h-full bg-background-dark">
                     <div className="p-2 lg:p-3 flex items-center justify-between border-b border-white/5 mb-1">
                         <div className="flex items-center gap-2">

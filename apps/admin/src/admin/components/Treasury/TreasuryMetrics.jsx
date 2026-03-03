@@ -1,6 +1,24 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 const TreasuryMetrics = () => {
+    const { data: metricsData, isLoading } = useQuery({
+        queryKey: ['treasuryMetrics'],
+        queryFn: async () => {
+            const response = await fetch('/api/v1/admin/treasury/metrics');
+            if (!response.ok) throw new Error('Failed to fetch treasury metrics');
+            const data = await response.json();
+            return data.data;
+        }
+    });
+
+    const metrics = metricsData || {
+        total_balance: 0,
+        eth_balance: 0,
+        usdc_balance: 0,
+        usdt_balance: 0
+    };
+
     return (
         <>
             {/* Hero Metrics */}
@@ -16,57 +34,60 @@ const TreasuryMetrics = () => {
                                 <span className="material-symbols-outlined text-base lg:text-lg">payments</span>
                             </div>
                             <div>
-                                <p className="text-[8px] lg:text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Royalty Wallet</p>
-                                <h3 className="text-lg lg:text-xl font-black tracking-tight text-white">$1.2M</h3>
-                                <p className="text-[9px] lg:text-xs font-medium text-yellow-400">450.22 ETH</p>
+                                <p className="text-[8px] lg:text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Total Treasury</p>
+                                <h3 className="text-lg lg:text-xl font-black tracking-tight text-white">
+                                    ${parseFloat(metrics.total_balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </h3>
+                                <p className="text-[9px] lg:text-xs font-medium text-yellow-400">{parseFloat(metrics.eth_balance).toFixed(2)} ETH</p>
                             </div>
                         </div>
                     </div>
-                    {/* Dev Fund */}
+                    {/* USDC Fund */}
                     <div className="bg-card-dark border border-white/5 p-4 lg:p-6 rounded-xl hover:border-slate-400/50 transition-all group relative">
                         <div className="absolute top-4 right-4 text-slate-400 opacity-20 group-hover:opacity-100 transition-opacity cursor-pointer">
                             <span className="material-symbols-outlined text-sm">content_copy</span>
                         </div>
                         <div className="flex flex-col gap-2 lg:gap-3">
-                            <div className="size-7 lg:size-9 rounded-lg bg-slate-400/10 border border-slate-400/20 flex items-center justify-center text-slate-400">
-                                <span className="material-symbols-outlined text-base lg:text-lg">code</span>
+                            <div className="size-7 lg:size-9 rounded-lg bg-blue-400/10 border border-blue-400/20 flex items-center justify-center text-blue-400">
+                                <span className="material-symbols-outlined text-base lg:text-lg">monetization_on</span>
                             </div>
                             <div>
-                                <p className="text-[8px] lg:text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Dev Fund</p>
-                                <h3 className="text-lg lg:text-xl font-black tracking-tight text-white">$850k</h3>
-                                <p className="text-[9px] lg:text-xs font-medium text-slate-400">320k USDC</p>
+                                <p className="text-[8px] lg:text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">USDC Balance</p>
+                                <h3 className="text-lg lg:text-xl font-black tracking-tight text-white">
+                                    ${parseFloat(metrics.usdc_balance).toLocaleString()}
+                                </h3>
+                                <p className="text-[9px] lg:text-xs font-medium text-slate-400">Stable Reserves</p>
                             </div>
                         </div>
                     </div>
-                    {/* Product Fund */}
+                    {/* USDT Fund */}
                     <div className="bg-card-dark border border-white/5 p-3 lg:p-4 rounded-xl hover:border-slate-400/50 transition-all group relative">
                         <div className="absolute top-3 right-3 text-slate-400 opacity-20 group-hover:opacity-100 transition-opacity cursor-pointer">
                             <span className="material-symbols-outlined text-xs">content_copy</span>
                         </div>
                         <div className="flex flex-col gap-2 lg:gap-3">
-                            <div className="size-7 lg:size-9 rounded-lg bg-slate-400/10 border border-slate-400/20 flex items-center justify-center text-slate-400">
-                                <span className="material-symbols-outlined text-base lg:text-lg">rocket_launch</span>
+                            <div className="size-7 lg:size-9 rounded-lg bg-green-400/10 border border-green-400/20 flex items-center justify-center text-green-400">
+                                <span className="material-symbols-outlined text-base lg:text-lg">account_balance_wallet</span>
                             </div>
                             <div>
-                                <p className="text-[8px] lg:text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Product Fund</p>
-                                <h3 className="text-lg lg:text-xl font-black tracking-tight text-white">$1.5M</h3>
-                                <p className="text-[9px] lg:text-xs font-medium text-slate-400">560.1 ETH</p>
+                                <p className="text-[8px] lg:text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">USDT Balance</p>
+                                <h3 className="text-lg lg:text-xl font-black tracking-tight text-white">
+                                    ${parseFloat(metrics.usdt_balance).toLocaleString()}
+                                </h3>
+                                <p className="text-[9px] lg:text-xs font-medium text-slate-400">Operational Liquidity</p>
                             </div>
                         </div>
                     </div>
-                    {/* Expense Fund */}
+                    {/* Assets Count */}
                     <div className="bg-card-dark border border-white/5 p-3 lg:p-4 rounded-xl hover:border-slate-400/50 transition-all group relative">
-                        <div className="absolute top-3 right-3 text-slate-400 opacity-20 group-hover:opacity-100 transition-opacity cursor-pointer">
-                            <span className="material-symbols-outlined text-xs">content_copy</span>
-                        </div>
                         <div className="flex flex-col gap-2 lg:gap-3">
-                            <div className="size-7 lg:size-9 rounded-lg bg-slate-400/10 border border-slate-400/20 flex items-center justify-center text-slate-400">
-                                <span className="material-symbols-outlined text-base lg:text-lg">receipt_long</span>
+                            <div className="size-7 lg:size-9 rounded-lg bg-purple-400/10 border border-purple-400/20 flex items-center justify-center text-purple-400">
+                                <span className="material-symbols-outlined text-base lg:text-lg">token</span>
                             </div>
                             <div>
-                                <p className="text-[8px] lg:text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Expense Fund</p>
-                                <h3 className="text-lg lg:text-xl font-black tracking-tight text-white">$700k</h3>
-                                <p className="text-[9px] lg:text-xs font-medium text-slate-400">260k USDT</p>
+                                <p className="text-[8px] lg:text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Active Assets</p>
+                                <h3 className="text-lg lg:text-xl font-black tracking-tight text-white">3 Types</h3>
+                                <p className="text-[9px] lg:text-xs font-medium text-slate-400">Multi-chain Ready</p>
                             </div>
                         </div>
                     </div>
@@ -94,19 +115,19 @@ const TreasuryMetrics = () => {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:gap-4 pt-3 lg:pt-4 border-t border-white/5">
                         <div>
                             <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Ethereum</p>
-                            <p className="text-xs font-bold text-white">$2,465,500.45</p>
+                            <p className="text-xs font-bold text-white">${parseFloat(metrics.eth_balance * 2600).toLocaleString()}</p>
                         </div>
                         <div>
                             <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">USDC</p>
-                            <p className="text-xs font-bold text-white">$935,000.00</p>
+                            <p className="text-xs font-bold text-white">${parseFloat(metrics.usdc_balance).toLocaleString()}</p>
                         </div>
                         <div>
                             <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">USDT</p>
-                            <p className="text-xs font-bold text-white">$637,500.00</p>
+                            <p className="text-xs font-bold text-white">${parseFloat(metrics.usdt_balance).toLocaleString()}</p>
                         </div>
                         <div>
                             <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Others</p>
-                            <p className="text-xs font-bold text-white">$212,000.00</p>
+                            <p className="text-xs font-bold text-white">$0.00</p>
                         </div>
                     </div>
                 </div>

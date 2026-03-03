@@ -20,6 +20,7 @@ import pool from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import slotActivationRoutes from "./routes/slotActivationRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
 import errorHandler from "./middleware/errorMiddleware.js";
 
@@ -57,8 +58,20 @@ if (!isProduction) {
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    // origin:  "http://localhost:3000",
+    origin: (origin, callback) => {
+      const allowedRoots = [
+        "localhost:5173",
+        "localhost:5174",
+        "127.0.0.1:5174",
+        "localhost:3000",
+        ".csb.app"
+      ];
+      if (!origin || allowedRoots.some(root => origin.includes(root))) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization", "ngrok-skip-browser-warning"],
     optionsSuccessStatus: 200,
@@ -89,6 +102,7 @@ app.get("/api/health", async (req, res) => {
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/slot-activation", slotActivationRoutes);
+app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/wallet", walletRoutes);
 
 app.use(errorHandler);
