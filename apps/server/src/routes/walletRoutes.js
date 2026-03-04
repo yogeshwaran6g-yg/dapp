@@ -3,11 +3,10 @@ import * as walletController from '../controllers/walletController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
-
-// GET /api/wallet/balance - Protected route to get real-time ETH balance
 router.get('/balance', authMiddleware, walletController.getWalletBalance);
-
-// POST /api/wallet/faucet - Get free test ETH for simulated world
+router.get('/info', authMiddleware, walletController.getWalletInfo);
 router.post('/faucet', authMiddleware, walletController.getTestEth);
+router.post('/record-stake', authMiddleware, walletController.recordStake);
+router.post('/stake-internal', authMiddleware, walletController.stakeInternal);
 
 export default router;

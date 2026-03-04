@@ -7,16 +7,18 @@ import './index.css'
 
 import { Web3Provider } from './components/Web3Provider'
 import { AuthProvider } from './context/AuthContext'
+import { WalletProvider } from './context/WalletContext'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <Web3Provider>
             <AuthProvider>
-                <BrowserRouter>
-                    <App />
-                </BrowserRouter>
+                <WalletProvider>
+                    <BrowserRouter>
+                        <App />
+                    </BrowserRouter>
+                </WalletProvider>
             </AuthProvider>
         </Web3Provider>
     </React.StrictMode>,
 )
-

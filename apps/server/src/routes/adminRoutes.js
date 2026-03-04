@@ -8,5 +8,6 @@ router.post('/users/:userId/block', adminController.blockUser);
 router.get('/stats', adminController.getStats);
 router.get('/treasury/metrics', adminController.getTreasuryMetrics);
 router.get('/treasury/logs', adminController.getTreasuryLogs);
+router.get('/staking/history', adminController.getStakeHistory);
 
 export default router;

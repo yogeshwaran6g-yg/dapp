@@ -1,4 +1,5 @@
 import * as blockchainService from '../services/blockchainService.js';
+import * as walletService from '../services/walletService.js';
 import { rtnRes } from '../utils/helper.js';
 
 /**
@@ -56,5 +57,79 @@ export const getTestEth = async (req, res) => {
     } catch (err) {
         console.error("Error from getTestEth controller:", err);
         return rtnRes(res, 500, "Internal Error in faucet");
+    }
+};
+
+/**
+ * Record a successful on-chain staking transaction
+ * @param {Object} req 
+ * @param {Object} res 
+ */
+export const recordStake = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const { amount, txHash } = req.body;
+
+        if (!userId) {
+            return rtnRes(res, 400, "User ID not found in session");
+        }
+
+        if (!amount || !txHash) {
+            return rtnRes(res, 400, "Amount and Transaction Hash are required");
+        }
+
+        const result = await walletService.recordStakingTransaction(userId, amount, txHash);
+
+        return rtnRes(res, result.status, result.message, result.data);
+    } catch (err) {
+        console.error("Error from recordStake controller:", err);
+        return rtnRes(res, 500, "Internal Error recording stake");
+    }
+};
+
+/**
+ * Stake internal tokens
+ * @param {Object} req 
+ * @param {Object} res 
+ */
+export const stakeInternal = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const { amount } = req.body;
+
+        if (!userId) {
+            return rtnRes(res, 400, "User ID not found in session");
+        }
+
+        if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+            return rtnRes(res, 400, "Valid stake amount is required");
+        }
+
+        const result = await walletService.stakeInternalToken(userId, parseFloat(amount));
+
+        return rtnRes(res, result.status, result.message, result.data);
+    } catch (err) {
+        console.error("Error from stakeInternal controller:", err);
+        return rtnRes(res, 500, "Internal Error staking tokens");
+    }
+};
+
+/**
+ * Get internal wallet balances (energy, rewards, staked)
+ * @param {Object} req 
+ * @param {Object} res 
+ */
+export const getWalletInfo = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return rtnRes(res, 400, "User ID not found in session");
+        }
+
+        const result = await walletService.getWalletInfo(userId);
+        return rtnRes(res, result.status, result.message, result.data);
+    } catch (err) {
+        console.error("Error from getWalletInfo controller:", err);
+        return rtnRes(res, 500, "Internal Error fetching wallet info");
     }
 };
