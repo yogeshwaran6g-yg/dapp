@@ -88,6 +88,33 @@ export const recordStake = async (req, res) => {
 };
 
 /**
+ * Stake internal tokens
+ * @param {Object} req 
+ * @param {Object} res 
+ */
+export const stakeInternal = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const { amount } = req.body;
+
+        if (!userId) {
+            return rtnRes(res, 400, "User ID not found in session");
+        }
+
+        if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+            return rtnRes(res, 400, "Valid stake amount is required");
+        }
+
+        const result = await walletService.stakeInternalToken(userId, parseFloat(amount));
+
+        return rtnRes(res, result.status, result.message, result.data);
+    } catch (err) {
+        console.error("Error from stakeInternal controller:", err);
+        return rtnRes(res, 500, "Internal Error staking tokens");
+    }
+};
+
+/**
  * Get internal wallet balances (energy, rewards, staked)
  * @param {Object} req 
  * @param {Object} res 

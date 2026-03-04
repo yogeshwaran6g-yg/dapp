@@ -16,7 +16,7 @@ const ERC20_ABI = [
 
 export const WalletProvider = ({ children }) => {
     const { address, isConnected } = useAccount();
-    const [usdtBalance, setUsdtBalance] = useState('0.00');
+    const [usdtBalance, setUsdtBalance] = useState('0.00'); // This will now represent "Own Token" balance
     const [stakedAmount, setStakedAmount] = useState(0);
     const [accumulatedRewards, setAccumulatedRewards] = useState(0);
     const [totalEarned, setTotalEarned] = useState(0);
@@ -57,6 +57,7 @@ export const WalletProvider = ({ children }) => {
             });
             const result = await response.json();
             if (result.success) {
+                setUsdtBalance(result.data.own_token_balance?.toString() || '0.00');
                 setStakedAmount(parseFloat(result.data.locked_balance || 0));
             }
         } catch (error) {
@@ -94,73 +95,46 @@ export const WalletProvider = ({ children }) => {
         }
 
         if (numAmount > parseFloat(usdtBalance)) {
-            toast.error('Insufficient USDT balance');
+            toast.error('Insufficient token balance');
             return false;
         }
 
         setIsLoading(true);
         try {
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            const signer = await provider.getSigner();
-            const contract = new ethers.Contract(USDT_ADDRESS, ERC20_ABI, signer);
-
-            const decimals = await contract.decimals();
-            const amountInWei = ethers.parseUnits(amount.toString(), decimals);
-
-            toast.info('Please confirm the transaction in your wallet');
-            const tx = await contract.transfer(ADMIN_WALLET, amountInWei);
-
-            toast.info('Transaction submitted. Waiting for confirmation...');
-            await tx.wait();
+            toast.info('Initiating internal staking...');
 
             // Record staking on backend
-            const response = await fetch('/api/wallet/record-stake', {
+            const response = await fetch('/api/wallet/stake-internal', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                 },
                 body: JSON.stringify({
-                    amount: numAmount,
-                    txHash: tx.hash
+                    amount: numAmount
                 })
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                throw new Error('Failed to record stake on server');
+                throw new Error(result.message || 'Failed to stake tokens on server');
             }
 
             setStakedAmount(prev => prev + numAmount);
-            toast.success(`Successfully staked ${numAmount} USDT`);
-            fetchBalance();
+            setUsdtBalance(prev => (parseFloat(prev) - numAmount).toString());
+            toast.success(`Successfully staked ${numAmount} tokens`);
+            fetchWalletInfo(); // Refresh both balances
             return true;
         } catch (error) {
-            console.error('Error staking USDT:', error);
-            toast.error(error.reason || error.message || 'Transaction failed');
+            console.error('Error staking tokens:', error);
+            toast.error(error.message || 'Staking failed');
             return false;
         } finally {
             setIsLoading(false);
         }
     };
 
-    const unstakeUSDT = (amount) => {
-        const numAmount = parseFloat(amount);
-        if (isNaN(numAmount) || numAmount <= 0) {
-            toast.error('Invalid amount');
-            return false;
-        }
-
-        if (numAmount > stakedAmount) {
-            toast.error('Insufficient staked amount');
-            return false;
-        }
-
-        // Note: Real unstaking logic would go here if needed.
-        // For now, retaining the original simulation for unstaking as per earlier code.
-        setStakedAmount(prev => prev - numAmount);
-        toast.success(`Successfully unstaked ${numAmount} USDT`);
-        return true;
-    };
 
     const claimRewards = () => {
         if (accumulatedRewards <= 0) {
@@ -185,7 +159,6 @@ export const WalletProvider = ({ children }) => {
                 totalEarned,
                 isLoading,
                 stakeUSDT,
-                unstakeUSDT,
                 claimRewards,
                 refreshBalance: () => {
                     fetchBalance();

@@ -72,26 +72,81 @@ export const recordStakingTransaction = async (userId, amount, txHash) => {
 };
 
 /**
+ * Stake internal tokens
+ * @param {number} userId 
+ * @param {number} amount 
+ * @returns {Promise<Object>}
+ */
+export const stakeInternalToken = async (userId, amount) => {
+    try {
+        return await transactionRunner(async (client) => {
+    
+            const balanceRes = await client.query(
+                'SELECT own_token_balance FROM user_wallets WHERE user_id = $1',
+                [userId]
+            );
+
+            if (balanceRes.rows.length === 0 || parseFloat(balanceRes.rows[0].own_token_balance) < amount) {
+                return serviceResponse(false, 400, 'Insufficient internal token balance');
+            }
+
+
+            await client.query(`
+                UPDATE user_wallets 
+                SET own_token_balance = own_token_balance - $1,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = $2
+            `, [amount, userId]);
+
+     
+            await client.query(`
+                INSERT INTO internal_stakes (user_id, amount, status)
+                VALUES ($1, $2, 'ACTIVE')
+            `, [userId, amount]);
+
+            await client.query(`
+                INSERT INTO yeild (user_id, amount, asset) 
+                VALUES ($1, $2, 'INTERNAL')
+            `, [userId, amount]);
+
+            await client.query(`
+                INSERT INTO stake_history (user_id, amount, type) 
+                VALUES ($1, $2, 'STAKE')
+            `, [userId, amount]);
+
+            return serviceResponse(true, 200, 'Internal staking successful');
+        });
+    } catch (err) {
+        console.error(`[WalletService] Error in stakeInternalToken: ${err.message}`);
+        return serviceResponse(false, 500, 'Error in internal staking', null, err.message);
+    }
+};
+
+/**
  * Get wallet details for a user
  * @param {number} userId 
  * @returns {Promise<Object>}
  */
 export const getWalletInfo = async (userId) => {
     try {
-        const result = await queryRunner(
-            'SELECT energy_balance, reward_token_balance, locked_balance FROM user_wallets WHERE user_id = $1',
+        const walletRes = await queryRunner(
+            'SELECT energy_balance, own_token_balance FROM user_wallets WHERE user_id = $1',
             [userId]
         );
 
-        if (result.length === 0) {
-            return serviceResponse(true, 200, 'Wallet not found, returning defaults', {
-                energy_balance: 0,
-                reward_token_balance: 0,
-                locked_balance: 0
-            });
-        }
+        const stakingRes = await queryRunner(
+            "SELECT COALESCE(SUM(amount), 0) as locked_balance FROM internal_stakes WHERE user_id = $1 AND status = 'ACTIVE'",
+            [userId]
+        );
 
-        return serviceResponse(true, 200, 'Wallet info fetched successfully', result[0]);
+        const wallet = walletRes[0] || { energy_balance: 0, own_token_balance: 0 };
+        const locked_balance = parseFloat(stakingRes[0]?.locked_balance || 0);
+
+        return serviceResponse(true, 200, 'Wallet info fetched successfully', {
+            energy_balance: wallet.energy_balance,
+            own_token_balance: wallet.own_token_balance,
+            locked_balance: locked_balance
+        });
     } catch (err) {
         console.error(`[WalletService] Error in getWalletInfo: ${err.message}`);
         return serviceResponse(false, 500, 'Error fetching wallet info', null, err.message);

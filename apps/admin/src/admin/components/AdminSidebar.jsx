@@ -9,7 +9,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
         { name: 'Slot Control', icon: 'view_cozy', path: '/slots' },
         { name: 'NFT Management', icon: 'token', path: '/nft' },
         { name: 'Tokenomics', icon: 'currency_bitcoin', path: '/tokenomics' },
-        { name: 'Staking Config', icon: 'layers', path: '/staking' },
+        { name: 'Stake History', icon: 'history', path: '/staking' },
         { name: 'System Logs', icon: 'terminal', path: '/logs' },
         { name: 'Settings', icon: 'settings', path: '/settings' },
     ];

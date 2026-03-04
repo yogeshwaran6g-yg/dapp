@@ -44,14 +44,14 @@ CREATE TABLE IF NOT EXISTS yeild (
     asset VARCHAR(50) NOT NULL DEFAULT 'USDT',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_staking_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-)
+);
 
 
 CREATE TABLE IF NOT EXISTS user_wallets (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL UNIQUE,
     energy_balance DECIMAL(18, 6) DEFAULT 0,
-    reward_token_balance DECIMAL(18, 6) DEFAULT 0,
+    own_token_balance DECIMAL(18, 6) DEFAULT 0,
     locked_balance DECIMAL(18, 6) DEFAULT 0,
     version INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -91,7 +91,32 @@ CREATE TABLE IF NOT EXISTS treasury_logs (
 );
 
 
+
 -- Initial seeding for system funds
 INSERT INTO system_funds (fund_name) VALUES 
 ('ROYALTY'), ('PRODUCT'), ('DEVELOPERS'), ('EXPENSE'), ('DEVELOPMENT')
 ON CONFLICT (fund_name) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS stake_history (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    amount DECIMAL(18, 6) NOT NULL,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('STAKE', 'REWARD_CLAIM')),
+    tx_hash VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_stake_history_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS internal_stakes (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    amount DECIMAL(18, 6) NOT NULL,
+    CREATE TYPE stake_status AS ENUM ('ACTIVE', 'UNSTAKED');
+    admin_address VARCHAR(255) DEFAULT '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
+    staked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status stake_status DEFAULT 'ACTIVE',
+    CONSTRAINT fk_internal_stake_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+
+

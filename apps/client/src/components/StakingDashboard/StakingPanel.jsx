@@ -2,29 +2,17 @@ import React, { useState } from 'react';
 import { useWallet } from '../../context/WalletContext';
 
 const StakingPanel = () => {
-    const { usdtBalance, stakedAmount, stakeUSDT, unstakeUSDT, claimRewards, isLoading, accumulatedRewards } = useWallet();
-    const [activeTab, setActiveTab] = useState('stake');
+    const { usdtBalance, stakedAmount, stakeUSDT, claimRewards, isLoading, accumulatedRewards } = useWallet();
     const [stakeAmount, setStakeAmount] = useState('');
 
     const handleMaxClick = () => {
-        if (activeTab === 'stake') {
-            setStakeAmount(usdtBalance);
-        } else {
-            setStakeAmount(stakedAmount.toString());
-        }
+        setStakeAmount(usdtBalance);
     };
 
     const handleAction = () => {
-        if (activeTab === 'stake') {
-            const success = stakeUSDT(stakeAmount);
-            if (success) {
-                setStakeAmount('');
-            }
-        } else {
-            const success = unstakeUSDT(stakeAmount);
-            if (success) {
-                setStakeAmount('');
-            }
+        const success = stakeUSDT(stakeAmount);
+        if (success) {
+            setStakeAmount('');
         }
     };
 
@@ -34,37 +22,22 @@ const StakingPanel = () => {
 
     return (
         <div className="lg:col-span-7 flex flex-col gap-6">
-            {/* Stake / Unstake Card */}
+            {/* Stake Card */}
             <div className="glass-panel rounded-xl overflow-hidden">
-                {/* Tabs */}
+                {/* Header */}
                 <div className="flex border-b border-white/10">
-                    <button
-                        onClick={() => setActiveTab('stake')}
-                        className={`flex-1 py-4 text-sm font-bold transition-colors ${activeTab === 'stake'
-                            ? 'border-b-2 border-accent-gold text-accent-gold'
-                            : 'text-white/40 hover:text-white'
-                            }`}
-                    >
+                    <div className="flex-1 py-4 text-sm font-bold text-center border-b-2 border-accent-gold text-accent-gold">
                         Stake Tokens
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('unstake')}
-                        className={`flex-1 py-4 text-sm font-bold transition-colors ${activeTab === 'unstake'
-                            ? 'border-b-2 border-accent-gold text-accent-gold'
-                            : 'text-white/40 hover:text-white'
-                            }`}
-                    >
-                        Unstake Tokens
-                    </button>
+                    </div>
                 </div>
 
                 <div className="p-4 sm:p-8">
                     <div className="flex justify-between items-end mb-4">
                         <label className="text-xs font-bold text-white/40 uppercase tracking-widest">
-                            {activeTab === 'stake' ? 'Amount to Stake' : 'Amount to Unstake'}
+                            Amount to Stake
                         </label>
                         <span className="text-xs text-white/60">
-                            Balance: <span className="text-white">{isLoading ? 'Loading...' : `${usdtBalance} USDT`}</span>
+                            Balance: <span className="text-white">{isLoading ? 'Loading...' : `${usdtBalance} TOKENS`}</span>
                         </span>
                     </div>
                     <div className="relative mb-8">
@@ -85,7 +58,7 @@ const StakingPanel = () => {
                     <div className="grid grid-cols-2 gap-4 mb-8">
                         <div className="p-4 rounded-lg bg-white/5 border border-white/5">
                             <p className="text-[10px] text-white/40 uppercase font-bold mb-1">Estimated Weekly</p>
-                            <p className="text-lg font-bold">1.2% USDT</p>
+                            <p className="text-lg font-bold">1.2% GOLD</p>
                         </div>
                         <div className="p-4 rounded-lg bg-white/5 border border-white/5">
                             <p className="text-[10px] text-white/40 uppercase font-bold mb-1">Lock-up Period</p>
@@ -96,7 +69,7 @@ const StakingPanel = () => {
                         onClick={handleAction}
                         className="w-full py-4 staking-button-gold rounded-lg text-primary font-black uppercase tracking-widest shadow-lg"
                     >
-                        {activeTab === 'stake' ? 'Stake Now' : 'Unstake Now'}
+                        Stake Now
                     </button>
                 </div>
             </div>
