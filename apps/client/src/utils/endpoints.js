@@ -24,6 +24,7 @@ export const API_ENDPOINTS = {
     SLOT_ACTIVATION: {
         GET_BY_USER: (userId) => `${V1}/slot-activation/${userId}`, // GET  — fetch slot activation by user_id
         UPDATE: `${V1}/slot-activation`,                         // PUT  — update own slot activation
+        GET_ADMIN_WALLET: `${V1}/slot-activation/config/admin-wallet`, // GET — fetch admin wallet
     },
 
     // ── Wallet ──────────────────────────────────────────

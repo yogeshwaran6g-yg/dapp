@@ -16,11 +16,12 @@ export const getWalletBalance = async (req, res) => {
             return rtnRes(res, 400, "Wallet address not found in user session");
         }
 
-        const ethBalance = await blockchainService.getWalletBalance(address);
+        const balances = await blockchainService.getWalletBalance(address);
 
         return rtnRes(res, 200, "Wallet balance fetched successfully", {
             address,
-            ethBalance: ethBalance.toString()
+            ethBalance: balances.ethBalance,
+            usdtBalance: balances.usdtBalance
         });
     } catch (err) {
         console.error("Error from getWalletBalance controller:", err);
@@ -35,25 +36,8 @@ export const getWalletBalance = async (req, res) => {
  */
 export const getTestEth = async (req, res) => {
     try {
-        const { queryRunner } = await import('../config/db.js');
-        const userId = req.user?.id;
-        const { amount: bodyAmount } = req.body;
-        const amount = parseFloat(bodyAmount) || 5.0; // Use body amount or default to 5.0
-
-        if (!userId) {
-            return rtnRes(res, 400, "User ID not found in session");
-        }
-
-        if (isNaN(amount) || amount <= 0) {
-            return rtnRes(res, 400, "Invalid amount provided");
-        }
-
-        await queryRunner(
-            'UPDATE users SET fake_eth_balance = fake_eth_balance + $1 WHERE id = $2',
-            [amount, userId]
-        );
-
-        return rtnRes(res, 200, `Successfully added $${amount} Test ETH to your account!`);
+        // Faucet logic for fake balance removed per user request
+        return rtnRes(res, 200, "The internal faucet is currently disabled. Please use an official Polygon Amoy faucet for testnet POL/USDT.");
     } catch (err) {
         console.error("Error from getTestEth controller:", err);
         return rtnRes(res, 500, "Internal Error in faucet");

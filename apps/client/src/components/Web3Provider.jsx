@@ -12,7 +12,7 @@ const projectId = import.meta.env.VITE_PROJECT_ID;
 const isTestnet = import.meta.env.VITE_NETWORK === 'testnet';
 const activePolygon = isTestnet ? polygonAmoy : polygon;
 
-const networks = [activePolygon, mainnet, arbitrum]
+const networks = isTestnet ? [polygonAmoy] : [activePolygon, mainnet, arbitrum];
 
 const wagmiAdapter = new WagmiAdapter({
     projectId,

@@ -30,5 +30,18 @@ export const slotApiService = {
         } catch (error) {
             return handleServiceError(error, 'SlotApiService.updateSlotActivation');
         }
+    },
+
+    /**
+     * Fetch the admin wallet address for payments
+     * @returns {Promise<Object>}
+     */
+    async fetchAdminWallet() {
+        try {
+            const response = await api.get(API_ENDPOINTS.SLOT_ACTIVATION.GET_ADMIN_WALLET);
+            return response;
+        } catch (error) {
+            return handleServiceError(error, 'SlotApiService.fetchAdminWallet');
+        }
     }
 };

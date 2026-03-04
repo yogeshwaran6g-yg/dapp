@@ -30,3 +30,14 @@ export const useUpdateSlotActivation = (userId) => {
         },
     });
 };
+
+/**
+ * Fetch the admin wallet address for payments.
+ */
+export const useGetAdminWallet = () => {
+    return useQuery({
+        queryKey: ['adminWallet'],
+        queryFn: () => slotApiService.fetchAdminWallet(),
+        staleTime: 1000 * 60 * 60, // 1 hour (rarely changes)
+    });
+};

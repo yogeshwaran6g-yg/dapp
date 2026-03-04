@@ -8,14 +8,15 @@ const provider = new ethers.JsonRpcProvider(RPC_URL);
  */
 export const getWalletBalance = async (address) => {
     try {
-        const wallet_address = address.toLowerCase();
+        if (!address) return { ethBalance: '0.00', usdtBalance: '0.00' };
 
         const balanceWei = await provider.getBalance(wallet_address);
         const balance = parseFloat(ethers.formatEther(balanceWei));
 
         console.log(`[BlockchainService] Real Balance for ${wallet_address}: ${balance} POL`);
 
-        return balance;
+        console.log(`[BlockchainService] Final: ${ethBalance} POL, ${usdtBalance} USDT`);
+        return { ethBalance, usdtBalance };
     } catch (err) {
         console.error(`[BlockchainService] Error fetching real balance for ${address}: ${err.message}`);
         return 0;
