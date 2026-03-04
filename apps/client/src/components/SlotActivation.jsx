@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAccount } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { parseUnits } from 'viem';
 import { toast } from 'react-toastify';
-import { useGetSlotActivation, useUpdateSlotActivation } from '../hooks/useSlotActivation';
+import { useGetSlotActivation, useUpdateSlotActivation, useGetAdminWallet } from '../hooks/useSlotActivation';
 import { useWalletBalance } from '../hooks/useWallet';
 import PageHeading from './PageHeading';
 
+const USDT_ABI = [
+    {
+        name: 'transfer',
+        type: 'function',
+        stateMutability: 'nonpayable',
+        inputs: [
+            { name: 'recipient', type: 'address' },
+            { name: 'amount', type: 'uint256' },
+        ],
+        outputs: [{ name: '', type: 'bool' }],
+    },
+];
+
+const USDT_ADDRESS = '0xAB32EAed1B1c2afa890a354B6D7D8BA730AcA434';
+
 const LEVEL_THRESHOLDS = {
+    1: 20,
     2: 40,
     3: 80,
     4: 160,
@@ -14,8 +31,6 @@ const LEVEL_THRESHOLDS = {
     6: 640,
     7: 1280
 };
-
-
 const MatrixOrbital = ({ level, isActive }) => {
     return (
         <div className="relative w-full h-44 flex items-center justify-center overflow-visible my-0.5">
@@ -66,7 +81,7 @@ const SlotLevelCard = ({ level, cost, earnings, isActive, status, onActivate, is
     const isPremium = level === 7;
 
     return (
-        <div className={`relative group transition-all duration-500 rounded-[1.5rem] overflow-hidden ${isActive ? 'shadow-[0_15px_40px_rgba(0,0,0,0.8)]' : 'shadow-xl'}`}>
+        <div className={`relative group transition-all duration-500 rounded-3xl overflow-hidden ${isActive ? 'shadow-[0_15px_40px_rgba(0,0,0,0.8)]' : 'shadow-xl'}`}>
             {/* Dark Card Body */}
             <div className={`
                 relative bg-linear-to-b from-[#2a1a15] to-[#0c0c0c]
@@ -151,11 +166,38 @@ const SlotActivation = () => {
     } catch (e) { }
 
     const { data: slotActivation, isLoading, error } = useGetSlotActivation(userId || '');
-    const { mutate: updateSlotActivation, isPending, variables } = useUpdateSlotActivation(userId || '');
-    const { data: walletData } = useWalletBalance();
+    const { mutate: updateSlotActivation, isPending: isUpdatingBackend, variables } = useUpdateSlotActivation(userId || '');
+    const { data: walletData, refetch: refetchBalance } = useWalletBalance();
+    const { data: adminWalletResponse } = useGetAdminWallet();
+    const dynamicTreasuryAddress = adminWalletResponse?.data?.address;
+
+    // Blockchain Transaction Hooks
+    const { writeContract, data: hash, error: txError, isPending: isTxPending } = useWriteContract();
+    const { isLoading: isWaitingForTx, isSuccess: isTxSuccess } = useWaitForTransactionReceipt({ hash });
 
     const currentActiveLevel = slotActivation?.data?.current_level_id ?? slotActivation?.current_level_id ?? 1;
-    const activatingLevel = isPending ? variables?.current_level_id : null;
+    const [pendingLevel, setPendingLevel] = useState(null);
+
+    // Effect to trigger backend update after transaction success
+    useEffect(() => {
+        if (isTxSuccess && pendingLevel && hash) {
+            toast.success(`Transaction Confirmed! Updating your level to ${pendingLevel}...`);
+            updateSlotActivation({
+                current_level_id: pendingLevel,
+                tx_hash: hash
+            });
+            setPendingLevel(null);
+            refetchBalance(); // Refresh USDT balance display
+        }
+    }, [isTxSuccess, pendingLevel, hash, updateSlotActivation, refetchBalance]);
+
+    // Handle Transaction Error
+    useEffect(() => {
+        if (txError) {
+            toast.error(`Transaction Failed: ${txError.shortMessage || txError.message}`);
+            setPendingLevel(null);
+        }
+    }, [txError]);
 
     const handleActivate = (level) => {
         const threshold = LEVEL_THRESHOLDS[level];
@@ -165,8 +207,25 @@ const SlotActivation = () => {
             toast.error(`Insufficient Balance! You need ${threshold} USDT to activate Level ${level}. (Current: ${currentBalance} USDT)`);
             return;
         }
-        updateSlotActivation({ current_level_id: level });
+
+        if (!dynamicTreasuryAddress) {
+            toast.error("Protocol Error: Payment address not found. Please try again later.");
+            return;
+        }
+
+        setPendingLevel(level);
+
+        // Trigger USDT Transfer
+        writeContract({
+            address: USDT_ADDRESS,
+            abi: USDT_ABI,
+            functionName: 'transfer',
+            args: [dynamicTreasuryAddress, parseUnits(threshold.toString(), 6)], // USDT usually has 6 decimals
+        });
     };
+
+    const isPending = isTxPending || isWaitingForTx || isUpdatingBackend;
+    const activatingLevel = pendingLevel || (isUpdatingBackend ? variables?.current_level_id : null);
 
     const levels = [
         { level: 1, cost: "20", earnings: { level: "100", referral: "200", recycle: "40" } },

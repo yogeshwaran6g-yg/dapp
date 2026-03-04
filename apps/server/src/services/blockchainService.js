@@ -23,18 +23,13 @@ const TOKEN_ADDRESSES = {
     usdt: {
         mainnet: ['0xc2132D059Ac9E4cd988EEdC7C9E7978ABbCe48b0'],
         testnet: [
-            '0xc2132D05Dd3F05C7B9A05ebcFE05B04B58E8F', // Polygon USDT Mirror
+            '0xAB32EAed1B1c2afa890a354B6D7D8BA730AcA434', // Verified Amoy USDT
+            '0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582', // Standard Amoy PoS USDT
             '0xAcC1945e0f5Ce9DE2dc27112aeeF09f96F4f6867', // Standard Mock
             '0x1fdE0ECC61D4C092cc9CCB715C81eaD1C59842f1', // Mock USDT
-            '0x41e941f147171800001d02c0c451da77d7000001', // Amoy Faucet Token
             '0xF6243A3060879e5822269dBa912d357f6629A24a', // Common Mirror
-            '0x522d64571A11756281734313B0E68868Aca0A34F', // Core candidate
-            '0x4c9327f566CE856F0a12d56037db653c6FBcAF72', // Alternative 1
-            '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa', // Alternative 2
-            '0xd366E3A39B1A53E417AAb0f1E8Af9D88998D0111', // Alternative 3
-            '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',  // USDC on Amoy
-            '0xAB32EAed1B1c2afa890a354B6D7D8BA730AcA434'
-            
+            '0x522d64571A11756281734313B0E68868Aca0A34F',
+            '0x4c9327f566CE856F0a12d56037db653c6FBcAF72'
         ]
     }
 };

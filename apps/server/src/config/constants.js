@@ -32,6 +32,7 @@ const JWT_CONFIG = {
 };
 
 const NETWORK_TYPE = process.env.NETWORK_TYPE || "testnet";
+const ADMIN_WALLET_ADDRESS = process.env.ADMIN_WALLET_ADDRESS || "0x71C21BF1D394539659A722830fF4e2A0"; // Fallback to previous treasury
 console.log(`[Config] Network Type: ${NETWORK_TYPE}`);
 
-export { DB_CONFIG, JWT_CONFIG, NETWORK_TYPE };
+export { DB_CONFIG, JWT_CONFIG, NETWORK_TYPE, ADMIN_WALLET_ADDRESS };

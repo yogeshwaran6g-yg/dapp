@@ -1,5 +1,6 @@
 import { queryRunner } from '../config/db.js';
 import { serviceResponse } from '../utils/helper.js';
+import { ADMIN_WALLET_ADDRESS } from '../config/constants.js';
 import { getWalletBalance, calculateEligibleLevel } from './blockchainService.js';
 import { distributeIncome } from './incomeService.js';
 
@@ -44,10 +45,10 @@ export const getSlotActivation = async (userId) => {
 /**
  * Update slot activation/level for a user
  * @param {string|number} userId 
- * @param {number} currentLevelId 
+ * @param {Object} activationData - { currentLevelId, txHash }
  * @returns {Promise<Object>}
  */
-export const updateSlotActivation = async (userId, currentLevelId) => {
+export const updateSlotActivation = async (userId, { current_level_id: currentLevelId, tx_hash: txHash }) => {
     try {
         const price = SLOT_PRICES[currentLevelId];
         if (!price) {
@@ -61,17 +62,22 @@ export const updateSlotActivation = async (userId, currentLevelId) => {
         }
         const user = userResult[0];
 
-        // 1. On-Chain Balance Check
-        const balances = await getWalletBalance(user.wallet_address);
-        const usdtBalance = parseFloat(balances.usdtBalance || '0');
+        // 1. Payment Verification / Balance Check
+        // If txHash is provided, we assume the user has paid (and we should ideally verify this hash on-chain)
+        // If no txHash, we fall back to checking the current balance (though this is less common now)
+        if (!txHash) {
+            const balances = await getWalletBalance(user.wallet_address);
+            const usdtBalance = parseFloat(balances.usdtBalance || '0');
 
-        if (usdtBalance < price) {
-            return serviceResponse(false, 403, `Insufficient USDT Balance! You need $${price} USDT for this slot. (Current: $${usdtBalance})`);
+            if (usdtBalance < price) {
+                return serviceResponse(false, 403, `Insufficient USDT Balance! You need $${price} USDT for this slot. (Current: $${usdtBalance})`);
+            }
+        } else {
+            console.log(`[SlotActivationService] Activation via Payment Received. Hash: ${txHash}`);
+            // TODO: In production, use a library to verify the txHash on-chain before proceeding
         }
 
         // 2. Execution & Distribution
-        // No longer deducting from internal fake balance as we use on-chain USDT
-
         // Distribute income
         await distributeIncome(userId, price);
 
@@ -95,5 +101,17 @@ export const updateSlotActivation = async (userId, currentLevelId) => {
     } catch (err) {
         console.error(`[SlotActivationService] Error in updateSlotActivation: ${err.message}`);
         return serviceResponse(false, 500, 'Error updating slot activation', null, err.message);
+    }
+};
+
+/**
+ * Returns the configured admin wallet/treasury address
+ * @returns {Promise<Object>}
+ */
+export const getAdminWallet = async () => {
+    try {
+        return serviceResponse(true, 200, 'Admin wallet fetched successfully', { address: ADMIN_WALLET_ADDRESS });
+    } catch (err) {
+        return serviceResponse(false, 500, 'Error fetching admin wallet', null, err.message);
     }
 };

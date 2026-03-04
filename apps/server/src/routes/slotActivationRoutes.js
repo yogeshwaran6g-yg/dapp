@@ -10,4 +10,7 @@ router.get('/:userId', slotActivationController.getSlotActivation);
 // PUT update slot activation - Protected
 router.put('/', authMiddleware, slotActivationController.updateSlotActivation);
 
+// GET admin wallet address - Public
+router.get('/config/admin-wallet', slotActivationController.getAdminWallet);
+
 export default router;
