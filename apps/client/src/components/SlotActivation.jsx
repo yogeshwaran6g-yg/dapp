@@ -18,8 +18,8 @@ const LEVEL_THRESHOLDS = {
 
 const MatrixOrbital = ({ level, isActive }) => {
     return (
-        <div className="relative w-full h-40 flex items-center justify-center overflow-visible my-3">
-            <svg viewBox="0 0 200 200" className="h-full w-auto relative z-10 overflow-visible">
+        <div className="relative w-full h-44 flex items-center justify-center overflow-visible my-0.5">
+            <svg viewBox="0 0 200 200" className="h-[110%] w-auto relative z-10 overflow-visible">
                 <defs>
                     <radialGradient id="coreGradient" cx="50%" cy="50%" r="50%">
                         <stop offset="0%" stopColor="#FF8C00" />
@@ -32,34 +32,29 @@ const MatrixOrbital = ({ level, isActive }) => {
                     </filter>
                 </defs>
 
-                {/* Orbit Circles */}
-                <circle cx="100" cy="100" r="45" fill="none" stroke="#633b24" strokeWidth="1" />
-                <circle cx="100" cy="100" r="70" fill="none" stroke="#633b24" strokeWidth="1" />
+                {/* Larger Orbit Circles */}
+                <circle cx="100" cy="100" r="55" fill="none" stroke="#633b24" strokeWidth="1" opacity="0.6" />
+                <circle cx="100" cy="100" r="85" fill="none" stroke="#633b24" strokeWidth="1" opacity="0.4" />
 
                 {/* Central Core */}
-                <circle cx="100" cy="100" r="24" fill="url(#coreGradient)" />
+                <circle cx="100" cy="100" r="28" fill="url(#coreGradient)" />
                 <text
-                    x="100" y="103"
+                    x="100" y="104"
                     textAnchor="middle"
                     dominantBaseline="middle"
                     fill="white"
-                    className="text-[24px] font-display font-black"
+                    className="text-[28px] font-display font-black"
                 >U</text>
 
-                {/* Nodes - Matching Image exactly */}
-                {/* Green node on first orbit */}
-                <circle cx="68" cy="132" r="6" fill="#00ff88" filter="url(#nodeGlow)" />
-                {/* Yellow nodes on first orbit */}
-                <circle cx="132" cy="132" r="6" fill="#FFC800" filter="url(#nodeGlow)" />
-                {/* Yellow node on top of first orbit */}
-                <circle cx="100" cy="55" r="5" fill="#FFC800" filter="url(#nodeGlow)" />
+                {/* Nodes - Adjusted for larger orbits */}
+                {/* Green node on first orbit (r=55) */}
+                <circle cx="61" cy="139" r="7" fill="#00ff88" filter="url(#nodeGlow)" />
+                {/* Yellow nodes on first orbit (r=55) */}
+                <circle cx="139" cy="139" r="6" fill="#FFC800" filter="url(#nodeGlow)" />
 
-                {/* Upper White Node */}
-                <circle cx="100" cy="30" r="6" fill="#ffffff" filter="url(#nodeGlow)" />
-
-                {/* RCYL connection */}
-                <circle cx="150" cy="50" r="4" fill="#ffffff" />
-                <text x="160" y="55" fill="#ffffff" className="text-[10px] font-display font-bold uppercase">RCYL</text>
+                {/* Nodes on second orbit (r=85) */}
+                <circle cx="100" cy="15" r="6" fill="#FFC800" filter="url(#nodeGlow)" />
+                <circle cx="100" cy="45" r="5" fill="#ffffff" filter="url(#nodeGlow)" />
             </svg>
         </div>
     );
@@ -71,29 +66,29 @@ const SlotLevelCard = ({ level, cost, earnings, isActive, status, onActivate, is
     const isPremium = level === 7;
 
     return (
-        <div className={`relative group transition-all duration-500 rounded-[2rem] overflow-hidden ${isActive ? 'shadow-[0_20px_50px_rgba(0,0,0,0.8)]' : 'shadow-2xl'}`}>
+        <div className={`relative group transition-all duration-500 rounded-[1.5rem] overflow-hidden ${isActive ? 'shadow-[0_15px_40px_rgba(0,0,0,0.8)]' : 'shadow-xl'}`}>
             {/* Dark Card Body */}
             <div className={`
                 relative bg-linear-to-b from-[#2a1a15] to-[#0c0c0c]
-                border border-[#3d2b24] p-5 flex flex-col items-center
+                border border-[#3d2b24] p-3 flex flex-col items-center
                 ${isLocked ? 'opacity-70 grayscale' : 'opacity-100'}
             `}>
                 {/* Top Bar */}
-                <div className="w-full flex justify-between items-center mb-1">
-                    <div className="bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
-                        <span className="text-white text-sm font-bold">{cost}$</span>
+                <div className="w-full flex justify-between items-center mb-0.5">
+                    <div className="bg-black/40 px-2 py-1 rounded-lg border border-white/5">
+                        <span className="text-white text-xs font-bold">{cost}$</span>
                     </div>
 
                     {isPremium && (
-                        <div className="bg-linear-to-r from-[#d4af37] to-[#8a6d3b] px-2 py-0.5 rounded-lg border border-white/20">
-                            <span className="text-black text-xs font-black uppercase tracking-wider">PREMIUM</span>
+                        <div className="bg-linear-to-r from-[#d4af37] to-[#8a6d3b] px-1.5 py-0.5 rounded-lg border border-white/20">
+                            <span className="text-black text-[9px] font-black uppercase tracking-wider">PREMIUM</span>
                         </div>
                     )}
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                         {isActive && (
-                            <div className="bg-green-500 px-3 py-1 rounded-md">
-                                <span className="text-black text-[10px] font-black uppercase tracking-widest">ACTIVE</span>
+                            <div className="bg-green-500 px-2 py-0.5 rounded-md">
+                                <span className="text-black text-[9px] font-black uppercase tracking-widest">ACTIVE</span>
                             </div>
                         )}
                     </div>
@@ -101,31 +96,24 @@ const SlotLevelCard = ({ level, cost, earnings, isActive, status, onActivate, is
 
                 <MatrixOrbital level={level} isActive={isActive} />
 
-                <h3 className="text-white text-2xl font-display font-black tracking-[0.2em] mb-4 uppercase">
+                <h3 className="text-white text-xl font-display font-black tracking-[0.15em] mb-3 uppercase">
                     LEVEL {level < 10 ? `0${level}` : level}
                 </h3>
 
-                {/* Info Grid */}
-                <div className="w-full grid grid-cols-2 lg:grid-cols-3 gap-2 mb-4">
-                    <div className="border border-white/10 p-2 rounded-lg flex flex-col items-start bg-black/20">
-                        <span className="text-[8px] text-[#8a6d3b] font-black uppercase mb-1">LEVEL INCOME</span>
-                        <span className="text-white text-xs font-bold">{earnings?.level || '100'}</span>
+                {/* Info Grid - More compact */}
+                <div className="w-full grid grid-cols-3 gap-1.5 mb-3">
+                    <div className="border border-white/10 p-1.5 rounded-lg flex flex-col items-start bg-black/20">
+                        <span className="text-[7px] text-[#8a6d3b] font-black uppercase mb-0.5">LEVEL</span>
+                        <span className="text-white text-[10px] font-bold">{earnings?.level || '100'}</span>
                     </div>
-                    <div className="border border-white/10 p-2 rounded-lg flex flex-col items-start bg-black/20">
-                        <span className="text-[8px] text-[#8a6d3b] font-black uppercase mb-1">REFERRAL INCOME</span>
-                        <span className="text-white text-xs font-bold">{earnings?.referral || '200'}</span>
+                    <div className="border border-white/10 p-1.5 rounded-lg flex flex-col items-start bg-black/20">
+                        <span className="text-[7px] text-[#8a6d3b] font-black uppercase mb-0.5">REFERRAL</span>
+                        <span className="text-white text-[10px] font-bold">{earnings?.referral || '200'}</span>
                     </div>
-                    <div className="border border-white/10 p-2 rounded-lg flex flex-col items-start bg-black/20">
-                        <span className="text-[8px] text-[#8a6d3b] font-black uppercase mb-1">RECYCLE</span>
-                        <span className="text-white text-xs font-bold">{earnings?.recycle || '40'}</span>
+                    <div className="border border-white/10 p-1.5 rounded-lg flex flex-col items-start bg-black/20">
+                        <span className="text-[7px] text-[#8a6d3b] font-black uppercase mb-0.5">RECYCLE</span>
+                        <span className="text-white text-[10px] font-bold">{earnings?.recycle || '40'}</span>
                     </div>
-
-                    {level >= 6 && (
-                        <div className="border border-white/10 p-2 rounded-lg flex flex-col items-start bg-black/20">
-                            <span className="text-[8px] text-[#8a6d3b] font-black uppercase mb-1">MATRIX INCOME</span>
-                            <span className="text-white text-xs font-bold">{earnings?.matrix || '20'}</span>
-                        </div>
-                    )}
                 </div>
 
                 {/* Button */}
@@ -134,17 +122,17 @@ const SlotLevelCard = ({ level, cost, earnings, isActive, status, onActivate, is
                         onClick={() => onActivate(level)}
                         disabled={isLocked || isPending}
                         className={`
-                        w-full py-4 rounded-xl font-display font-black text-sm uppercase transition-all duration-300
+                        w-full py-3 rounded-lg font-display font-black text-xs uppercase transition-all duration-300
                         ${(isLocked || isPending)
                                 ? 'bg-[#1a1a1a] text-[#444] cursor-not-allowed border border-white/5'
-                                : 'bg-linear-to-r from-[#d4af37] via-[#f7d581] to-[#8a6d3b] text-black shadow-[0_10px_30px_rgba(212,175,55,0.3)] hover:scale-[1.02]'
+                                : 'bg-linear-to-r from-[#d4af37] via-[#f7d581] to-[#8a6d3b] text-black shadow-[0_8px_20px_rgba(212,175,55,0.2)] hover:scale-[1.01]'
                             }
                     `}
                     >
                         {isLocked ? 'LOCKED' : (isActivatingThis ? 'ACTIVATING...' : 'ACTIVATE NOW')}
                     </button>
                 ) : (
-                    <div className="w-full py-4 rounded-xl bg-[#142319] border border-green-500/30 text-green-500 font-display font-black text-sm uppercase text-center shadow-inner">
+                    <div className="w-full py-3 rounded-lg bg-[#142319] border border-green-500/30 text-green-500 font-display font-black text-xs uppercase text-center shadow-inner">
                         ACTIVATED
                     </div>
                 )}
@@ -171,12 +159,11 @@ const SlotActivation = () => {
 
     const handleActivate = (level) => {
         const threshold = LEVEL_THRESHOLDS[level];
-        if (threshold) {
-            const currentBalance = parseFloat(walletData?.ethBalance || '0');
-            if (currentBalance < threshold) {
-                toast.error(`Insufficient Balance! You need $${threshold} to activate Level ${level}.`);
-                return;
-            }
+        const currentBalance = parseFloat(walletData?.usdtBalance || '0');
+
+        if (threshold && currentBalance < threshold) {
+            toast.error(`Insufficient Balance! You need ${threshold} USDT to activate Level ${level}. (Current: ${currentBalance} USDT)`);
+            return;
         }
         updateSlotActivation({ current_level_id: level });
     };
@@ -247,7 +234,7 @@ const SlotActivation = () => {
                 </div>
 
                 {/* Bottom Section: Slots Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {levels.map((lvl) => {
                         let status = 'locked';
                         if (lvl.level <= currentActiveLevel) status = 'active';

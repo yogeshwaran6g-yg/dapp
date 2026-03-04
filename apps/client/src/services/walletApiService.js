@@ -11,9 +11,9 @@ export const walletApiService = {
             const response = await api.get(API_ENDPOINTS.WALLET.BALANCE, {}, {
                 showErrorToast: false
             });
-            // Our backend returns { status, message, data: { address, ethBalance } }
-            // The axios interceptor returns response.data (which is the { status, message, data } object)
-            return response?.data || { ethBalance: '0.00' };
+            // The axios interceptor returns response.data (the whole { status, message, data } object)
+            // We need to return the nested data object
+            return response?.data || { ethBalance: '0.00', usdtBalance: '0.00' };
         } catch (error) {
             return handleServiceError(error, 'WalletApiService.getBalance');
         }

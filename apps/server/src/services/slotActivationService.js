@@ -55,23 +55,22 @@ export const updateSlotActivation = async (userId, currentLevelId) => {
         }
 
         // Fetch user data
-        const userResult = await queryRunner('SELECT wallet_address, fake_eth_balance FROM users WHERE id = $1', [userId]);
+        const userResult = await queryRunner('SELECT wallet_address FROM users WHERE id = $1', [userId]);
         if (userResult.length === 0) {
             return serviceResponse(false, 404, 'User not found');
         }
         const user = userResult[0];
 
-        // 1. Balance Check
-        if (parseFloat(user.fake_eth_balance) < price) {
-            return serviceResponse(false, 403, `Insufficient Balance! You need $${price} for this slot. (Current: $${user.fake_eth_balance})`);
+        // 1. On-Chain Balance Check
+        const balances = await getWalletBalance(user.wallet_address);
+        const usdtBalance = parseFloat(balances.usdtBalance || '0');
+
+        if (usdtBalance < price) {
+            return serviceResponse(false, 403, `Insufficient USDT Balance! You need $${price} USDT for this slot. (Current: $${usdtBalance})`);
         }
 
         // 2. Execution & Distribution
-        // Deduct price
-        await queryRunner(
-            'UPDATE users SET fake_eth_balance = fake_eth_balance - $1 WHERE id = $2',
-            [price, userId]
-        );
+        // No longer deducting from internal fake balance as we use on-chain USDT
 
         // Distribute income
         await distributeIncome(userId, price);

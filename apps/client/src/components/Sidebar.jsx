@@ -83,7 +83,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                             <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Network Status</p>
                             <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                                <p className="text-[10px] font-medium text-white">Mainnet Connected</p>
+                                <p className="text-[10px] font-medium text-white">
+                                    {import.meta.env.VITE_NETWORK === 'testnet' ? 'Testnet Connected' : 'Mainnet Connected'}
+                                </p>
                             </div>
                         </div>
                     </div>

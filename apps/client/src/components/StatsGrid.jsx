@@ -2,13 +2,13 @@ import React from 'react';
 
 const StatsGrid = () => {
     const stats = [
-        { label: 'Total Earnings', value: '$12,450.00', trend: '+12.5%', trendIcon: 'trending_up', trendColor: 'text-green-400' },
-        { label: 'Active Slot', value: 'Level 12', special: 'MAX LEVEL' },
-        { label: 'Royalty Income', value: '$3,200.00', trend: '+8.2%', trendIcon: 'trending_up', trendColor: 'text-green-400' },
-        { label: 'Referrals', value: '148', trend: '+5 New', trendIcon: 'group_add', trendColor: 'text-green-400' },
-        { label: 'Staked', value: '5,000 LX', trend: '0% Change', trendColor: 'text-gray-500' },
-        { label: 'Energy Bal.', value: '450.50', trend: '-2.1%', trendIcon: 'trending_down', trendColor: 'text-red-400' },
-        { label: 'Pending Rewards', value: '$120.45', special: 'CLAIM NOW' },
+        { label: 'Total Earnings', value: '$ 0.00', trend: '---', trendColor: 'text-gray-500' },
+        { label: 'Active Slot', value: 'Level 1', special: 'CURRENT' },
+        { label: 'Royalty Income', value: '$ 0.00', trend: '---', trendColor: 'text-gray-500' },
+        { label: 'Referrals', value: '0', trend: '0 New', trendColor: 'text-gray-500' },
+        { label: 'Staked', value: '0 LX', trend: '0% Change', trendColor: 'text-gray-500' },
+        { label: 'Energy Bal.', value: '0.00', trend: '---', trendColor: 'text-gray-500' },
+        { label: 'Pending Rewards', value: '$ 0.00', special: '---' },
     ];
 
     return (

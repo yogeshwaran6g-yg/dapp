@@ -32,5 +32,6 @@ const JWT_CONFIG = {
 };
 
 const NETWORK_TYPE = process.env.NETWORK_TYPE || "testnet";
+console.log(`[Config] Network Type: ${NETWORK_TYPE}`);
 
 export { DB_CONFIG, JWT_CONFIG, NETWORK_TYPE };
