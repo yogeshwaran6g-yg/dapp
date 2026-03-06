@@ -45,6 +45,7 @@ const Header = ({ onMenuClick }) => {
         };
     }, [showDropdown]);
 
+
     const formatAddress = (addr) => {
         if (!addr) return '';
         return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
@@ -132,7 +133,7 @@ const Header = ({ onMenuClick }) => {
                 </div>
 
                 {/* ── Wallet Address Pill + Dropdown ── */}
-                <div className="relative">
+                <div className="relative" ref={dropdownRef}>
                     <div
                         onClick={() => address && setShowDropdown(!showDropdown)}
                         className="flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-accent-gold/30 cursor-pointer transition-all duration-300 group shadow-lg"
@@ -152,16 +153,12 @@ const Header = ({ onMenuClick }) => {
 
                     <AnimatePresence>
                         {showDropdown && address && (
-                            <>
-                                {/* Backdrop */}
-                                <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
-
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute right-0 mt-3 w-72 bg-[#0b0b0f]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
-                                >
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute right-0 mt-3 w-72 bg-[#0b0b0f]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                            >
                                     <div className="p-5 space-y-4">
                                         {/* Wallet header row */}
                                         <div className="flex items-center justify-between">
@@ -239,7 +236,6 @@ const Header = ({ onMenuClick }) => {
                                         </div>
                                     </div>
                                 </motion.div>
-                            </>
                         )}
                     </AnimatePresence>
                 </div>
@@ -271,7 +267,8 @@ const Header = ({ onMenuClick }) => {
                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFKaOGEqx67axoW6iLXhSdvdyvxDb170U5VryWHnElt8B3QKCoot9mI3RUcatVZuM5rltR8cmExLDnrl_qsNwJBKSWJ6IESqKE7jtV5trks0gBD0ikRyggNLDZju4NL_dHT_qL4IKZl2YkK5nhwjM81QMVMHF5cs_4VGOBa2KfROplMXKA7hoh0uPc5xu1YaEdSa9r7MrlepExGa4G1dGmzZ3j6X_251LoiCgf46PRS98ilHdr2GxmH1QaHqcYhB-sHIbLdRdoAjrj"
                         />
                     </div>
-                    <ChevronDown size={14} className="text-gray-500 hidden sm:block" />
+                    <ChevronDown
+                        size={14} className="text-gray-500 hidden sm:block" />
                 </Link>
             </div>
         </header>

@@ -66,5 +66,20 @@ export const walletApiService = {
         } catch (error) {
             return handleServiceError(error, 'WalletApiService.updateBalance');
         }
+    },
+
+    /**
+     * Fetch user transaction history
+     * @returns {Promise<Array>}
+     */
+    async getTransactions() {
+        try {
+            const response = await api.get(API_ENDPOINTS.WALLET.TRANSACTIONS, {}, {
+                showErrorToast: false
+            });
+            return response?.data || [];
+        } catch (error) {
+            return handleServiceError(error, 'WalletApiService.getTransactions');
+        }
     }
 };

@@ -108,6 +108,14 @@ export const updateSlotActivation = async (userId, { current_level_id: currentLe
                 updated_at = CURRENT_TIMESTAMP
         `, [userId, price]);
 
+        // Track energy credit in logs for UI visibility
+        await queryRunner(`
+            INSERT INTO income_logs (user_id, source_user_id, amount, level, type)
+            VALUES ($1, $1, $2, $3, 'ENERGY_CREDIT')
+        `, [userId, price, currentLevelId]);
+
+        console.log(`[SlotActivationService] Credited ${price} Energy Tokens to user ${userId} (Slot ${currentLevelId})`);
+
         return serviceResponse(true, 200, `Slot Level ${currentLevelId} activated! Energy Token is now ACTIVE.`);
     } catch (err) {
         console.error(`[SlotActivationService] Error in updateSlotActivation: ${err.message}`);

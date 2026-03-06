@@ -19,3 +19,22 @@ export const useWalletBalance = () => {
         retry: 1,
     });
 };
+
+/**
+ * Hook to fetch the user's transaction history
+ * @returns {Object} query result
+ */
+export const useWalletTransactions = () => {
+    const token = localStorage.getItem('authToken');
+
+    return useQuery({
+        queryKey: ['walletTransactions'],
+        queryFn: async () => {
+            return await walletApiService.getTransactions();
+        },
+        enabled: !!token && token !== 'undefined' && token !== 'null',
+        refetchInterval: 30000,
+        staleTime: 10000,
+        retry: 1,
+    });
+};

@@ -1,5 +1,6 @@
 import * as blockchainService from '../services/blockchainService.js';
 import * as walletService from '../services/walletService.js';
+import * as transactionService from '../services/transactionService.js';
 import { rtnRes } from '../utils/helper.js';
 
 
@@ -138,6 +139,7 @@ export const topUpInternal = async (req, res) => {
 
 
 export const updateBalance = async (req, res) => {
+    // ... (existing updateBalance implementation)
     try {
         const userId = req.user?.id;
         const { type, amount } = req.body;
@@ -160,5 +162,20 @@ export const updateBalance = async (req, res) => {
     } catch (err) {
         console.error("Error from updateBalance controller:", err);
         return rtnRes(res, 500, "Internal Error updating balance");
+    }
+};
+
+export const getTransactions = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return rtnRes(res, 400, "User ID not found in session");
+        }
+
+        const transactions = await transactionService.getUserTransactions(userId);
+        return rtnRes(res, 200, "Transactions fetched successfully", transactions);
+    } catch (err) {
+        console.error("Error from getTransactions controller:", err);
+        return rtnRes(res, 500, "Internal Error fetching transactions");
     }
 };
