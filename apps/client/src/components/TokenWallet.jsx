@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import PageHeading from './PageHeading';
+import { useWalletBalance } from '../hooks/useWallet';
+import { walletApiService } from '../services/walletApiService';
 
 const transactions = [
     {
@@ -44,7 +46,7 @@ const transactions = [
     },
 ];
 
-const TokenCard = ({ icon, title, subtitle, balance, usdValue, change, actions, highlighted }) => (
+const TokenCard = ({ icon, title, subtitle, balance, usdValue, change, actions, highlighted, onEdit }) => (
     <div
         className={`glass-card rounded-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden group border ${highlighted ? 'border-[#D4AF37]/30' : 'border-[#D4AF37]/10'
             }`}
@@ -55,6 +57,15 @@ const TokenCard = ({ icon, title, subtitle, balance, usdValue, change, actions, 
             className={`absolute -right-10 -top-10 size-40 rounded-full blur-3xl transition-all ${highlighted ? 'bg-[#D4AF37]/10 group-hover:bg-[#D4AF37]/20' : 'bg-[#D4AF37]/5 group-hover:bg-[#D4AF37]/10'
                 }`}
         />
+
+        {/* Edit Button (Dev Only) */}
+        <button
+            onClick={onEdit}
+            className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-white/5 hover:bg-white/10 p-1.5 rounded-lg border border-white/10 text-white/40 hover:text-white"
+            title="Edit Base Balance"
+        >
+            <span className="material-symbols-outlined text-sm">edit</span>
+        </button>
 
         {/* Header */}
         <div className="flex justify-between items-start relative z-10">
@@ -79,7 +90,7 @@ const TokenCard = ({ icon, title, subtitle, balance, usdValue, change, actions, 
 
         {/* Balance */}
         <div className="mt-4 sm:mt-8 relative z-10">
-            <p className="text-[8px] sm:text-[10px] text-white/30 uppercase font-bold tracking-[0.2em] mb-1">Available Balance</p>
+            <p className="text-[8px] sm:text-[10px] text-white/30 uppercase font-bold tracking-[0.2em] mb-1">Available Token</p>
             <h4 className="text-2xl sm:text-4xl font-mono font-bold text-white tracking-tight">{balance}</h4>
             <p className="text-[#F9E076]/60 font-medium text-base sm:text-lg mt-1">≈ {usdValue}</p>
         </div>
@@ -114,9 +125,21 @@ const StatusBadge = ({ status }) =>
     );
 
 const TokenWallet = () => {
+    const { data: walletData, isLoading, refetch } = useWalletBalance();
+
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const totalPages = 12;
+
+    const formatBalance = (val) => {
+        const num = parseFloat(val || '0');
+        return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    const formatUSD = (val, rate) => {
+        const num = parseFloat(val || '0') * rate;
+        return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
+    };
 
     const filtered = transactions.filter(
         (tx) =>
@@ -124,22 +147,44 @@ const TokenWallet = () => {
             tx.type.toLowerCase().includes(search.toLowerCase())
     );
 
+    const handleEditBalance = async (type, currentVal) => {
+        const newVal = window.prompt(`Enter new ${type} balance:`, currentVal);
+        if (newVal !== null && !isNaN(parseFloat(newVal))) {
+            try {
+                await walletApiService.updateBalance(type, parseFloat(newVal));
+                refetch();
+            } catch (error) {
+                console.error('Failed to update balance:', error);
+            }
+        }
+    };
+
     return (
         <div className="space-y-8">
-            <PageHeading
-                highlight="TOKEN"
-                title="WALLET"
-                subtitle="Manage your assets with multi-chain security and real-time tracking."
-            />
+            <div className="flex justify-between items-end">
+                <PageHeading
+                    highlight="TOKEN"
+                    title="WALLET"
+                    subtitle="Manage your assets with multi-chain security and real-time tracking."
+                />
+                <div className="text-right pb-2 opacity-50 hover:opacity-100 transition-opacity">
+                    <span className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Dev Diagnostics</span>
+                    <div className="text-[10px] text-accent-gold/60 font-mono">
+                        User ID: {localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).id : 'N/A'}<br />
+                        Table: user_wallets
+                    </div>
+                </div>
+            </div>
             {/* Hero Balance Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <TokenCard
                     icon="bolt"
                     title="Energy Token"
                     subtitle="NRG / GOVERNANCE"
-                    balance="45,000.00"
-                    usdValue="$20,250.00 USD"
+                    balance={isLoading ? "..." : formatBalance(walletData?.energyBalance)}
+                    usdValue={isLoading ? "..." : formatUSD(walletData?.energyBalance, 0.45)}
                     change="+5.2%"
+                    onEdit={() => handleEditBalance('NRG', walletData?.energyBalance || 0)}
                     actions={[
                         { label: 'Deposit', icon: 'south_west' },
                         { label: 'Withdraw', icon: 'north_east' },
@@ -148,12 +193,13 @@ const TokenWallet = () => {
                 />
                 <TokenCard
                     icon="star"
-                    title="Own Token"
+                    title="OWN Token"
                     subtitle="OWN / UTILITY"
-                    balance="12,500.24"
-                    usdValue="$26,250.50 USD"
+                    balance={isLoading ? "..." : formatBalance(walletData?.ownTokenBalance)}
+                    usdValue={isLoading ? "..." : formatUSD(walletData?.ownTokenBalance, 2.10)}
                     change="+12.8%"
                     highlighted
+                    onEdit={() => handleEditBalance('DB', walletData?.ownTokenBalance || 0)}
                     actions={[
                         { label: 'Deposit', icon: 'south_west' },
                         { label: 'Withdraw', icon: 'north_east' },
@@ -207,7 +253,7 @@ const TokenWallet = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#D4AF37]/5">
-                            {filtered.length > 0 ? (
+                            {filtered && filtered.length > 0 ? (
                                 filtered.map((tx, idx) => (
                                     <tr key={idx} className="hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4">

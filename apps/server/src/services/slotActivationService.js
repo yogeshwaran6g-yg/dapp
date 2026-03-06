@@ -1,6 +1,6 @@
 import { queryRunner } from '../config/db.js';
 import { serviceResponse } from '../utils/helper.js';
-import { ADMIN_WALLET_ADDRESS } from '../config/constants.js';
+import { ACTIVE_CONFIG } from '../config/constants.js';
 import { getWalletBalance, calculateEligibleLevel } from './blockchainService.js';
 import { distributeIncome } from './incomeService.js';
 
@@ -43,7 +43,7 @@ export const getSlotActivation = async (userId) => {
 };
 
 
-export const updateSlotActivation = async (userId, { current_level_id: currentLevelId, tx_hash: txHash }) => {
+export const updateSlotActivation = async (userId, { current_level_id: currentLevelId, tx_hash: txHash, payment_type: paymentType = 'USDT' }) => {
     try {
         const price = SLOT_PRICES[currentLevelId];
         if (!price) {
@@ -58,18 +58,34 @@ export const updateSlotActivation = async (userId, { current_level_id: currentLe
         const user = userResult[0];
 
         // 1. Payment Verification / Balance Check
-        // If txHash is provided, we assume the user has paid (and we should ideally verify this hash on-chain)
-        // If no txHash, we fall back to checking the current balance (though this is less common now)
-        if (!txHash) {
-            const balances = await getWalletBalance(user.wallet_address);
-            const usdtBalance = parseFloat(balances.usdtBalance || '0');
+        if (paymentType === 'OWN_TOKEN') {
+            const walletRes = await queryRunner('SELECT own_token FROM user_wallets WHERE user_id = $1', [userId]);
+            const ownTokenBalance = parseFloat(walletRes[0]?.own_token || '0');
 
-            if (usdtBalance < price) {
-                return serviceResponse(false, 403, `Insufficient USDT Balance! You need $${price} USDT for this slot. (Current: $${usdtBalance})`);
+            if (ownTokenBalance < price) {
+                return serviceResponse(false, 403, `Insufficient Internal Token Balance! You need ${price} tokens for this slot. (Current: ${ownTokenBalance})`);
             }
+
+            // Deduct balance
+            await queryRunner(
+                'UPDATE user_wallets SET own_token = own_token - $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2',
+                [price, userId]
+            );
+            console.log(`[SlotActivationService] Activation via Internal Token. Deducting ${price} from user ${userId}`);
         } else {
-            console.log(`[SlotActivationService] Activation via Payment Received. Hash: ${txHash}`);
-            // TODO: In production, use a library to verify the txHash on-chain before proceeding
+            // Default USDT Payment
+            if (txHash === 'MOCK_USDT_PAYMENT') {
+                console.log(`[SlotActivationService] Activation via MOCK USDT PAYMENT for demo purposes. User: ${userId}`);
+            } else if (!txHash) {
+                const balances = await getWalletBalance(user.wallet_address);
+                const usdtBalance = parseFloat(balances.usdtBalance || '0');
+
+                if (usdtBalance < price) {
+                    return serviceResponse(false, 403, `Insufficient USDT Balance! You need $${price} USDT for this slot. (Current: $${usdtBalance})`);
+                }
+            } else {
+                console.log(`[SlotActivationService] Activation via USDT Received. Hash: ${txHash}`);
+            }
         }
 
         // 2. Execution & Distribution
@@ -86,11 +102,11 @@ export const updateSlotActivation = async (userId, { current_level_id: currentLe
         // Ensure wallet exists and increase energy balance slightly or set active status
         await queryRunner(`
             INSERT INTO user_wallets (user_id, energy_balance) 
-            VALUES ($1, 100) 
+            VALUES ($1, $2) 
             ON CONFLICT (user_id) DO UPDATE SET 
-                energy_balance = user_wallets.energy_balance + 100,
+                energy_balance = user_wallets.energy_balance + $2,
                 updated_at = CURRENT_TIMESTAMP
-        `, [userId]);
+        `, [userId, price]);
 
         return serviceResponse(true, 200, `Slot Level ${currentLevelId} activated! Energy Token is now ACTIVE.`);
     } catch (err) {
@@ -105,7 +121,7 @@ export const updateSlotActivation = async (userId, { current_level_id: currentLe
  */
 export const getAdminWallet = async () => {
     try {
-        return serviceResponse(true, 200, 'Admin wallet fetched successfully', { address: ADMIN_WALLET_ADDRESS });
+        return serviceResponse(true, 200, 'Admin wallet fetched successfully', { address: ACTIVE_CONFIG.ADMIN_WALLET });
     } catch (err) {
         return serviceResponse(false, 500, 'Error fetching admin wallet', null, err.message);
     }

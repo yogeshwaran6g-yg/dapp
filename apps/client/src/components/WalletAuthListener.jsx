@@ -13,8 +13,10 @@ export function WalletAuthListener() {
     const { address, isConnected } = useAccount();
     const { isAuthenticated } = useAuthContext();
     const { login } = useLogin();
+    const referralCode = localStorage.getItem('referralCode');
     const { data: nonce, refetch: fetchNonce } = useNonce(
-        isConnected && !isAuthenticated ? address : null
+        isConnected && !isAuthenticated ? address : null,
+        referralCode
     );
     const navigate = useNavigate();
 
@@ -27,7 +29,7 @@ export function WalletAuthListener() {
                 isAuthenticating.current = true;
 
                 try {
-                    // 1. Get a fresh nonce
+                    // 1. Get a fresh nonce (referralCode is already in the hook's queryKey)
                     const result = await fetchNonce();
                     const currentNonce = result.data;
 
@@ -35,6 +37,8 @@ export function WalletAuthListener() {
                         // 2. Trigger the login (signature prompt)
                         const loginResult = await login(currentNonce);
                         if (loginResult) {
+                            // Clear referral code after successful login
+                            localStorage.removeItem('referralCode');
                             navigate('/dashboard');
                         }
                     }

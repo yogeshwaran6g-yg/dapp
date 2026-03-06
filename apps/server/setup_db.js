@@ -69,11 +69,11 @@ const setupDatabase = async () => {
             const users = await pool.query('SELECT id FROM users');
             for (const user of users.rows) {
                 await pool.query(`
-                    INSERT INTO user_wallets (user_id, energy_balance, own_token_balance, locked_balance)
+                    INSERT INTO user_wallets (user_id, energy_balance, own_token, locked_balance)
                     VALUES ($1, $2, $3, $4)
                     ON CONFLICT (user_id) DO UPDATE SET 
                         energy_balance = EXCLUDED.energy_balance,
-                        own_token_balance = EXCLUDED.own_token_balance,
+                        own_token = EXCLUDED.own_token,
                         locked_balance = EXCLUDED.locked_balance,
                         updated_at = CURRENT_TIMESTAMP
                 `, [user.id, 1000.50, 500.25, 100.00]);

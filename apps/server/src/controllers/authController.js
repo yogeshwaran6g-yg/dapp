@@ -3,11 +3,11 @@ import { rtnRes } from '../utils/helper.js';
 
 export const getNonce = async (req, res) => {
     try {
-        const { address } = req.query;
+        const { address, ref } = req.query;
         if (!address) {
             return rtnRes(res, 400, "wallet address is required, must connect the wallet");
         }
-        const result = await authService.generateNonce(address);
+        const result = await authService.generateNonce(address, ref);
         return rtnRes(res, result.status, result.message, result.data);
     } catch (err) {
         console.log("error from the get nonce", err);

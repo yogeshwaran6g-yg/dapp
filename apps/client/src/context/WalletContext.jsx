@@ -1,8 +1,21 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
+import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
+import { getActiveNetwork } from '../config/networkConfig';
+import { api } from '../services/axios';
+import { API_ENDPOINTS } from '../utils/endpoints';
 
 const WalletContext = createContext(null);
+
+const activeNetwork = getActiveNetwork();
+const USDT_ADDRESS = activeNetwork.usdtAddress;
+
+const ERC20_ABI = [
+    'function balanceOf(address owner) view returns (uint256)',
+    'function decimals() view returns (uint8)',
+    'function transfer(address to, uint256 amount) returns (bool)',
+];
 
 export const WalletProvider = ({ children }) => {
     const { address, isConnected } = useAccount();
@@ -25,18 +38,17 @@ export const WalletProvider = ({ children }) => {
 
         setIsLoading(true);
         try {
-            const response = await fetch('/api/v1/wallet/balance', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            const result = await response.json();
-            if (result.success) {
-                setPolBalance(result.data.polBalance);
-                setUsdtBalance(result.data.usdtBalance);
-            }
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const contract = new ethers.Contract(USDT_ADDRESS, ERC20_ABI, provider);
+
+            const [balance, decimals] = await Promise.all([
+                contract.balanceOf(address),
+                contract.decimals()
+            ]);
+
+            setUsdtBalance(ethers.formatUnits(balance, decimals));
         } catch (error) {
-            console.error('Error fetching on-chain balances:', error);
+            console.error('Error fetching on-chain balance:', error);
         } finally {
             setIsLoading(false);
         }
@@ -44,15 +56,13 @@ export const WalletProvider = ({ children }) => {
 
     const fetchWalletInfo = useCallback(async () => {
         const token = localStorage.getItem('authToken');
-        if (!token) return; // Only require JWT auth, not wallet connection
+        if (!token) return;
 
         try {
-            const response = await fetch('/api/v1/wallet/info', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            const result = await api.get(API_ENDPOINTS.WALLET.INFO, {}, {
+                showErrorToast: false // Don't show toast for background refreshes
             });
-            const result = await response.json();
+
             if (result.success && result.data) {
                 const rawBalance = result.data.own_token_balance;
                 setOwnBalance(parseFloat(rawBalance || 0).toString());
@@ -70,12 +80,9 @@ export const WalletProvider = ({ children }) => {
         if (!isConnected || !address) return;
 
         try {
-            const response = await fetch('/api/v1/wallet/stake-history', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
+            const result = await api.get(API_ENDPOINTS.WALLET.STAKE_HISTORY, {}, {
+                showErrorToast: false
             });
-            const result = await response.json();
             if (result.success) {
                 setStakeHistory(result.data);
             }
@@ -95,7 +102,6 @@ export const WalletProvider = ({ children }) => {
         }, 30000);
         return () => clearInterval(interval);
     }, [fetchBalance, fetchWalletInfo, fetchStakeHistory]);
-
 
     useEffect(() => {
         if (stakedAmount <= 0) return;
@@ -123,37 +129,26 @@ export const WalletProvider = ({ children }) => {
 
         setIsLoading(true);
         try {
-
-            const response = await fetch('/api/v1/wallet/stake-internal', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({
-                    amount: numAmount
-                })
+            const result = await api.post(API_ENDPOINTS.WALLET.STAKE_INTERNAL, { amount: numAmount }, {
+                showSuccessToast: true
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to stake tokens on server');
+            if (result.status === 200) {
+                setStakedAmount(prev => prev + numAmount);
+                setOwnBalance(prev => (parseFloat(prev) - numAmount).toString());
+                fetchWalletInfo();
+                fetchStakeHistory();
+                return true;
             }
-
-            toast.success(`Successfully staked ${numAmount} tokens`);
-            fetchWalletInfo();
-            fetchStakeHistory();
-            return true;
+            return false;
         } catch (error) {
             console.error('Error staking tokens:', error);
-            toast.error(error.message || 'Staking failed');
+            // Error toast is already shown by axios interceptor unless showErrorToast is false
             return false;
         } finally {
             setIsLoading(false);
         }
     };
-
 
     const claimRewards = async () => {
         if (accumulatedRewards <= 0) {
@@ -164,31 +159,23 @@ export const WalletProvider = ({ children }) => {
         setIsLoading(true);
         try {
             const rewardsToClaim = accumulatedRewards;
-            const response = await fetch('/api/v1/wallet/claim-rewards', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({
-                    amount: rewardsToClaim
-                })
+            const result = await api.post(API_ENDPOINTS.WALLET.CLAIM_REWARDS, {
+                amount: rewardsToClaim
+            }, {
+                showSuccessToast: true
             });
 
-            const result = await response.json();
-            if (!response.ok) {
+            if (result.status !== 200 && !result.success) {
                 throw new Error(result.message || 'Failed to claim rewards on server');
             }
 
             setTotalEarned(prev => prev + rewardsToClaim);
             setAccumulatedRewards(0);
-            toast.success(`Successfully claimed ${rewardsToClaim.toFixed(4)} GOLD`);
             fetchWalletInfo();
             fetchStakeHistory();
             return true;
         } catch (error) {
             console.error('Error claiming rewards:', error);
-            toast.error(error.message || 'Reward claim failed');
             return false;
         } finally {
             setIsLoading(false);

@@ -3,9 +3,13 @@ import { API_ENDPOINTS } from '../utils/endpoints';
 
 export const authApiService = {
 
-    async getNonce(address) {
+    async getNonce(address, options = {}) {
         try {
-            const response = await api.get(API_ENDPOINTS.AUTH.NONCE, { address });
+            const { referralCode } = options;
+            const params = { address };
+            if (referralCode) params.ref = referralCode;
+
+            const response = await api.get(API_ENDPOINTS.AUTH.NONCE, params);
             return response.data?.nonce || response.nonce;
         } catch (error) {
             return handleServiceError(error, 'AuthApiService.getNonce');

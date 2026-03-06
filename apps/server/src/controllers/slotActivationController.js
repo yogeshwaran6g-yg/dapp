@@ -18,7 +18,7 @@ export const getSlotActivation = async (req, res) => {
 export const updateSlotActivation = async (req, res) => {
     try {
         const userId = req.user?.id || req.body.userId; // Prefer authenticated user ID
-        const { current_level_id, tx_hash } = req.body;
+        const { current_level_id, tx_hash, payment_type } = req.body;
 
         if (!userId) {
             return rtnRes(res, 400, "User ID is required");
@@ -27,7 +27,7 @@ export const updateSlotActivation = async (req, res) => {
             return rtnRes(res, 400, "Current level ID is required");
         }
 
-        const result = await slotActivationService.updateSlotActivation(userId, { current_level_id, tx_hash });
+        const result = await slotActivationService.updateSlotActivation(userId, { current_level_id, tx_hash, payment_type });
         return rtnRes(res, result.status, result.message, result.data);
     } catch (err) {
         console.error("Error from updateSlotActivation controller:", err);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, ChevronDown, Menu, LogOut, Wallet, ExternalLink, Copy, Check } from 'lucide-react';
 import { useLogout } from '../hooks/useAuth';
@@ -11,6 +11,7 @@ const Header = ({ onMenuClick }) => {
     const [address, setAddress] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
     const [copied, setCopied] = useState(false);
+    const dropdownRef = useRef(null);
     const logout = useLogout();
     const { data: balanceData } = useWalletBalance();
     const { ownBalance, energyBalance } = useWallet();
@@ -26,6 +27,23 @@ const Header = ({ onMenuClick }) => {
             console.error('Error parsing user from localStorage', e);
         }
     }, []);
+
+    // Click outside handler
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        };
+
+        if (showDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showDropdown]);
 
     const formatAddress = (addr) => {
         if (!addr) return '';

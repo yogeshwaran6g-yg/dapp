@@ -1,36 +1,68 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useReferralNetwork } from '../../hooks/useReferral';
+import { useGetProfile } from '../../hooks/useProfile';
 
 const NetworkVisualization = () => {
     const [hoveredNode, setHoveredNode] = React.useState(null);
-    const [username, setUsername] = React.useState('');
+    const { data: network, isLoading } = useReferralNetwork();
+    const [userId, setUserId] = React.useState(null);
+    const [walletAddr, setWalletAddr] = React.useState('');
+
+    // Fetch the latest profile data for the center node
+    const { data: profileData } = useGetProfile(userId);
 
     React.useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             try {
                 const user = JSON.parse(storedUser);
-                if (user.username) {
-                    setUsername(user.username);
-                } else if (user.wallet_address) {
-                    const addr = user.wallet_address;
-                    setUsername(`${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`);
-                }
+                setUserId(user.id);
+                setWalletAddr(user.wallet_address);
             } catch (e) {
                 console.error("Error parsing user from localStorage", e);
             }
         }
     }, []);
 
+    const currentUser = profileData?.data || { username: '', wallet_address: walletAddr };
+
+    // Helper to get initials or first letter
+    const getInitials = (name, wallet) => {
+        if (name && name.trim()) return name.substring(0, 1).toUpperCase();
+        if (wallet && wallet.length > 5) {
+            // Use first alphanumeric char after 0x
+            const clean = wallet.startsWith('0x') ? wallet.substring(2) : wallet;
+            return clean.substring(0, 1).toUpperCase();
+        }
+        return '?';
+    };
+
+    // Helper to format short address
+    const shortAddr = (addr) => addr ? `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}` : '';
+
     // Dynamic 6 rings configuration
     const ringConfig = [
-        { id: 'ring-1', size: 240, duration: 25, label: 'L1: Core', color: '#FF8C00', icon: 'hub' },
-        { id: 'ring-2', size: 360, duration: 35, label: 'L2: Primary', color: '#FF4500', icon: 'person' },
-        { id: 'ring-3', size: 480, duration: 45, label: 'L3: Secondary', color: '#FFA500', icon: 'groups' },
-        { id: 'ring-4', size: 600, duration: 55, label: 'L4: Tertiary', color: '#FFD700', icon: 'share' },
-        { id: 'ring-5', size: 720, duration: 65, label: 'L5: Quaternary', color: '#B08D57', icon: 'language' },
-        { id: 'ring-6', size: 840, duration: 75, label: 'L6: Global', color: '#C0C0C0', icon: 'public' },
+        { id: 'ring-1', size: 240, duration: 25, label: 'L1: Core', color: '#FF8C00' },
+        { id: 'ring-2', size: 360, duration: 35, label: 'L2: Primary', color: '#FF4500' },
+        { id: 'ring-3', size: 480, duration: 45, label: 'L3: Secondary', color: '#FFA500' },
+        { id: 'ring-4', size: 600, duration: 55, label: 'L4: Tertiary', color: '#FFD700' },
+        { id: 'ring-5', size: 720, duration: 65, label: 'L5: Quaternary', color: '#B08D57' },
+        { id: 'ring-6', size: 840, duration: 75, label: 'L6: Global', color: '#C0C0C0' },
     ];
+
+    // Group referrals by level
+    const groupedNetwork = React.useMemo(() => {
+        const groups = {};
+        if (network) {
+            network.forEach(user => {
+                const level = parseInt(user.level);
+                if (!groups[level]) groups[level] = [];
+                groups[level].push(user);
+            });
+        }
+        return groups;
+    }, [network]);
 
     const generateStars = () => {
         return Array.from({ length: 50 }).map((_, i) => ({
@@ -85,85 +117,106 @@ const NetworkVisualization = () => {
                 <div className="relative w-full h-full flex items-center justify-center transform-gpu" style={{ transformStyle: 'preserve-3d', transform: 'rotateX(50deg)' }}>
 
                     {/* Orbit Rings */}
-                    {ringConfig.map((ring) => (
-                        <div
-                            key={ring.id}
-                            className="absolute rounded-full border border-white/10"
-                            style={{
-                                width: ring.size,
-                                height: ring.size,
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                transformStyle: 'preserve-3d',
-                                background: 'radial-gradient(circle, transparent 60%, rgba(255,255,255,0.03) 100%)'
-                            }}
-                        >
-                            {/* Single Planet per Ring */}
-                            <motion.div
-                                className="absolute w-full h-full"
+                    {ringConfig.map((ring, rIdx) => {
+                        const level = rIdx + 1;
+                        const members = groupedNetwork[level] || [];
+
+                        return (
+                            <div
+                                key={ring.id}
+                                className="absolute rounded-full border border-white/10"
                                 style={{
-                                    top: 0,
-                                    left: 0,
-                                    transformStyle: 'preserve-3d'
-                                }}
-                                animate={{ rotateZ: 360 }}
-                                transition={{
-                                    duration: ring.duration,
-                                    repeat: Infinity,
-                                    ease: "linear",
+                                    width: ring.size,
+                                    height: ring.size,
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    transformStyle: 'preserve-3d',
+                                    background: 'radial-gradient(circle, transparent 60%, rgba(255,255,255,0.03) 100%)'
                                 }}
                             >
-                                <motion.div
-                                    className="absolute pointer-events-none"
-                                    style={{
-                                        top: '50%',
-                                        left: '100%',
-                                        width: 0,
-                                        height: 0,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        transformStyle: 'preserve-3d'
-                                    }}
-                                    animate={{ rotateZ: -360 }}
-                                    transition={{
-                                        duration: ring.duration,
-                                        repeat: Infinity,
-                                        ease: "linear",
-                                    }}
-                                >
-                                    <div
-                                        className="pointer-events-auto"
-                                        style={{
-                                            transform: 'rotateX(-50deg)',
-                                            transformStyle: 'preserve-3d'
-                                        }}
-                                    >
+                                {/* Active Referrals on this Ring */}
+                                {members.map((user, uIdx) => {
+                                    const angle = (360 / members.length) * uIdx;
+
+                                    return (
                                         <motion.div
-                                            className="cursor-pointer"
-                                            whileHover={{ scale: 1.3 }}
-                                            onHoverStart={() => setHoveredNode({ label: ring.label, color: ring.color, detail: `Active node on ${ring.label} ring. Click for node telemetry.` })}
-                                            onHoverEnd={() => setHoveredNode(null)}
+                                            key={user.id}
+                                            className="absolute w-full h-full"
+                                            style={{
+                                                top: 0,
+                                                left: 0,
+                                                transformStyle: 'preserve-3d',
+                                                rotateZ: angle
+                                            }}
+                                            animate={{ rotateZ: angle + 360 }}
+                                            transition={{
+                                                duration: ring.duration,
+                                                repeat: Infinity,
+                                                ease: "linear",
+                                            }}
                                         >
-                                            <div
-                                                className="rounded-full gold-gradient-bg border-[3px] border-[#0a0a0a] relative"
+                                            <motion.div
+                                                className="absolute pointer-events-none"
                                                 style={{
-                                                    width: 40 - (ringConfig.indexOf(ring) * 2), // Slightly smaller sizes for outer rings
-                                                    height: 40 - (ringConfig.indexOf(ring) * 2),
-                                                    boxShadow: `0 0 25px ${ring.color}66, inset 0 0 10px rgba(0,0,0,0.3)`
+                                                    top: '50%',
+                                                    left: '100%',
+                                                    width: 0,
+                                                    height: 0,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    transformStyle: 'preserve-3d'
+                                                }}
+                                                animate={{ rotateZ: -(angle + 360) }}
+                                                transition={{
+                                                    duration: ring.duration,
+                                                    repeat: Infinity,
+                                                    ease: "linear",
                                                 }}
                                             >
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    <span className="material-symbols-outlined text-black !text-[14px] opacity-60">{ring.icon}</span>
+                                                <div
+                                                    className="pointer-events-auto"
+                                                    style={{
+                                                        transform: 'rotateX(-50deg)',
+                                                        transformStyle: 'preserve-3d'
+                                                    }}
+                                                >
+                                                    <motion.div
+                                                        className="cursor-pointer"
+                                                        whileHover={{ scale: 1.3 }}
+                                                        onHoverStart={() => setHoveredNode({
+                                                            label: user.username || shortAddr(user.wallet_address),
+                                                            color: ring.color,
+                                                            detail: `Loyal member status on ${ring.label}. Part of your growing matrix team.`
+                                                        })}
+                                                        onHoverEnd={() => setHoveredNode(null)}
+                                                    >
+                                                        <div
+                                                            className="rounded-full bg-linear-to-br from-gold-start via-gold-mid to-gold-end border-[2.5px] border-[#0a0a0a] relative flex items-center justify-center overflow-hidden"
+                                                            style={{
+                                                                width: 38 - (rIdx * 2.5),
+                                                                height: 38 - (rIdx * 2.5),
+                                                                boxShadow: `0 0 20px ${ring.color}44, inset 0 0 10px rgba(0,0,0,0.3)`
+                                                            }}
+                                                        >
+                                                            {user.avatar_url ? (
+                                                                <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <span className="text-black font-black text-[10px] leading-none">
+                                                                    {getInitials(user.username, user.wallet_address)}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </motion.div>
                                                 </div>
-                                            </div>
+                                            </motion.div>
                                         </motion.div>
-                                    </div>
-                                </motion.div>
-                            </motion.div>
-                        </div>
-                    ))}
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
 
                     {/* Central Sun/User */}
                     <div
@@ -176,29 +229,35 @@ const NetworkVisualization = () => {
                         }}
                     >
                         <motion.div
-                            className="size-20 sm:size-24 gold-gradient-bg rounded-full border-[6px] border-[#0a0a0a] flex items-center justify-center cursor-pointer relative"
+                            className="size-20 sm:size-24 bg-linear-to-br from-gold-start via-gold-mid to-gold-end rounded-full border-[6px] border-[#0a0a0a] flex items-center justify-center cursor-pointer relative overflow-hidden"
                             style={{
                                 boxShadow: '0 0 50px rgba(255, 140, 0, 0.4), inset 0 0 15px rgba(0,0,0,0.3)'
                             }}
                             animate={{
-                                scale: [1, 1.08, 1],
+                                scale: [1, 1.05, 1],
                                 boxShadow: [
                                     '0 0 40px rgba(255, 140, 0, 0.3)',
                                     '0 0 70px rgba(255, 140, 0, 0.5)',
                                     '0 0 40px rgba(255, 140, 0, 0.3)'
                                 ]
                             }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                         >
-                            <span className="material-symbols-outlined text-black !text-3xl font-black">person</span>
+                            {currentUser?.avatar_url ? (
+                                <img src={currentUser.avatar_url} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-black font-black text-3xl">
+                                    {getInitials(currentUser?.username, currentUser?.wallet_address)}
+                                </span>
+                            )}
                             <div className="absolute inset-0 border-2 border-white/20 rounded-full animate-ping opacity-10"></div>
                         </motion.div>
 
                         <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 text-center w-max pointer-events-none">
-                            <p className="text-[10px] font-black gold-gradient-text uppercase tracking-[0.2em] drop-shadow-lg">
-                                {username || 'NODE CONTROLLER'}
+                            <p className="text-[10px] font-black bg-linear-to-r from-gold-start via-gold-mid to-gold-end bg-clip-text text-transparent uppercase tracking-[0.2em] drop-shadow-lg">
+                                {currentUser?.username || shortAddr(currentUser?.wallet_address) || 'NODE CONTROLLER'}
                             </p>
-                            <p className="text-[8px] text-silver/60 font-bold mt-0.5 uppercase">Network Core</p>
+                            <p className="text-[8px] text-silver/60 font-bold mt-0.5 uppercase tracking-widest">Network Core</p>
                         </div>
                     </div>
                 </div>
@@ -210,7 +269,7 @@ const NetworkVisualization = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                            className="absolute bottom-6 right-6 p-4 rounded-xl border border-white/10 z-[100] min-w-[160px]"
+                            className="absolute bottom-6 right-6 p-4 rounded-xl border border-white/10 z-[100] min-w-[180px]"
                             style={{
                                 background: 'rgba(11, 11, 15, 0.9)',
                                 backdropFilter: 'blur(12px)',
@@ -234,6 +293,16 @@ const NetworkVisualization = () => {
                         </motion.div>
                     )}
                 </AnimatePresence>
+
+                {/* Loading State Overlay */}
+                {isLoading && (
+                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="size-8 border-2 border-gold-start/20 border-t-gold-start rounded-full animate-spin"></div>
+                            <p className="text-[10px] text-gold-start font-black tracking-widest uppercase">Syncing Network...</p>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -19,12 +19,22 @@ export const distributeIncome = async (userId, totalPrice) => {
             const referrer = referralPath[i];
             const amount = totalPrice * referralSplits[i];
 
-            // Distribution to internal balance postponed per user request
-            // await queryRunner(
-            //     'UPDATE users SET fake_eth_balance = fake_eth_balance + $1 WHERE id = $2',
-            //     [amount, referrer.id]
-            // );
-            console.log(`[Pushed] $${amount} to Referrer L${i + 1} (User ID: ${referrer.id}) - Internal balance update skipped.`);
+            // Distribution to OWN TOKEN wallet
+            await queryRunner(`
+                INSERT INTO user_wallets (user_id, own_token) 
+                VALUES ($1, $2) 
+                ON CONFLICT (user_id) DO UPDATE SET 
+                    own_token = user_wallets.own_token + $2,
+                    updated_at = CURRENT_TIMESTAMP
+            `, [referrer.id, amount]);
+
+            // Track income in logs
+            await queryRunner(`
+                INSERT INTO income_logs (user_id, source_user_id, amount, level, type)
+                VALUES ($1, $2, $3, $4, 'COMMISSION')
+            `, [referrer.id, userId, amount, i + 1]);
+
+            console.log(`[Distributed] $${amount} (OWN TOKEN) to Referrer L${i + 1} (User ID: ${referrer.id})`);
         }
 
         // 2. System Funds Split (Total 50%)

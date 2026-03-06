@@ -1,37 +1,14 @@
-import { NETWORK_TYPE } from '../config/constants.js';
+import { NETWORK_TYPE, ACTIVE_CONFIG } from '../config/constants.js';
 import { ethers } from 'ethers';
 
 /**
  * Service to interact with the blockchain
  */
 
-const RPC_URLS = {
-    mainnet: [
-        'https://polygon-rpc.com',
-        'https://polygon.llamarpc.com',
-        'https://rpc.ankr.com/polygon'
-    ],
-    testnet: [
-        'https://rpc-amoy.polygon.technology',
-        'https://polygon-amoy-bor-rpc.publicnode.com',
-        'https://1rpc.io/amoy',
-        'https://polygon-amoy.drpc.org'
-    ]
-};
+const RPC_URLS = ACTIVE_CONFIG.RPC_URLS;
 
 const TOKEN_ADDRESSES = {
-    usdt: {
-        mainnet: ['0xc2132D059Ac9E4cd988EEdC7C9E7978ABbCe48b0'],
-        testnet: [
-            '0xAB32EAed1B1c2afa890a354B6D7D8BA730AcA434', // Verified Amoy USDT
-            // '0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582', // Standard Amoy PoS USDT
-            // '0xAcC1945e0f5Ce9DE2dc27112aeeF09f96F4f6867', // Standard Mock
-            // '0x1fdE0ECC61D4C092cc9CCB715C81eaD1C59842f1', // Mock USDT
-            // '0xF6243A3060879e5822269dBa912d357f6629A24a', // Common Mirror
-            // '0x522d64571A11756281734313B0E68868Aca0A34F',
-            // '0x4c9327f566CE856F0a12d56037db653c6FBcAF72'
-        ]
-    }
+    usdt: [ACTIVE_CONFIG.USDT_ADDRESS]
 };
 
 const MINIMAL_ERC20_ABI = [
@@ -40,18 +17,31 @@ const MINIMAL_ERC20_ABI = [
 ];
 
 // Initialize provider using multiple RPCs for fallbacks
+let cachedProvider = null;
+let lastProviderCheck = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 const getBestProvider = async () => {
-    const urls = RPC_URLS[NETWORK_TYPE] || RPC_URLS.testnet;
+    const now = Date.now();
+    if (cachedProvider && (now - lastProviderCheck < CACHE_DURATION)) {
+        return cachedProvider;
+    }
+
+    const urls = RPC_URLS;
     for (const url of urls) {
         try {
             const p = new ethers.JsonRpcProvider(url, undefined, { staticNetwork: true });
             await p.getBlockNumber(); // Test connection
             console.log(`[BlockchainService] Using RPC: ${url}`);
+            cachedProvider = p;
+            lastProviderCheck = now;
             return p;
         } catch (e) {
             console.warn(`[BlockchainService] RPC failed: ${url}`);
         }
     }
+
+    if (cachedProvider) return cachedProvider; // Fallback to old if all new fail
     throw new Error("All RPC endpoints failed");
 };
 
@@ -74,7 +64,7 @@ export const getWalletBalance = async (address) => {
 
         // USDT - Scan multiple candidate addresses
         let usdtBalance = '0.00';
-        const usdtAddresses = TOKEN_ADDRESSES.usdt[NETWORK_TYPE] || TOKEN_ADDRESSES.usdt.testnet;
+        const usdtAddresses = TOKEN_ADDRESSES.usdt;
 
         for (const usdtAddress of usdtAddresses) {
             try {

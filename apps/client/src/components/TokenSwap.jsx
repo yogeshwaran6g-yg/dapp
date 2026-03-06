@@ -155,7 +155,7 @@ const TokenSwap = () => {
                         <div className="flex justify-between mb-2 px-1">
                             <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">Pay From</span>
                             <span className="text-xs font-medium text-white/60">
-                                Balance:{' '}
+                                Token:{' '}
                                 <span className="text-[#D4AF37]">
                                     {fromToken.balance} {fromToken.symbol}
                                 </span>
@@ -210,7 +210,7 @@ const TokenSwap = () => {
                         <div className="flex justify-between mb-2 px-1">
                             <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">Receive</span>
                             <span className="text-xs font-medium text-white/60">
-                                Balance:{' '}
+                                Token:{' '}
                                 <span className="text-[#D4AF37]">
                                     {toToken.balance} {toToken.symbol}
                                 </span>

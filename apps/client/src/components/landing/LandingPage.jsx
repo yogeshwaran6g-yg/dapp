@@ -8,15 +8,25 @@ import Footer from './Footer'
 import Roadmap from './Roadmap'
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
 import { WalletAuthListener } from '../WalletAuthListener'
 
 function LandingPage() {
     const { open } = useAppKit()
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
     const { isConnected } = useAccount()
     const { isAuthenticated } = useAuthContext()
+
+    // Capture referral code
+    React.useEffect(() => {
+        const ref = searchParams.get('ref');
+        if (ref) {
+            console.log('[LandingPage] Captured referral code:', ref);
+            localStorage.setItem('referralCode', ref);
+        }
+    }, [searchParams]);
 
     const handleConnectClick = () => {
         if (!isAuthenticated) {

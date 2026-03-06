@@ -24,12 +24,12 @@ const updateUserAuthData = async (userId) => {
     await queryRunner('UPDATE users SET nonce = $1, last_login_at = CURRENT_TIMESTAMP WHERE id = $2', [newNonce, userId]);
 };
 
-export const generateNonce = async (address) => {
+export const generateNonce = async (address, referralCode = null) => {
     try {
         const wallet_address = address.toLowerCase();
         const nonce = Math.floor(Math.random() * 1000000).toString();
 
-        console.log(`[AuthService] Generating nonce for ${wallet_address}`);
+        console.log(`[AuthService] Generating nonce for ${wallet_address} (ref: ${referralCode})`);
 
         // Check if user exists
         const userResult = await queryRunner(
@@ -39,11 +39,21 @@ export const generateNonce = async (address) => {
 
         if (userResult.length === 0) {
             console.log(`[AuthService] New user detected: ${wallet_address}. Creating...`);
+
+            let referredBy = null;
+            if (referralCode) {
+                const referrerResult = await queryRunner('SELECT id FROM users WHERE referral_code = $1', [referralCode]);
+                if (referrerResult.length > 0) {
+                    referredBy = referrerResult[0].id;
+                    console.log(`[AuthService] User referred by: ${referredBy}`);
+                }
+            }
+
             // Signup: Create user with nonce and a dummy referral code
-            const referral_code = `REF-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+            const my_referral_code = `REF-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
             await queryRunner(
-                'INSERT INTO users (wallet_address, nonce, referral_code, role) VALUES ($1, $2, $3, $4)',
-                [wallet_address, nonce, referral_code, "USER"]
+                'INSERT INTO users (wallet_address, nonce, referral_code, referred_by, role) VALUES ($1, $2, $3, $4, $5)',
+                [wallet_address, nonce, my_referral_code, referredBy, "USER"]
             );
         } else {
             console.log(`[AuthService] Existing user: ${wallet_address}. Updating nonce.`);
@@ -94,7 +104,8 @@ export const verifySignature = async (address, signature, origin) => {
             user: {
                 id: user.id,
                 wallet_address: user.wallet_address,
-                role: user.role
+                role: user.role,
+                referral_code: user.referral_code
             }
         });
     } catch (err) {
@@ -134,7 +145,8 @@ export const devLogin = async (address) => {
             user: {
                 id: user.id,
                 wallet_address: user.wallet_address,
-                role: user.role
+                role: user.role,
+                referral_code: user.referral_code
             }
         });
     } catch (err) {

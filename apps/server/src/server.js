@@ -22,6 +22,7 @@ import profileRoutes from "./routes/profileRoutes.js";
 import slotActivationRoutes from "./routes/slotActivationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
+import referralRoutes from "./routes/referralRoutes.js";
 import errorHandler from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -40,21 +41,6 @@ app.use(
 );
 
 app.use(compression());
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 200,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(limiter);
-
-if (!isProduction) {
-  app.use(morgan("dev"));
-} else {
-  app.use(morgan("combined"));
-}
-
 
 app.use(
   cors({
@@ -77,6 +63,20 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
+
+if (!isProduction) {
+  app.use(morgan("dev"));
+} else {
+  app.use(morgan("combined"));
+}
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000, // Increased for development and dApp usage
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
 
 
 app.use(express.json({ limit: "10mb" }));
@@ -105,6 +105,7 @@ app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/slot-activation", slotActivationRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/wallet", walletRoutes);
+app.use("/api/v1/referral", referralRoutes);
 
 app.use(errorHandler);
 

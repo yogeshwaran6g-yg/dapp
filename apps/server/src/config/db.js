@@ -11,6 +11,7 @@ const poolConfig = DB_CONFIG.CONNECTION_STRING
       ? { rejectUnauthorized: false }
       : false,
     max: DB_CONFIG.MAX_POOL,
+    statement_timeout: DB_CONFIG.STATEMENT_TIMEOUT,
   }
   : {
     host: DB_CONFIG.HOST,
@@ -22,6 +23,7 @@ const poolConfig = DB_CONFIG.CONNECTION_STRING
       ? { rejectUnauthorized: false }
       : false,
     max: DB_CONFIG.MAX_POOL,
+    statement_timeout: DB_CONFIG.STATEMENT_TIMEOUT,
   };
 
 const pool = new Pool(poolConfig);

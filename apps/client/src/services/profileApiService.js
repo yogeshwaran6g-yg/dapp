@@ -5,7 +5,9 @@ export const profileApiService = {
 
     async fetchProfile(userId) {
         try {
-            const data = await api.get(API_ENDPOINTS.PROFILE.GET_BY_USER(userId));
+            const data = await api.get(API_ENDPOINTS.PROFILE.GET_BY_USER(userId), {}, {
+                showErrorToast: false
+            });
             return data;
         } catch (error) {
             return handleServiceError(error, 'ProfileApiService.fetchProfile');

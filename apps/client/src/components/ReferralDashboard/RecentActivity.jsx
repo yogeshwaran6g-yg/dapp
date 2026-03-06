@@ -1,6 +1,16 @@
 import React from 'react';
+import { useReferralNetwork } from '../../hooks/useReferral';
 
 const RecentActivity = () => {
+    const { data: network, isLoading } = useReferralNetwork();
+
+    const formatAddress = (addr) => `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
+
+    const formatDate = (dateStr) => {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
     return (
         <div className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden mt-4 lg:mt-6">
             <div className="p-4 sm:p-6 border-b border-white/5 flex items-center justify-between">
@@ -13,42 +23,52 @@ const RecentActivity = () => {
             <div className="overflow-x-auto">
                 <table className="w-full min-w-[600px]">
                     <thead>
-                        <tr className="text-left text-[10px] text-silver/40 uppercase tracking-[0.2em] bg-white/[0.02]">
+                        <tr className="text-left text-[10px] text-silver/40 uppercase tracking-[0.2em] bg-white/2">
                             <th className="px-4 sm:px-8 py-4 font-black">Wallet Address</th>
                             <th className="px-4 sm:px-8 py-4 font-black">Tier Level</th>
                             <th className="px-4 sm:px-8 py-4 font-black">Status</th>
                             <th className="px-4 sm:px-8 py-4 font-black">Date Joined</th>
-                            <th className="px-4 sm:px-8 py-4 font-black text-right">Potential APY</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                        {[
-                            { address: '0x8a2...3b1f', level: 'LEVEL 1', status: 'ACTIVE', color: 'gold-start', date: '2 mins ago', apy: '14.2%' },
-                            { address: '0x1c4...e892', level: 'LEVEL 2', status: 'ACTIVE', color: 'silver', date: '1 hour ago', apy: '8.5%' },
-                            { address: '0x5f2...a1c9', level: 'LEVEL 3', status: 'INACTIVE', color: 'gray-700', date: '5 hours ago', apy: '--' }
-                        ].map((row, idx) => (
-                            <tr key={idx} className="hover:bg-white/[0.03] transition-colors group">
-                                <td className="px-4 sm:px-8 py-4 lg:py-5">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`size-8 rounded-full bg-gradient-to-br from-${row.color} to-transparent opacity-30 shrink-0`}></div>
-                                        <span className="text-xs sm:text-sm font-mono text-silver group-hover:text-white transition-colors">{row.address}</span>
-                                    </div>
-                                </td>
-                                <td className="px-4 sm:px-8 py-4 lg:py-5">
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${row.level === 'LEVEL 1' ? 'bg-gold-start/10 text-gold-start border border-gold-start/20' : 'bg-white/5 text-silver border border-white/10'}`}>
-                                        {row.level}
-                                    </span>
-                                </td>
-                                <td className="px-4 sm:px-8 py-4 lg:py-5">
-                                    <span className={`flex items-center gap-2 text-[10px] font-bold ${row.status === 'ACTIVE' ? 'text-green-400' : 'text-silver/40'}`}>
-                                        <span className={`size-1.5 rounded-full ${row.status === 'ACTIVE' ? 'bg-green-400 animate-pulse' : 'bg-silver/20'}`}></span>
-                                        {row.status}
-                                    </span>
-                                </td>
-                                <td className="px-4 sm:px-8 py-4 lg:py-5 text-[10px] sm:text-xs text-silver/60 font-medium">{row.date}</td>
-                                <td className="px-4 sm:px-8 py-4 lg:py-5 text-right font-bold text-white text-xs sm:text-sm">{row.apy}</td>
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="4" className="px-8 py-10 text-center text-silver/40 font-bold uppercase tracking-widest text-[10px]">Loading Network Data...</td>
                             </tr>
-                        ))}
+                        ) : network?.length === 0 ? (
+                            <tr>
+                                <td colSpan="4" className="px-8 py-10 text-center text-silver/40 font-bold uppercase tracking-widest text-[10px]">No referrals yet</td>
+                            </tr>
+                        ) : (
+                            network?.map((row, idx) => (
+                                <tr key={idx} className="hover:bg-white/3 transition-colors group">
+                                    <td className="px-4 sm:px-8 py-4 lg:py-5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-8 rounded-full bg-linear-to-br from-gold-start/20 to-transparent shrink-0 flex items-center justify-center">
+                                                <span className="material-symbols-outlined text-gold-start text-xs">person</span>
+                                            </div>
+                                            <span className="text-xs sm:text-sm font-mono text-silver group-hover:text-white transition-colors">
+                                                {formatAddress(row.wallet_address)}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 sm:px-8 py-4 lg:py-5">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold bg-gold-start/10 text-gold-start border border-gold-start/20`}>
+                                            LEVEL {row.level}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 sm:px-8 py-4 lg:py-5">
+                                        <span className="flex items-center gap-2 text-[10px] font-bold text-green-400">
+                                            <span className="size-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                                            ACTIVE
+                                        </span>
+                                    </td>
+                                    <td className="px-4 sm:px-8 py-4 lg:py-5 text-[10px] sm:text-xs text-silver/60 font-medium">
+                                        {formatDate(row.created_at)}
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

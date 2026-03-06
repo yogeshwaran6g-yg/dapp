@@ -24,7 +24,7 @@ const StatsCards = () => {
             {/* Available to Stake */}
             <div className="glass-panel p-4 sm:p-6 rounded-xl border-l-4 border-l-accent-gold/40">
                 <div className="flex items-center justify-between mb-2 sm:mb-4">
-                    <span className="text-white/60 text-xs sm:text-sm font-medium">Available Balance</span>
+                    <span className="text-white/60 text-xs sm:text-sm font-medium">Available Token</span>
                     <span className="material-symbols-outlined text-accent-gold/60 text-lg sm:text-xl">account_balance_wallet</span>
                 </div>
                 <div className="flex flex-col">

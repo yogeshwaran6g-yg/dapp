@@ -81,9 +81,25 @@ http.interceptors.response.use(
 
     // Show error toast if enabled
     if (error.config?.showErrorToast !== false) {
-      toast.error(message, {
-        autoClose: 4000,
-      });
+      // Don't show toast for 404 on profile (often expected for new users)
+      const isProfileGet = error.config?.url?.includes('/api/v1/profile/') && error.config?.method === 'get';
+
+      if (!(status === 404 && isProfileGet)) {
+        toast.error(message, {
+          autoClose: 4000,
+        });
+      }
+    }
+
+
+    if (status === 401) {
+      console.warn("[API] 401 Unauthorized - Clearing session...");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     }
 
     return Promise.reject(normalizedError);

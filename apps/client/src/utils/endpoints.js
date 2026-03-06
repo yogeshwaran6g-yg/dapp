@@ -35,5 +35,13 @@ export const API_ENDPOINTS = {
         STAKE_HISTORY: `${V1}/wallet/stake-history`,   // GET  — fetch stake history
         STAKE_INTERNAL: `${V1}/wallet/stake-internal`, // POST — stake own tokens
         CLAIM_REWARDS: `${V1}/wallet/claim-rewards`,   // POST — claim rewards
+        UPDATE_BALANCE: `${V1}/wallet/update-balance`, // POST — update balance (testing)
+        TOPUP_INTERNAL: `${V1}/wallet/topup-internal`, // POST — top up internal balance
+    },
+
+    // ── Referral ──────────────────────────────────────────
+    REFERRAL: {
+        STATS: `${V1}/referral/stats`,
+        NETWORK: `${V1}/referral/network`,
     },
 };

@@ -8,10 +8,14 @@ import { useAuthContext } from '../context/AuthContext';
 
 // ─── Data Hooks ───────────────────────────────────────────────────────────────
 
-export const useNonce = (address) =>
+export const useNonce = (address, referralCode = null) =>
     useQuery({
-        queryKey: ['nonce', address],
-        queryFn: () => authApiService.getNonce(address),
+        queryKey: ['nonce', address, referralCode],
+        queryFn: ({ queryKey }) => {
+            const [, addr, ref] = queryKey;
+            // The first call might pass params via the trigger function (refetch)
+            return authApiService.getNonce(addr, { referralCode: ref });
+        },
         enabled: !!address,
         staleTime: 0,
         retry: false,

@@ -9,5 +9,7 @@ router.get('/stake-history', authMiddleware, walletController.getStakeHistory);
 router.post('/faucet', authMiddleware, walletController.getTestEth);
 router.post('/stake-internal', authMiddleware, walletController.stakeInternal);
 router.post('/claim-rewards', authMiddleware, walletController.claimRewards);
+router.post('/topup-internal', authMiddleware, walletController.topUpInternal);
+router.post('/update-balance', authMiddleware, walletController.updateBalance);
 
 export default router;
