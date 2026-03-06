@@ -48,16 +48,16 @@ const getBestProvider = async () => {
 
 export const getWalletBalance = async (address) => {
     try {
-        if (!address) return { ethBalance: '0.00', usdtBalance: '0.00' };
+        if (!address) return { polBalance: '0.00', usdtBalance: '0.00' };
 
         const activeProvider = await getBestProvider();
         console.log(`[BlockchainService] Scanning balances for ${address} on ${NETWORK_TYPE}...`);
 
         // Native POL
-        let ethBalance = '0.00';
+        let polBalance = '0.00';
         try {
             const nativeBalance = await activeProvider.getBalance(address);
-            ethBalance = parseFloat(ethers.formatEther(nativeBalance)).toFixed(4);
+            polBalance = parseFloat(ethers.formatEther(nativeBalance)).toFixed(4);
         } catch (e) {
             console.error(`[BlockchainService] Native balance error: ${e.message}`);
         }
@@ -90,11 +90,11 @@ export const getWalletBalance = async (address) => {
             }
         }
 
-        console.log(`[BlockchainService] Final: ${ethBalance} POL, ${usdtBalance} USDT`);
-        return { ethBalance, usdtBalance };
+        console.log(`[BlockchainService] Final: ${polBalance} POL, ${usdtBalance} USDT`);
+        return { polBalance, usdtBalance };
     } catch (err) {
         console.error(`[BlockchainService] Error: ${err.message}`);
-        return { ethBalance: '0.00', usdtBalance: '0.00' };
+        return { polBalance: '0.00', usdtBalance: '0.00' };
     }
 };
 

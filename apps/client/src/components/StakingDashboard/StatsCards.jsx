@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useWallet } from '../../context/WalletContext';
 
 const StatsCards = () => {
-    const { stakedAmount, usdtBalance, accumulatedRewards } = useWallet();
+    const { stakedAmount, ownBalance, accumulatedRewards } = useWallet();
     const rewardRef = useRef(null);
 
     return (
@@ -14,7 +14,7 @@ const StatsCards = () => {
                     <span className="material-symbols-outlined text-accent-gold text-lg sm:text-xl">lock</span>
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-2xl sm:text-3xl font-black tracking-tight">{stakedAmount.toFixed(2)} USDT</span>
+                    <span className="text-2xl sm:text-3xl font-black tracking-tight">{stakedAmount.toFixed(2)} TOKENS</span>
                     <span className="text-green-400 text-[10px] sm:text-xs mt-1 font-bold flex items-center gap-1">
                         <span className="material-symbols-outlined text-[10px] sm:text-xs">trending_up</span> Active Staking
                     </span>
@@ -28,7 +28,7 @@ const StatsCards = () => {
                     <span className="material-symbols-outlined text-accent-gold/60 text-lg sm:text-xl">account_balance_wallet</span>
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-2xl sm:text-3xl font-black tracking-tight">{usdtBalance} USDT</span>
+                    <span className="text-2xl sm:text-3xl font-black tracking-tight">{ownBalance} TOKENS</span>
                     <span className="text-accent-gold text-[10px] sm:text-xs mt-1 font-bold">Ready to stake</span>
                 </div>
             </div>

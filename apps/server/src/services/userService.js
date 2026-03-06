@@ -3,12 +3,21 @@ import { serviceResponse } from '../utils/helper.js';
 
 export const ensureUserProfile = async (userId, walletAddress) => {
     try {
-        // Ensure profile exists - using ON CONFLICT to handle concurrent inserts
+        // Ensure profile exists
         await queryRunner(
             'INSERT INTO profile (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING',
             [userId]
         );
 
+        // Ensure wallet row exists — every user must have a wallet record
+        await queryRunner(
+            `INSERT INTO user_wallets (user_id, energy_balance, own_token_balance, locked_balance)
+             VALUES ($1, 0, 0, 0)
+             ON CONFLICT (user_id) DO NOTHING`,
+            [userId]
+        );
+
+        console.log(`[UserService] Profile and wallet ensured for userId: ${userId}`);
         return serviceResponse(true, 200, 'Profile ensured successfully');
     } catch (err) {
         console.error(`[UserService] Error in ensureUserProfile: ${err.message}`);

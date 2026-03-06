@@ -29,9 +29,12 @@ export const API_ENDPOINTS = {
 
     // ── Wallet ──────────────────────────────────────────
     WALLET: {
-        BALANCE: `${V1}/wallet/balance`, // GET — fetch fake eth balance
-        FAUCET: `${V1}/wallet/faucet`,   // POST — request test eth
-        INFO: `${V1}/wallet/info`,       // GET — fetch detailed info
+        BALANCE: `${V1}/wallet/balance`,               // GET  — fetch on-chain balances
+        FAUCET: `${V1}/wallet/faucet`,                 // POST — request test eth
+        INFO: `${V1}/wallet/info`,                     // GET  — fetch DB token balances
+        STAKE_HISTORY: `${V1}/wallet/stake-history`,   // GET  — fetch stake history
+        STAKE_INTERNAL: `${V1}/wallet/stake-internal`, // POST — stake own tokens
+        CLAIM_REWARDS: `${V1}/wallet/claim-rewards`,   // POST — claim rewards
         UPDATE_BALANCE: `${V1}/wallet/update-balance`, // POST — update balance (testing)
         TOPUP_INTERNAL: `${V1}/wallet/topup-internal`, // POST — top up internal balance
         TRANSACTIONS: `${V1}/wallet/transactions`,     // GET — fetch transaction history

@@ -15,6 +15,8 @@ import SlotActivation from './components/SlotActivation';
 import Profile from './components/Profile';
 import WithdrawPortal from './components/WithdrawPortal';
 import PageHeading from './components/PageHeading';
+import Tickets from './components/Tickets';
+import Notifications from './components/Notifications';
 
 import LandingPage from './components/landing/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -105,6 +107,8 @@ function App() {
                         <Route path="/staking" element={<StakingDashboard />} />
                         <Route path="/withdraw" element={<WithdrawPortal />} />
                         <Route path="/profile" element={<Profile />} />
+                        <Route path="/tickets" element={<Tickets />} />
+                        <Route path="/notifications" element={<Notifications />} />
                     </Route>
                 </Route>
 

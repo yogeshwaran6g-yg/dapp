@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { useWallet } from '../../context/WalletContext';
 
 const StakingPanel = () => {
-    const { usdtBalance, stakedAmount, stakeUSDT, claimRewards, isLoading, accumulatedRewards } = useWallet();
+    const { ownBalance, stakedAmount, stakeOwnToken, claimRewards, isLoading, accumulatedRewards } = useWallet();
     const [stakeAmount, setStakeAmount] = useState('');
 
     const handleMaxClick = () => {
-        setStakeAmount(usdtBalance);
+        setStakeAmount(ownBalance);
     };
 
     const handleAction = () => {
-        const success = stakeUSDT(stakeAmount);
+        const success = stakeOwnToken(stakeAmount);
         if (success) {
             setStakeAmount('');
         }
@@ -26,7 +26,7 @@ const StakingPanel = () => {
             <div className="glass-panel rounded-xl overflow-hidden">
                 {/* Header */}
                 <div className="flex border-b border-white/10">
-                    <div className="flex-1 py-4 text-sm font-bold text-center border-b-2 border-accent-gold text-accent-gold">
+                    <div className="flex-1 py-4 text-sm font-bold text-center text-accent-gold">
                         Stake Tokens
                     </div>
                 </div>
@@ -37,7 +37,7 @@ const StakingPanel = () => {
                             Amount to Stake
                         </label>
                         <span className="text-xs text-white/60">
-                            Balance: <span className="text-white">{isLoading ? 'Loading...' : `${usdtBalance} TOKENS`}</span>
+                            Balance: <span className="text-white">{isLoading ? 'Loading...' : `${ownBalance} TOKENS`}</span>
                         </span>
                     </div>
                     <div className="relative mb-8">
@@ -74,7 +74,7 @@ const StakingPanel = () => {
                 </div>
             </div>
 
-            {/* Rewards Claim Card */}
+            {/* Rewards Claim Card 
             <div className="glass-panel rounded-xl p-4 sm:p-6 lg:p-8 flex flex-col sm:flex-row items-center justify-between border border-accent-gold/20 gap-4">
                 <div className="flex items-center gap-4 sm:gap-6">
                     <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-accent-gold/10 flex items-center justify-center text-accent-gold flex-shrink-0">
@@ -94,6 +94,7 @@ const StakingPanel = () => {
                     Claim Rewards
                 </button>
             </div>
+            */}
         </div>
     );
 };

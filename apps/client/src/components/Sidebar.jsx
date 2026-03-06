@@ -11,7 +11,9 @@ const Sidebar = ({ isOpen, onClose }) => {
         { icon: 'swap_horiz', label: 'Swap', path: '/swap' },
         { icon: 'lock', label: 'Staking', path: '/staking' },
         { icon: 'north_east', label: 'Withdraw', path: '/withdraw' },
+        { icon: 'notifications', label: 'Notifications', path: '/notifications' },
         { icon: 'person', label: 'Profile', path: '/profile' },
+        { icon: 'confirmation_number', label: 'Tickets', path: '/tickets' },
     ];
 
     return (

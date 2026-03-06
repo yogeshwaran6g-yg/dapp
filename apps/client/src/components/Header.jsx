@@ -78,9 +78,61 @@ const Header = ({ onMenuClick }) => {
                 </button>
             </div>
 
-            <div className="flex items-center gap-4 sm:gap-6">
-                {/* Status Pill / Wallet Address */}
-                <div className="relative" ref={dropdownRef}>
+            {/* ── token pills + wallet + actions ── */}
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+
+                {/* ── ENERGY Token Balance Pill ── */}
+                <div
+                    className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full border border-white/10 bg-white/5 hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition-all duration-300 cursor-default shrink-0"
+                    title={`ENERGY Balance: ${fmt(energyBalance)}`}
+                >
+                    {/* bolt icon  */}
+                    <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                        style={{ background: 'linear-gradient(135deg, #D4AF37 0%, #B8860B 100%)' }}
+                    >
+                        <span className="material-symbols-outlined text-[10px] font-bold leading-none text-[#0b0b0f]">
+                            bolt
+                        </span>
+                    </div>
+                    {/* label + value */}
+                    <div className="flex flex-col leading-none">
+                        <span className="text-[8px] font-black text-[#D4AF37]/70 uppercase tracking-widest whitespace-nowrap">
+                            ENERGY
+                        </span>
+                        <span className="text-[11px] font-black text-white tabular-nums whitespace-nowrap">
+                            {fmt(energyBalance)}
+                        </span>
+                    </div>
+                </div>
+
+                {/* ── OWN Token Balance Pill ── */}
+                <div
+                    className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full border border-white/10 bg-white/5 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all duration-300 cursor-default shrink-0"
+                    title={`OWN Balance: ${fmt(ownBalance)}`}
+                >
+                    {/* diamond icon  */}
+                    <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                        style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' }}
+                    >
+                        <span className="material-symbols-outlined text-[10px] font-bold leading-none text-white">
+                            diamond
+                        </span>
+                    </div>
+                    {/* label + value */}
+                    <div className="flex flex-col leading-none">
+                        <span className="text-[8px] font-black text-blue-400/80 uppercase tracking-widest whitespace-nowrap">
+                            OWN
+                        </span>
+                        <span className="text-[11px] font-black text-white tabular-nums whitespace-nowrap">
+                            {fmt(ownBalance)}
+                        </span>
+                    </div>
+                </div>
+
+                {/* ── Wallet Address Pill + Dropdown ── */}
+                <div className="relative">
                     <div
                         onClick={() => address && setShowDropdown(!showDropdown)}
                         className="flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-accent-gold/30 cursor-pointer transition-all duration-300 group shadow-lg"
@@ -101,6 +153,9 @@ const Header = ({ onMenuClick }) => {
                     <AnimatePresence>
                         {showDropdown && address && (
                             <>
+                                {/* Backdrop */}
+                                <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
+
                                 <motion.div
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}

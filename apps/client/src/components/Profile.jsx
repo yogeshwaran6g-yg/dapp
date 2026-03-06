@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useGetProfile, useUpdateProfile } from '../hooks/useProfile';
+import React, { useState, useEffect, useRef } from 'react';
+import { useGetProfile, useUpdateProfile, useUploadProfilePicture } from '../hooks/useProfile';
 import PageHeading from './PageHeading';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
     let userId = null;
@@ -15,6 +16,7 @@ const Profile = () => {
 
     const { data: queryData, isLoading, isError, error } = useGetProfile(userId);
     const { mutate: saveProfile, isPending: isSaving } = useUpdateProfile(userId);
+    const { mutate: uploadPicture, isPending: isUploading } = useUploadProfilePicture(userId);
 
     const [profile, setProfile] = useState({
         username: '',
@@ -23,9 +25,15 @@ const Profile = () => {
         dob: '',
         city: '',
         country: '',
-        wallet_address: ''
+        wallet_address: '',
+        profile_picture: ''
     });
     const [isEditing, setIsEditing] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [previewImage, setPreviewImage] = useState(null);
+    const fileInputRef = useRef(null);
+
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
     // Sync local edit buffer when remote data arrives
     useEffect(() => {
@@ -44,12 +52,79 @@ const Profile = () => {
             ...prev,
             [name]: value
         }));
+        // Clear error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        // Relaxed validation: only check if typing something, otherwise allow empty
+        if (profile.username && profile.username.length < 3) {
+            newErrors.username = 'Username must be at least 3 characters';
+        }
+        if (profile.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) {
+            newErrors.email = 'Invalid email address';
+        }
+        if (profile.phone_number && profile.phone_number.length < 10) {
+            newErrors.phone_number = 'Phone number must be at least 10 digits';
+        }
+        setErrors(newErrors);
+        // Return true to allow saving even with "warnings"
+        // The user specifically asked to be able to "change stuff with errors and leave blanks"
+        return true;
     };
 
     const handleSave = () => {
+        if (!validateForm()) {
+            toast.error('Please fix the errors before saving');
+            return;
+        }
         saveProfile(profile, {
-            onSuccess: () => setIsEditing(false),
+            onSuccess: () => {
+                setIsEditing(false);
+                setErrors({});
+            },
         });
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Basic validation
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please select an image file');
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('File size should be less than 2MB');
+            return;
+        }
+
+        // Preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setPreviewImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+        // Upload
+        const formData = new FormData();
+        formData.append('profile_picture', file);
+        uploadPicture(formData, {
+            onSuccess: (data) => {
+                setProfile(prev => ({ ...prev, profile_picture: data.data.profile_picture }));
+                setPreviewImage(null);
+            }
+        });
+    };
+
+    const triggerFileInput = () => {
+        if (isEditing && fileInputRef.current) {
+            fileInputRef.current.click();
+        }
     };
 
     if (isLoading) {
@@ -150,17 +225,31 @@ const Profile = () => {
                                 <div className="absolute inset-[-6px] sm:inset-[-8px] border border-accent-gold/20 rounded-[2.2rem] sm:rounded-[2.5rem] animate-pulse"></div>
                                 <div className="w-28 h-28 sm:w-40 md:w-48 sm:h-40 md:h-48 rounded-[1.8rem] sm:rounded-[2rem] overflow-hidden border-2 border-accent-gold/30 shadow-2xl relative z-10 transition-all duration-500">
                                     <img
-                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFKaOGEqx67axoW6iLXhSdvdyvxDb170U5VryWHnElt8B3QKCoot9mI3RUcatVZuM5rltR8cmExLDnrl_qsNwJBKSWJ6IESqKE7jtV5trks0gBD0ikRyggNLDZju4NL_dHT_qL4IKZl2YkK5nhwjM81QMVMHF5cs_4VGOBa2KfROplMXKA7hoh0uPc5xu1YaEdSa9r7MrlepExGa4G1dGmzZ3j6X_251LoiCgf46PRS98ilHdr2GxmH1QaHqcYhB-sHIbLdRdoAjrj"
+                                        src={previewImage || (profile.profile_picture ? `${API_BASE_URL}${profile.profile_picture}` : "https://lh3.googleusercontent.com/aida-public/AB6AXuBFKaOGEqx67axoW6iLXhSdvdyvxDb170U5VryWHnElt8B3QKCoot9mI3RUcatVZuM5rltR8cmExLDnrl_qsNwJBKSWJ6IESqKE7jtV5trks0gBD0ikRyggNLDZju4NL_dHT_qL4IKZl2YkK5nhwjM81QMVMHF5cs_4VGOBa2KfROplMXKA7hoh0uPc5xu1YaEdSa9r7MrlepExGa4G1dGmzZ3j6X_251LoiCgf46PRS98ilHdr2GxmH1QaHqcYhB-sHIbLdRdoAjrj")}
                                         alt="User profile"
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
                                     {isEditing && (
-                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer group/upload">
+                                        <div
+                                            onClick={triggerFileInput}
+                                            className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer group/upload"
+                                        >
                                             <div className="bg-accent-gold p-3 rounded-full text-primary transform scale-75 group-hover/upload:scale-100 transition-transform duration-300">
-                                                <span className="material-symbols-outlined text-2xl">photo_camera</span>
+                                                {isUploading ? (
+                                                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                                ) : (
+                                                    <span className="material-symbols-outlined text-2xl">photo_camera</span>
+                                                )}
                                             </div>
                                         </div>
                                     )}
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleImageChange}
+                                        className="hidden"
+                                        accept="image/*"
+                                    />
                                 </div>
                             </div>
 
@@ -179,6 +268,7 @@ const Profile = () => {
                                         isEditing={isEditing}
                                         onChange={handleChange}
                                         icon="location_on"
+                                        error={errors.city}
                                     />
                                     <ProfileItem
                                         label="Country"
@@ -187,6 +277,7 @@ const Profile = () => {
                                         isEditing={isEditing}
                                         onChange={handleChange}
                                         icon="public"
+                                        error={errors.country}
                                     />
                                 </div>
                                 <div className="space-y-3 pt-6 border-t border-white/5">
@@ -226,6 +317,7 @@ const Profile = () => {
                                     isEditing={isEditing}
                                     onChange={handleChange}
                                     icon="person"
+                                    error={errors.username}
                                 />
                                 <ProfileItem
                                     label="Email Address"
@@ -235,6 +327,7 @@ const Profile = () => {
                                     isEditing={isEditing}
                                     onChange={handleChange}
                                     icon="mail"
+                                    error={errors.email}
                                 />
                                 <ProfileItem
                                     label="Phone Number"
@@ -243,6 +336,7 @@ const Profile = () => {
                                     isEditing={isEditing}
                                     onChange={handleChange}
                                     icon="call"
+                                    error={errors.phone_number}
                                 />
                                 <ProfileItem
                                     label="Date of Birth"
@@ -252,6 +346,7 @@ const Profile = () => {
                                     isEditing={isEditing}
                                     onChange={handleChange}
                                     icon="cake"
+                                    error={errors.dob}
                                 />
                                 <div className="sm:col-span-2">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -267,7 +362,7 @@ const Profile = () => {
     );
 };
 
-const ProfileItem = ({ label, name, value, isEditing, onChange, type = "text", icon }) => (
+const ProfileItem = ({ label, name, value, isEditing, onChange, type = "text", icon, error }) => (
     <div className="space-y-3 group/item">
         <label className="text-xs text-gray-500 uppercase font-black tracking-[0.15em] ml-1 flex items-center gap-2">
             <span className="material-symbols-outlined text-sm text-accent-gold/60">{icon}</span>
@@ -280,8 +375,9 @@ const ProfileItem = ({ label, name, value, isEditing, onChange, type = "text", i
                     name={name}
                     value={value || ''}
                     onChange={onChange}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 sm:px-5 py-3 sm:py-4 text-sm sm:text-base text-white focus:border-accent-gold/50 focus:ring-4 focus:ring-accent-gold/5 outline-none transition-all duration-300 placeholder:text-gray-600 [color-scheme:dark]"
+                    className={`w-full bg-white/5 border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-4 sm:px-5 py-3 sm:py-4 text-sm sm:text-base text-white focus:border-accent-gold/50 focus:ring-4 focus:ring-accent-gold/5 outline-none transition-all duration-300 placeholder:text-gray-600 [color-scheme:dark]`}
                 />
+                {error && <p className="text-red-500 text-xs mt-1 ml-1">{error}</p>}
             </div>
         ) : (
             <div className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 sm:px-6 py-3 sm:py-4 text-gray-200 min-h-[50px] sm:min-h-[58px] flex items-center shadow-inner group-hover/item:border-white/20 transition-colors overflow-hidden">

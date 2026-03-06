@@ -29,3 +29,20 @@ export const useUpdateProfile = (userId) => {
         },
     });
 };
+
+/**
+ * Upload profile picture for the authenticated user.
+ * Automatically invalidates the profile cache on success.
+ * @param {string|number} userId — used to invalidate the correct cache key
+ */
+export const useUploadProfilePicture = (userId) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (formData) => profileApiService.uploadProfilePicture(formData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['profile', userId] });
+        },
+    });
+};
+

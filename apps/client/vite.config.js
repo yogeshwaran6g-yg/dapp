@@ -13,7 +13,14 @@ export default defineConfig({
         port: 3000,
         host: true,
         hmr: true,
-        allowedHosts: 'all'
+        allowedHosts: 'all',
+        proxy: {
+            '/api': {
+                target: 'http://localhost:5000',
+                changeOrigin: true,
+                secure: false,
+            }
+        }
     },
     resolve: {
         alias: {
@@ -22,3 +29,4 @@ export default defineConfig({
         }
     }
 })
+

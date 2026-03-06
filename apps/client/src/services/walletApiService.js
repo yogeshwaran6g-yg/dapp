@@ -4,7 +4,7 @@ import { API_ENDPOINTS } from '../utils/endpoints';
 export const walletApiService = {
     /**
      * Fetch the user's on-chain balance from the backend
-     * @returns {Promise<Object>} The balance data { ethBalance, address }
+     * @returns {Promise<Object>} The balance data { polBalance, usdtBalance, address }
      */
     async getBalance() {
         try {
@@ -13,7 +13,7 @@ export const walletApiService = {
             });
             // The axios interceptor returns response.data (the whole { status, message, data } object)
             // We need to return the nested data object
-            return response?.data || { ethBalance: '0.00', usdtBalance: '0.00', ownTokenBalance: '0' };
+            return response?.data || { polBalance: '0.00', usdtBalance: '0.00' };
         } catch (error) {
             return handleServiceError(error, 'WalletApiService.getBalance');
         }

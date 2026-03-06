@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { ethers } from 'ethers';
 import { useAccount } from 'wagmi';
+import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 import { getActiveNetwork } from '../config/networkConfig';
 import { api } from '../services/axios';
@@ -19,14 +19,19 @@ const ERC20_ABI = [
 
 export const WalletProvider = ({ children }) => {
     const { address, isConnected } = useAccount();
-    const [usdtBalance, setUsdtBalance] = useState('0.00'); // This now represents "DB Token" balance for simpler state management
+    const [polBalance, setPolBalance] = useState('0.00');
+    const [usdtBalance, setUsdtBalance] = useState('0.00');
+    const [energyBalance, setEnergyBalance] = useState(0);
+    const [ownBalance, setOwnBalance] = useState('0.00');
     const [stakedAmount, setStakedAmount] = useState(0);
     const [accumulatedRewards, setAccumulatedRewards] = useState(0);
     const [totalEarned, setTotalEarned] = useState(0);
+    const [stakeHistory, setStakeHistory] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const fetchBalance = useCallback(async () => {
-        if (!isConnected || !address || !window.ethereum) {
+        if (!isConnected || !address) {
+            setPolBalance('0.00');
             setUsdtBalance('0.00');
             return;
         }
@@ -41,9 +46,7 @@ export const WalletProvider = ({ children }) => {
                 contract.decimals()
             ]);
 
-            // Note: This is on-chain USDT balance
-            // However, the app seems to use setUsdtBalance for DB Tokens elsewhere.
-            // For now, we keep this as is but ensure backend takes priority if needed.
+            setUsdtBalance(ethers.formatUnits(balance, decimals));
         } catch (error) {
             console.error('Error fetching on-chain balance:', error);
         } finally {
@@ -52,29 +55,58 @@ export const WalletProvider = ({ children }) => {
     }, [address, isConnected]);
 
     const fetchWalletInfo = useCallback(async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        try {
+            const response = await fetch('/api/v1/wallet/info', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const result = await response.json();
+            if (result.success && result.data) {
+                const rawBalance = result.data.own_token_balance;
+                setOwnBalance(parseFloat(rawBalance || 0).toString());
+                setEnergyBalance(parseFloat(result.data.energy_balance || 0));
+                setStakedAmount(parseFloat(result.data.locked_balance || 0));
+            } else {
+                console.warn('[WalletContext] fetchWalletInfo: API returned failure or no data', result);
+            }
+        } catch (error) {
+            console.error('Error fetching wallet info:', error);
+        }
+    }, [address, isConnected]);
+
+    const fetchStakeHistory = useCallback(async () => {
         if (!isConnected || !address) return;
 
         try {
-            const result = await api.get(API_ENDPOINTS.WALLET.BALANCE);
-            if (result.status === 200) {
-                // The balance endpoint returns { ownTokenBalance, energyBalance, ... }
-                setUsdtBalance(result.data.ownTokenBalance?.toString() || '0.00');
-                setStakedAmount(parseFloat(result.data.lockedBalance || 0));
+            const response = await fetch('/api/v1/wallet/stake-history', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            const result = await response.json();
+            if (result.success) {
+                setStakeHistory(result.data);
             }
         } catch (error) {
-            console.error('Error fetching wallet info from backend:', error);
+            console.error('Error fetching stake history:', error);
         }
     }, [address, isConnected]);
 
     useEffect(() => {
         fetchBalance();
         fetchWalletInfo();
+        fetchStakeHistory();
         const interval = setInterval(() => {
             fetchBalance();
             fetchWalletInfo();
+            fetchStakeHistory();
         }, 30000);
         return () => clearInterval(interval);
-    }, [fetchBalance, fetchWalletInfo]);
+    }, [fetchBalance, fetchWalletInfo, fetchStakeHistory]);
 
     useEffect(() => {
         if (stakedAmount <= 0) return;
@@ -87,30 +119,30 @@ export const WalletProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, [stakedAmount]);
 
-    const stakeUSDT = async (amount) => {
+    const stakeOwnToken = async (amount) => {
         const numAmount = parseFloat(amount);
         if (isNaN(numAmount) || numAmount <= 0) {
             toast.error('Invalid amount');
             return false;
         }
 
-        if (numAmount > parseFloat(usdtBalance)) {
-            toast.error('Insufficient token amount');
+        const currentBalance = parseFloat(ownBalance) || 0;
+        if (numAmount > currentBalance) {
+            toast.error(`Insufficient token balance (have ${currentBalance}, need ${numAmount})`);
             return false;
         }
 
         setIsLoading(true);
         try {
-            toast.info('Initiating internal staking...');
-
             const result = await api.post('/wallet/stake-internal', { amount: numAmount }, {
                 showSuccessToast: true
             });
 
             if (result.status === 200) {
                 setStakedAmount(prev => prev + numAmount);
-                setUsdtBalance(prev => (parseFloat(prev) - numAmount).toString());
-                fetchWalletInfo(); // Refresh both balances
+                setOwnBalance(prev => (parseFloat(prev) - numAmount).toString());
+                fetchWalletInfo();
+                fetchStakeHistory();
                 return true;
             }
             return false;
@@ -123,33 +155,64 @@ export const WalletProvider = ({ children }) => {
         }
     };
 
-    const claimRewards = () => {
+    const claimRewards = async () => {
         if (accumulatedRewards <= 0) {
             toast.info('No rewards to claim');
             return false;
         }
 
-        const rewardsToClaim = accumulatedRewards;
-        setTotalEarned(prev => prev + rewardsToClaim);
-        setAccumulatedRewards(0);
-        toast.success(`Successfully claimed ${rewardsToClaim.toFixed(4)} GOLD`);
-        return true;
+        setIsLoading(true);
+        try {
+            const rewardsToClaim = accumulatedRewards;
+            const response = await fetch('/api/v1/wallet/claim-rewards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify({
+                    amount: rewardsToClaim
+                })
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to claim rewards on server');
+            }
+
+            setTotalEarned(prev => prev + rewardsToClaim);
+            setAccumulatedRewards(0);
+            toast.success(`Successfully claimed ${rewardsToClaim.toFixed(4)} GOLD`);
+            fetchWalletInfo();
+            fetchStakeHistory();
+            return true;
+        } catch (error) {
+            console.error('Error claiming rewards:', error);
+            toast.error(error.message || 'Reward claim failed');
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <WalletContext.Provider
             value={{
-                usdtBalance: usdtBalance,
-                rawUsdtBalance: usdtBalance,
+                polBalance,
+                usdtBalance,
+                energyBalance,
+                ownBalance,
                 stakedAmount,
                 accumulatedRewards,
                 totalEarned,
+                stakeHistory,
                 isLoading,
-                stakeUSDT,
+                stakeOwnToken,
                 claimRewards,
                 refreshBalance: () => {
                     fetchBalance();
                     fetchWalletInfo();
+                    fetchStakeHistory();
                 }
             }}
         >

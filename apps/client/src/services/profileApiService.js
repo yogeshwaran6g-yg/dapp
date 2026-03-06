@@ -23,7 +23,22 @@ export const profileApiService = {
         }
     },
 
+    async uploadProfilePicture(formData) {
+        try {
+            const data = await api.post(`${API_ENDPOINTS.PROFILE.UPDATE}/upload`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                showSuccessToast: true,
+            });
+            return data;
+        } catch (error) {
+            return handleServiceError(error, 'ProfileApiService.uploadProfilePicture');
+        }
+    },
+
     async getAllProfiles() {
+
         try {
             const data = await api.get(API_ENDPOINTS.PROFILE.GET_ALL);
             return data;
