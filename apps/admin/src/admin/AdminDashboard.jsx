@@ -5,6 +5,8 @@ import AdminLayout from './components/AdminLayout';
 import UserManagement from './components/UserManagement';
 import Treasury from './components/Treasury';
 import StakeHistory from './components/StakeHistory';
+import AdminNotifications from './components/AdminNotifications';
+import AdminTickets from './components/AdminTickets';
 
 const DashboardHome = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -266,6 +268,8 @@ const AdminDashboard = () => {
                 <Route path="users/:query" element={<UserManagement />} />
                 <Route path="treasury" element={<Treasury />} />
                 <Route path="staking" element={<StakeHistory />} />
+                <Route path="notifications" element={<AdminNotifications />} />
+                <Route path="tickets" element={<AdminTickets />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
         </Routes>
