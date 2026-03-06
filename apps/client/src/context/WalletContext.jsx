@@ -59,12 +59,10 @@ export const WalletProvider = ({ children }) => {
         if (!token) return;
 
         try {
-            const response = await fetch('/api/v1/wallet/info', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            const result = await api.get(API_ENDPOINTS.WALLET.INFO, {}, {
+                showErrorToast: false // Don't show toast for background refreshes
             });
-            const result = await response.json();
+
             if (result.success && result.data) {
                 const rawBalance = result.data.own_token_balance;
                 setOwnBalance(parseFloat(rawBalance || 0).toString());
@@ -82,12 +80,9 @@ export const WalletProvider = ({ children }) => {
         if (!isConnected || !address) return;
 
         try {
-            const response = await fetch('/api/v1/wallet/stake-history', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
+            const result = await api.get(API_ENDPOINTS.WALLET.STAKE_HISTORY, {}, {
+                showErrorToast: false
             });
-            const result = await response.json();
             if (result.success) {
                 setStakeHistory(result.data);
             }
@@ -134,7 +129,7 @@ export const WalletProvider = ({ children }) => {
 
         setIsLoading(true);
         try {
-            const result = await api.post('/wallet/stake-internal', { amount: numAmount }, {
+            const result = await api.post(API_ENDPOINTS.WALLET.STAKE_INTERNAL, { amount: numAmount }, {
                 showSuccessToast: true
             });
 
@@ -148,7 +143,7 @@ export const WalletProvider = ({ children }) => {
             return false;
         } catch (error) {
             console.error('Error staking tokens:', error);
-            toast.error(error.message || 'Staking failed');
+            // Error toast is already shown by axios interceptor unless showErrorToast is false
             return false;
         } finally {
             setIsLoading(false);
@@ -164,31 +159,23 @@ export const WalletProvider = ({ children }) => {
         setIsLoading(true);
         try {
             const rewardsToClaim = accumulatedRewards;
-            const response = await fetch('/api/v1/wallet/claim-rewards', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({
-                    amount: rewardsToClaim
-                })
+            const result = await api.post(API_ENDPOINTS.WALLET.CLAIM_REWARDS, {
+                amount: rewardsToClaim
+            }, {
+                showSuccessToast: true
             });
 
-            const result = await response.json();
-            if (!response.ok) {
+            if (result.status !== 200 && !result.success) {
                 throw new Error(result.message || 'Failed to claim rewards on server');
             }
 
             setTotalEarned(prev => prev + rewardsToClaim);
             setAccumulatedRewards(0);
-            toast.success(`Successfully claimed ${rewardsToClaim.toFixed(4)} GOLD`);
             fetchWalletInfo();
             fetchStakeHistory();
             return true;
         } catch (error) {
             console.error('Error claiming rewards:', error);
-            toast.error(error.message || 'Reward claim failed');
             return false;
         } finally {
             setIsLoading(false);

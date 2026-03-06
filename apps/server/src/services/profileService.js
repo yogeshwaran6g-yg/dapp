@@ -45,10 +45,11 @@ export const updateProfilePicture = async (userId, profilePicture) => {
         console.log(`[ProfileService] Updating profile picture for user ID: ${userId}`);
 
         await queryRunner(
-            `UPDATE profile
-             SET profile_picture = $1
-             WHERE user_id = $2`,
-            [profilePicture, userId]
+            `INSERT INTO profile (user_id, profile_picture)
+             VALUES ($1, $2)
+             ON CONFLICT (user_id) DO UPDATE SET 
+                profile_picture = EXCLUDED.profile_picture`,
+            [userId, profilePicture]
         );
 
         return serviceResponse(true, 200, 'Profile picture updated successfully');
