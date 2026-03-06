@@ -124,7 +124,7 @@ export const stakeInternalToken = async (userId, amount) => {
 export const getWalletInfo = async (userId) => {
     try {
         const walletRes = await queryRunner(
-            'SELECT energy_balance, own_token_balance FROM user_wallets WHERE user_id = $1',
+            'SELECT energy_balance, own_token_balance, usdt_balance FROM user_wallets WHERE user_id = $1',
             [userId]
         );
 
@@ -134,12 +134,13 @@ export const getWalletInfo = async (userId) => {
             [userId]
         );
 
-        const wallet = walletRes[0] || { energy_balance: 0, own_token_balance: 0 };
+        const wallet = walletRes[0] || { energy_balance: 0, own_token_balance: 0, usdt_balance: 0 };
         const locked_balance = parseFloat(stakingRes[0]?.locked_balance || 0);
 
         return serviceResponse(true, 200, 'Wallet info fetched successfully', {
             energy_balance: wallet.energy_balance,
             own_token_balance: wallet.own_token_balance,
+            usdt_balance: wallet.usdt_balance,
             locked_balance: locked_balance
         });
     } catch (err) {

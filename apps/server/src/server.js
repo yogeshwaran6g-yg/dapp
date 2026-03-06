@@ -22,6 +22,7 @@ import profileRoutes from "./routes/profileRoutes.js";
 import slotActivationRoutes from "./routes/slotActivationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
+import swapRoutes from "./routes/swapRoutes.js";
 import errorHandler from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -104,6 +105,7 @@ app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/slot-activation", slotActivationRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/wallet", walletRoutes);
+app.use("/api/v1/swap", swapRoutes);
 
 app.use(errorHandler);
 

@@ -63,6 +63,10 @@ BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'user_wallets' AND column_name = 'reward_token_balance') THEN
         ALTER TABLE user_wallets RENAME COLUMN reward_token_balance TO own_token_balance;
     END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'user_wallets' AND column_name = 'usdt_balance') THEN
+        ALTER TABLE user_wallets ADD COLUMN usdt_balance DECIMAL(18, 6) DEFAULT 0;
+    END IF;
 END $$;
 
 CREATE TABLE IF NOT EXISTS user_nfts (
@@ -140,16 +144,75 @@ CREATE TABLE IF NOT EXISTS internal_stakes (
     CONSTRAINT fk_internal_stake_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS swaps (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    swap_type VARCHAR(50) NOT NULL, -- 'USDT_TO_OWN', 'USDT_TO_ENERGY', 'OWN_TO_USDT', 'OWN_TO_ENERGY'
+    from_token VARCHAR(20) NOT NULL,
+    to_token VARCHAR(20) NOT NULL,
+    from_amount DECIMAL(18, 6) NOT NULL,
+    to_amount DECIMAL(18, 6) NOT NULL,
+    rate DECIMAL(18, 8) NOT NULL,
+    status VARCHAR(20) DEFAULT 'COMPLETED',
+    tx_hash VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_swap_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'swaps' AND column_name = 'swap_type') THEN
+        ALTER TABLE swaps ADD COLUMN swap_type VARCHAR(50) NOT NULL DEFAULT 'USDT_TO_OWN';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'swaps' AND column_name = 'from_token') THEN
+        ALTER TABLE swaps ADD COLUMN from_token VARCHAR(20) NOT NULL DEFAULT '';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'swaps' AND column_name = 'to_token') THEN
+        ALTER TABLE swaps ADD COLUMN to_token VARCHAR(20) NOT NULL DEFAULT '';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'swaps' AND column_name = 'from_amount') THEN
+        ALTER TABLE swaps ADD COLUMN from_amount DECIMAL(18, 6) NOT NULL DEFAULT 0;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'swaps' AND column_name = 'to_amount') THEN
+        ALTER TABLE swaps ADD COLUMN to_amount DECIMAL(18, 6) NOT NULL DEFAULT 0;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'swaps' AND column_name = 'rate') THEN
+        ALTER TABLE swaps ADD COLUMN rate DECIMAL(18, 8) NOT NULL DEFAULT 0;
+    END IF;
+END $$;
+
 -- Performance Indexes
-CREATE INDEX IF NOT EXISTS idx_users_referred_by ON users(referred_by);
-CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
-CREATE INDEX IF NOT EXISTS idx_profile_user_id ON profile(user_id);
-CREATE INDEX IF NOT EXISTS idx_profile_username_lower ON profile(LOWER(username));
-CREATE INDEX IF NOT EXISTS idx_user_wallets_user_id ON user_wallets(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_nfts_user_id ON user_nfts(user_id);
-CREATE INDEX IF NOT EXISTS idx_stake_history_user_id ON stake_history(user_id);
-CREATE INDEX IF NOT EXISTS idx_stake_history_created_at ON stake_history(created_at);
-CREATE INDEX IF NOT EXISTS idx_internal_stakes_user_id ON internal_stakes(user_id);
-CREATE INDEX IF NOT EXISTS idx_internal_stakes_status ON internal_stakes(status);
-CREATE INDEX IF NOT EXISTS idx_yeild_user_id ON yeild(user_id);
-CREATE INDEX IF NOT EXISTS idx_treasury_logs_created_at ON treasury_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_users_referred_by ON users (referred_by);
+
+CREATE INDEX IF NOT EXISTS idx_users_created_at ON users (created_at);
+
+CREATE INDEX IF NOT EXISTS idx_profile_user_id ON profile (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_profile_username_lower ON profile (LOWER(username));
+
+CREATE INDEX IF NOT EXISTS idx_user_wallets_user_id ON user_wallets (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_user_nfts_user_id ON user_nfts (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_stake_history_user_id ON stake_history (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_stake_history_created_at ON stake_history (created_at);
+
+CREATE INDEX IF NOT EXISTS idx_internal_stakes_user_id ON internal_stakes (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_internal_stakes_status ON internal_stakes (status);
+
+CREATE INDEX IF NOT EXISTS idx_yeild_user_id ON yeild (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_treasury_logs_created_at ON treasury_logs (created_at);
+
+CREATE INDEX IF NOT EXISTS idx_swaps_user_id ON swaps (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_swaps_swap_type ON swaps (swap_type);
+
+CREATE INDEX IF NOT EXISTS idx_swaps_created_at ON swaps (created_at);

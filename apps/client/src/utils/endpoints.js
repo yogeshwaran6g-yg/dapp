@@ -31,5 +31,13 @@ export const API_ENDPOINTS = {
     WALLET: {
         BALANCE: `${V1}/wallet/balance`, // GET — fetch fake eth balance
         FAUCET: `${V1}/wallet/faucet`,   // POST — request test eth
+        INFO: `${V1}/wallet/info`,       // GET — fetch wallet info (energy, own, usdt)
+    },
+
+    // ── Swap ────────────────────────────────────────────
+    SWAP: {
+        EXECUTE: `${V1}/swap/execute`,   // POST — execute a token swap
+        HISTORY: `${V1}/swap/history`,   // GET  — fetch swap history
+        RATES:   `${V1}/swap/rates`,     // GET  — fetch swap rates
     },
 };

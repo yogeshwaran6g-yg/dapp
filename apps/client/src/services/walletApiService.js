@@ -33,5 +33,20 @@ export const walletApiService = {
         } catch (error) {
             return handleServiceError(error, 'WalletApiService.requestFaucet');
         }
+    },
+
+    /**
+     * Fetch internal wallet info (energy, own token, usdt balances)
+     * @returns {Promise<Object>} The wallet data { energy_balance, own_token_balance, usdt_balance, locked_balance }
+     */
+    async getWalletInfo() {
+        try {
+            const response = await api.get(API_ENDPOINTS.WALLET.INFO, {}, {
+                showErrorToast: false
+            });
+            return response?.data || { energy_balance: 0, own_token_balance: 0, usdt_balance: 0, locked_balance: 0 };
+        } catch (error) {
+            return handleServiceError(error, 'WalletApiService.getWalletInfo');
+        }
     }
 };
