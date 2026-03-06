@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
         CLAIM_REWARDS: `${V1}/wallet/claim-rewards`,   // POST — claim rewards
         UPDATE_BALANCE: `${V1}/wallet/update-balance`, // POST — update balance (testing)
         TOPUP_INTERNAL: `${V1}/wallet/topup-internal`, // POST — top up internal balance
+        TRANSACTIONS: `${V1}/wallet/transactions`,     // GET — fetch transaction history
     },
 
     // ── Referral ──────────────────────────────────────────

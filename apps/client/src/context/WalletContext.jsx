@@ -64,7 +64,7 @@ export const WalletProvider = ({ children }) => {
             });
 
             if (result.success && result.data) {
-                const rawBalance = result.data.own_token_balance;
+                const rawBalance = result.data.own_token;
                 setOwnBalance(parseFloat(rawBalance || 0).toString());
                 setEnergyBalance(parseFloat(result.data.energy_balance || 0));
                 setStakedAmount(parseFloat(result.data.locked_balance || 0));

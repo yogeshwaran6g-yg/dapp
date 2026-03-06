@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PageHeading from './PageHeading';
-import { useWalletBalance } from '../hooks/useWallet';
+import { useWalletBalance, useWalletTransactions } from '../hooks/useWallet';
 import { walletApiService } from '../services/walletApiService';
 
 const transactions = [
@@ -125,11 +125,12 @@ const StatusBadge = ({ status }) =>
     );
 
 const TokenWallet = () => {
-    const { data: walletData, isLoading, refetch } = useWalletBalance();
+    const { data: walletData, isLoading: isWalletLoading, refetch } = useWalletBalance();
+    const { data: transactionsData, isLoading: isTxLoading } = useWalletTransactions();
 
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
-    const totalPages = 12;
+    const totalPages = 1; // Simplified for now since we usually have limited recent tx
 
     const formatBalance = (val) => {
         const num = parseFloat(val || '0');
@@ -141,10 +142,37 @@ const TokenWallet = () => {
         return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
     };
 
-    const filtered = transactions.filter(
+    const getTxIcon = (type, subtype) => {
+        if (subtype === 'ENERGY_CREDIT') return { icon: 'bolt', color: 'text-yellow-400', bg: 'bg-yellow-400/10' };
+        if (subtype === 'COMMISSION') return { icon: 'payments', color: 'text-green-400', bg: 'bg-green-400/10' };
+        if (type === 'Stake') return { icon: 'lock', color: 'text-blue-400', bg: 'bg-blue-400/10' };
+        return { icon: 'sync', color: 'text-purple-400', bg: 'bg-purple-400/10' };
+    };
+
+    // Map backend data to UI format
+    const mappedTransactions = (transactionsData || []).map(tx => {
+        const style = getTxIcon(tx.type, tx.subtype);
+        return {
+            ...tx,
+            ...style,
+            amount: `${tx.subtype === 'ENERGY_CREDIT' ? '+' : ''}${parseFloat(tx.amount).toLocaleString()} ${tx.subtype === 'ENERGY_CREDIT' ? 'NRG' : 'OWN'}`,
+            displayDate: new Date(tx.date).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }),
+            status: 'Completed',
+            displayHash: tx.hash.toString().length > 10 ? `0x${tx.hash.slice(0, 6)}...${tx.hash.slice(-4)}` : `#${tx.hash}`
+        };
+    });
+
+    const filtered = mappedTransactions.filter(
         (tx) =>
-            tx.hash.toLowerCase().includes(search.toLowerCase()) ||
-            tx.type.toLowerCase().includes(search.toLowerCase())
+            tx.hash.toString().toLowerCase().includes(search.toLowerCase()) ||
+            tx.type.toLowerCase().includes(search.toLowerCase()) ||
+            (tx.subtype && tx.subtype.toLowerCase().includes(search.toLowerCase()))
     );
 
     const handleEditBalance = async (type, currentVal) => {
@@ -159,6 +187,8 @@ const TokenWallet = () => {
         }
     };
 
+    const isLoading = isWalletLoading || isTxLoading;
+
     return (
         <div className="space-y-8">
             <div className="flex justify-between items-end">
@@ -168,10 +198,10 @@ const TokenWallet = () => {
                     subtitle="Manage your assets with multi-chain security and real-time tracking."
                 />
                 <div className="text-right pb-2 opacity-50 hover:opacity-100 transition-opacity">
-                    <span className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Dev Diagnostics</span>
+                    <span className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Live Data</span>
                     <div className="text-[10px] text-accent-gold/60 font-mono">
                         User ID: {localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).id : 'N/A'}<br />
-                        Table: user_wallets
+                        Connection: PostgreSQL
                     </div>
                 </div>
             </div>
@@ -181,8 +211,8 @@ const TokenWallet = () => {
                     icon="bolt"
                     title="Energy Token"
                     subtitle="NRG / GOVERNANCE"
-                    balance={isLoading ? "..." : formatBalance(walletData?.energyBalance)}
-                    usdValue={isLoading ? "..." : formatUSD(walletData?.energyBalance, 0.45)}
+                    balance={isWalletLoading ? "..." : formatBalance(walletData?.energyBalance)}
+                    usdValue={isWalletLoading ? "..." : formatUSD(walletData?.energyBalance, 0.45)}
                     change="+5.2%"
                     onEdit={() => handleEditBalance('NRG', walletData?.energyBalance || 0)}
                     actions={[
@@ -195,8 +225,8 @@ const TokenWallet = () => {
                     icon="star"
                     title="OWN Token"
                     subtitle="OWN / UTILITY"
-                    balance={isLoading ? "..." : formatBalance(walletData?.ownTokenBalance)}
-                    usdValue={isLoading ? "..." : formatUSD(walletData?.ownTokenBalance, 2.10)}
+                    balance={isWalletLoading ? "..." : formatBalance(walletData?.ownTokenBalance)}
+                    usdValue={isWalletLoading ? "..." : formatUSD(walletData?.ownTokenBalance, 2.10)}
                     change="+12.8%"
                     highlighted
                     onEdit={() => handleEditBalance('DB', walletData?.ownTokenBalance || 0)}
@@ -258,18 +288,18 @@ const TokenWallet = () => {
                                     <tr key={idx} className="hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className={`size-8 rounded ${tx.iconBg} flex items-center justify-center`}>
-                                                    <span className={`material-symbols-outlined ${tx.iconColor} text-lg`}>
+                                                <div className={`size-8 rounded ${tx.bg} flex items-center justify-center`}>
+                                                    <span className={`material-symbols-outlined ${tx.color} text-lg`}>
                                                         {tx.icon}
                                                     </span>
                                                 </div>
-                                                <span className="text-sm font-semibold">{tx.type}</span>
+                                                <span className="text-sm font-semibold">{tx.subtype || tx.type}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="text-sm font-mono font-bold text-white">{tx.amount}</span>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-white/60">{tx.date}</td>
+                                        <td className="px-6 py-4 text-sm text-white/60">{tx.displayDate}</td>
                                         <td className="px-6 py-4">
                                             <StatusBadge status={tx.status} />
                                         </td>
@@ -277,8 +307,9 @@ const TokenWallet = () => {
                                             <a
                                                 href="#"
                                                 className="text-sm font-mono text-[#D4AF37] hover:underline flex items-center justify-end gap-1"
+                                                onClick={(e) => e.preventDefault()}
                                             >
-                                                {tx.hash}
+                                                {tx.displayHash}
                                                 <span className="material-symbols-outlined text-sm">open_in_new</span>
                                             </a>
                                         </td>
@@ -287,7 +318,7 @@ const TokenWallet = () => {
                             ) : (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-12 text-center text-white/30 text-sm">
-                                        No transactions match your search.
+                                        {isTxLoading ? "Loading transactions..." : "No transactions match your search."}
                                     </td>
                                 </tr>
                             )}

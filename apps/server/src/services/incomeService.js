@@ -14,10 +14,12 @@ export const distributeIncome = async (userId, totalPrice) => {
 
         // 50% Referral Splits: L1: 25%, L2: 15%, L3: 5%, L4: 5%
         const referralSplits = [0.25, 0.15, 0.05, 0.05];
+        let totalReferralDistributed = 0;
 
         for (let i = 0; i < referralPath.length; i++) {
             const referrer = referralPath[i];
             const amount = totalPrice * referralSplits[i];
+            totalReferralDistributed += amount;
 
             // Distribution to OWN TOKEN wallet
             await queryRunner(`
@@ -37,9 +39,17 @@ export const distributeIncome = async (userId, totalPrice) => {
             console.log(`[Distributed] $${amount} (OWN TOKEN) to Referrer L${i + 1} (User ID: ${referrer.id})`);
         }
 
-        // 2. System Funds Split (Total 50%)
+        // Calculate overflow (Any part of the 50% not distributed due to short referral chain)
+        const maxReferralPool = totalPrice * 0.50;
+        const overflowAmount = Math.max(0, maxReferralPool - totalReferralDistributed);
+
+        if (overflowAmount > 0) {
+            console.log(`[Overflow] $${overflowAmount} redirected to ROYALTY fund`);
+        }
+
+        // 2. System Funds Split (Total 50% + Overflow)
         const systemSplits = [
-            { name: 'ROYALTY', percent: 0.20 },
+            { name: 'ROYALTY', percent: 0.20, overflow: true },
             { name: 'PRODUCT', percent: 0.10 },
             { name: 'DEVELOPERS', percent: 0.10 },
             { name: 'EXPENSE', percent: 0.05 },
@@ -47,12 +57,16 @@ export const distributeIncome = async (userId, totalPrice) => {
         ];
 
         for (const fund of systemSplits) {
-            const amount = totalPrice * fund.percent;
+            let amount = totalPrice * fund.percent;
+            if (fund.overflow) {
+                amount += overflowAmount;
+            }
+
             await queryRunner(
                 'UPDATE system_funds SET balance = balance + $1 WHERE fund_name = $2',
                 [amount, fund.name]
             );
-            console.log(`✓ Distributed $${amount} to System Fund: ${fund.name}`);
+            console.log(`✓ Distributed $${amount} to System Fund: ${fund.name}${fund.overflow ? ' (Includes Overflow)' : ''}`);
         }
 
         return { success: true };
