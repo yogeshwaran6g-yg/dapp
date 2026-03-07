@@ -188,3 +188,80 @@ export const getTreasuryLogs = async () => {
         return serviceResponse(false, 500, 'Error fetching treasury logs', null, err.message);
     }
 };
+
+export const getUserDetailForAdmin = async (userId) => {
+    try {
+        const query = `
+            SELECT 
+                u.id, 
+                u.wallet_address, 
+                u.is_active, 
+                u.is_blocked, 
+                u.created_at,
+                p.username,
+                p.email,
+                l.current_level_id as level,
+                l.total_xp,
+                r.wallet_address as referred_by_address,
+                (SELECT COUNT(*) FROM users WHERE referred_by = u.id) as total_referrals
+            FROM users u
+            LEFT JOIN profile p ON u.id = p.user_id
+            LEFT JOIN levels l ON u.id = l.id
+            LEFT JOIN users r ON u.referred_by = r.id
+            WHERE u.id = $1
+        `;
+        const result = await queryRunner(query, [userId]);
+        if (result.length === 0) {
+            return serviceResponse(false, 404, 'User not found');
+        }
+        return serviceResponse(true, 200, 'User details fetched successfully', { user: result[0] });
+    } catch (err) {
+        return serviceResponse(false, 500, 'Error fetching user details for admin', null, err.message);
+    }
+};
+export const getSwapHistoryForAdmin = async (page = 1, limit = 10, search = '') => {
+    try {
+        const offset = (page - 1) * limit;
+        const queryParams = [limit, offset];
+        let whereClause = '';
+
+        if (search) {
+            whereClause = `WHERE u.wallet_address ILIKE $3 OR s.from_asset ILIKE $3 OR s.to_asset ILIKE $3`;
+            queryParams.push(`%${search}%`);
+        }
+
+        const dataQuery = `
+            SELECT 
+                s.*, 
+                u.wallet_address,
+                p.username
+            FROM swap_history s
+            JOIN users u ON s.user_id = u.id
+            LEFT JOIN profile p ON u.id = p.user_id
+            ${whereClause}
+            ORDER BY s.created_at DESC
+            LIMIT $1 OFFSET $2
+        `;
+
+        const countQuery = `
+            SELECT COUNT(*) as total
+            FROM swap_history s
+            JOIN users u ON s.user_id = u.id
+            ${whereClause}
+        `;
+
+        const [data, countResult] = await Promise.all([
+            queryRunner(dataQuery, queryParams),
+            queryRunner(countQuery, search ? [limit, offset, `%${search}%`] : [])
+        ]);
+
+        return serviceResponse(true, 200, 'Swap history fetched successfully', {
+            history: data,
+            total: parseInt(countResult[0]?.total || 0),
+            page,
+            limit
+        });
+    } catch (err) {
+        return serviceResponse(false, 500, 'Error fetching swap history', null, err.message);
+    }
+};

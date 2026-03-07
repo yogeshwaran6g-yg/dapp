@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const AdminHeader = ({ onMenuClick }) => {
     const [searchValue, setSearchValue] = useState('');
     const navigate = useNavigate();
+    const { user, logout } = useAuth();
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && searchValue.trim()) {
             navigate(`/users/${searchValue.trim()}`);
             setSearchValue(''); // Clear after searching
         }
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
     };
 
     return (
@@ -32,25 +39,34 @@ const AdminHeader = ({ onMenuClick }) => {
                         onKeyDown={handleKeyDown}
                     />
                 </div>
-                <div className="flex items-center gap-4 lg:gap-6">
-                    <div className="flex items-center gap-2">
-                        <span className="size-1.5 lg:size-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)] animate-pulse"></span>
-                        <span className="text-[9px] lg:text-[11px] font-bold text-slate-300 uppercase tracking-widest hidden xs:block">Net: <span className="text-white">Main</span></span>
+            </div>
+
+            <div className="flex items-center gap-3 lg:gap-6">
+                {/* Admin Profile & Logout */}
+                <div className="items-center gap-3 pr-3 border-r border-white/5 hidden xs:flex">
+                    <div className="text-right">
+                        <p className="text-[10px] font-black text-white uppercase tracking-tight">{user?.username || 'Admin'}</p>
+                        <p className="text-[8px] font-bold text-yellow-400 uppercase tracking-widest opacity-70">Super Admin</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="size-1.5 lg:size-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]"></span>
-                        <span className="text-[9px] lg:text-[11px] font-bold text-slate-300 uppercase tracking-widest hidden xs:block">Safe: <span className="text-white">Yes</span></span>
+                    <div className="size-8 rounded-lg bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center text-yellow-400">
+                        <span className="material-symbols-outlined text-lg">shield_person</span>
                     </div>
                 </div>
-            </div>
-            <div className="flex items-center gap-3 lg:gap-6">
-                <button className="flex items-center gap-2 lg:gap-2.5 bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-2 lg:px-6 lg:py-2.5 rounded-lg lg:rounded-xl text-[10px] lg:text-xs font-bold transition-all hover:scale-[1.02] shadow-xl shadow-yellow-400/10 uppercase tracking-widest border border-yellow-500/20">
-                    <span className="material-symbols-outlined text-base lg:text-lg">account_balance_wallet</span>
-                    <span className="hidden sm:inline">Connect</span>
-                </button>
-                <div className="relative p-2 lg:p-2.5 bg-card-dark rounded-lg lg:rounded-xl border border-white/5 cursor-pointer">
-                    <span className="material-symbols-outlined text-slate-400 text-xl lg:text-2xl">notifications</span>
-                    <span className="absolute top-1.5 right-1.5 lg:top-2 lg:right-2 size-1.5 lg:size-2 bg-yellow-400 rounded-full border-2 border-background-dark"></span>
+
+                <div className="flex items-center gap-2 lg:gap-3">
+                    <div className="relative p-2 lg:p-2.5 bg-card-dark rounded-lg lg:rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
+                        <span className="material-symbols-outlined text-slate-400 text-xl">notifications</span>
+                        <span className="absolute top-1.5 right-1.5 size-1.5 bg-yellow-400 rounded-full border-2 border-background-dark"></span>
+                    </div>
+
+                    <button 
+                        onClick={handleLogout}
+                        className="p-2 lg:p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg lg:rounded-xl border border-red-500/10 transition-all group flex items-center gap-2"
+                        title="Logout"
+                    >
+                        <span className="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform">logout</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest hidden lg:inline">Sign Out</span>
+                    </button>
                 </div>
             </div>
         </header>

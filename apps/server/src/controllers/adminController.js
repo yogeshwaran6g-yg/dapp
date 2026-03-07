@@ -69,3 +69,19 @@ export const getStakeHistory = async (req, res) => {
         return rtnRes(res, 500, 'Failed to fetch stake history');
     }
 };
+
+export const getUserDetail = async (req, res) => {
+    const { userId } = req.params;
+    const result = await userService.getUserDetailForAdmin(userId);
+    return rtnRes(res, result.status, result.message, result.data);
+};
+
+export const getSwapHistory = async (req, res) => {
+    const { page, limit, search } = req.query;
+    const result = await userService.getSwapHistoryForAdmin(
+        parseInt(page) || 1,
+        parseInt(limit) || 10,
+        search
+    );
+    return rtnRes(res, result.status, result.message, result.data);
+};

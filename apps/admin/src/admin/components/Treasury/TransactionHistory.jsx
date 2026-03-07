@@ -1,8 +1,10 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const TransactionHistory = () => {
+    const { token } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const page = parseInt(searchParams.get('page') || '1');
     const limit = 10;
@@ -14,11 +16,16 @@ const TransactionHistory = () => {
                 page: page.toString(),
                 limit: limit.toString()
             });
-            const response = await fetch(`/api/v1/admin/treasury/logs?${params}`);
+            const response = await fetch(`/api/v1/admin/treasury/logs?${params}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (!response.ok) throw new Error('Failed to fetch treasury logs');
             const data = await response.json();
             return data.data;
-        }
+        },
+        enabled: !!token
     });
 
     const logs = logsData?.logs || [];

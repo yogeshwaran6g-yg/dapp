@@ -12,6 +12,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
         { name: 'Stake History', icon: 'history', path: '/staking' },
         { name: 'Notifications', icon: 'notifications', path: '/notifications' },
         { name: 'Support Tickets', icon: 'confirmation_number', path: '/tickets' },
+        { name: 'Swap History', icon: 'swap_horiz', path: '/swaps' },
         { name: 'System Logs', icon: 'terminal', path: '/logs' },
         { name: 'Settings', icon: 'settings', path: '/settings' },
     ];

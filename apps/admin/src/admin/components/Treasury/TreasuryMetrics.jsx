@@ -1,15 +1,22 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '../../context/AuthContext';
 
 const TreasuryMetrics = () => {
+    const { token } = useAuth();
     const { data: metricsData, isLoading } = useQuery({
         queryKey: ['treasuryMetrics'],
         queryFn: async () => {
-            const response = await fetch('/api/v1/admin/treasury/metrics');
+            const response = await fetch('/api/v1/admin/treasury/metrics', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (!response.ok) throw new Error('Failed to fetch treasury metrics');
             const data = await response.json();
             return data.data;
-        }
+        },
+        enabled: !!token
     });
 
     const metrics = metricsData || {

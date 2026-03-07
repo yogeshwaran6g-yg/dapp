@@ -181,3 +181,30 @@ CREATE INDEX IF NOT EXISTS idx_tickets_created_at ON tickets(created_at);
 CREATE INDEX IF NOT EXISTS idx_treasury_logs_created_at ON treasury_logs(created_at);
 CREATE INDEX IF NOT EXISTS idx_income_logs_user_id ON income_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_income_logs_created_at ON income_logs(created_at);
+
+CREATE TABLE IF NOT EXISTS swap_history (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    from_asset VARCHAR(50) NOT NULL,
+    to_asset VARCHAR(50) NOT NULL,
+    from_amount DECIMAL(18, 6) NOT NULL,
+    to_amount DECIMAL(18, 6) NOT NULL,
+    tx_hash VARCHAR(255),
+    status VARCHAR(50) NOT NULL DEFAULT 'COMPLETED' CHECK (status IN ('PENDING', 'COMPLETED', 'FAILED')),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_swap_history_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_swap_history_user_id ON swap_history(user_id);
+CREATE INDEX IF NOT EXISTS idx_swap_history_created_at ON swap_history(created_at);
+
+-- Dummy data for swap history
+-- Assuming user IDs 1, 2, 3 exist from previous seeding or activity
+INSERT INTO swap_history (user_id, from_asset, to_asset, from_amount, to_amount, tx_hash, status, created_at)
+VALUES 
+(1, 'USDT', 'OWN', 100.00, 85.42, '0x' || encode(gen_random_bytes(20), 'hex'), 'COMPLETED', NOW() - INTERVAL '1 hour'),
+(1, 'USDT', 'ENERGY', 50.00, 58.50, '0x' || encode(gen_random_bytes(20), 'hex'), 'COMPLETED', NOW() - INTERVAL '2 hours'),
+(2, 'OWN', 'USDT', 200.00, 230.15, '0x' || encode(gen_random_bytes(20), 'hex'), 'COMPLETED', NOW() - INTERVAL '3 hours'),
+(2, 'OWN', 'ENERGY', 150.00, 175.20, '0x' || encode(gen_random_bytes(20), 'hex'), 'COMPLETED', NOW() - INTERVAL '4 hours'),
+(3, 'USDT', 'OWN', 500.00, 427.10, '0x' || encode(gen_random_bytes(20), 'hex'), 'PENDING', NOW() - INTERVAL '30 minutes')
+ON CONFLICT DO NOTHING;

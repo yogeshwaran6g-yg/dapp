@@ -1,14 +1,37 @@
 import React from 'react';
-import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
+import { Routes, Route, Navigate, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import AdminLayout from './components/AdminLayout';
 import UserManagement from './components/UserManagement';
+import UserDetail from './components/UserDetail';
 import Treasury from './components/Treasury';
 import StakeHistory from './components/StakeHistory';
 import AdminNotifications from './components/AdminNotifications';
 import AdminTickets from './components/AdminTickets';
+import SwapHistory from './components/SwapHistory';
+import Login from './components/Login';
+
+const ProtectedRoute = ({ children }) => {
+    const { token, loading } = useAuth();
+    
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-background-dark flex items-center justify-center">
+                <div className="size-10 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+    
+    if (!token) {
+        return <Navigate to="/login" replace />;
+    }
+    
+    return children;
+};
 
 const DashboardHome = () => {
+    const { token } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const page = parseInt(searchParams.get('page') || '1');
     const limit = 10;
@@ -20,11 +43,16 @@ const DashboardHome = () => {
                 page: page.toString(),
                 limit: limit.toString()
             });
-            const response = await fetch(`/api/v1/admin/stats?${params}`);
+            const response = await fetch(`/api/v1/admin/stats?${params}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (!response.ok) throw new Error('Failed to fetch stats');
             const data = await response.json();
             return data.data;
-        }
+        },
+        enabled: !!token
     });
 
     const stats = dashboardData?.stats || {};
@@ -48,7 +76,7 @@ const DashboardHome = () => {
         { label: 'Total XP', value: Number(stats.total_xp || 0).toLocaleString(), trend: 'Global Progress', icon: 'workspace_premium' },
         { label: 'Blocked Users', value: Number(stats.blocked_users || 0).toLocaleString(), trend: 'Safety Monitoring', icon: 'block', down: true },
         { label: 'Growth rate', value: Number(stats.users_24h || 0).toLocaleString(), trend: 'New Registrations', icon: 'trending_up' },
-    ].slice(0, 5); // Matching the grid layout
+    ].slice(0, 5);
 
     const handleCopy = (text) => {
         navigator.clipboard.writeText(text);
@@ -59,7 +87,6 @@ const DashboardHome = () => {
 
     return (
         <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6">
-            {/* Row 1: Global Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
                 {isLoading ? (
                     <div className="col-span-full h-32 flex items-center justify-center glass-card rounded-2xl border border-white/5">
@@ -86,9 +113,7 @@ const DashboardHome = () => {
                 )}
             </div>
 
-            {/* Row 2: Analytics */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
-                {/* User Growth */}
                 <div className="bg-card-dark rounded-2xl lg:rounded-3xl p-4 lg:p-6 flex flex-col gap-4 lg:gap-6 border border-white/5">
                     <div className="flex items-center justify-between">
                         <h4 className="text-lg lg:text-xl font-black text-white tracking-tight">User Growth</h4>
@@ -114,7 +139,6 @@ const DashboardHome = () => {
                     </div>
                 </div>
 
-                {/* Revenue vs Payouts */}
                 <div className="bg-card-dark rounded-2xl lg:rounded-3xl p-4 lg:p-6 flex flex-col gap-4 lg:gap-6 border border-white/5">
                     <div className="flex items-center justify-between">
                         <h4 className="text-lg lg:text-xl font-black text-white tracking-tight">System Revenue</h4>
@@ -141,9 +165,7 @@ const DashboardHome = () => {
                 </div>
             </div>
 
-            {/* Row 3: Management Overview */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                {/* Recent Activities */}
                 <div className="lg:col-span-2 bg-card-dark rounded-2xl lg:rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
                     <div className="p-4 lg:p-6 border-b border-white/5 flex items-center justify-between">
                         <h4 className="text-lg lg:text-xl font-black text-white tracking-tight">Recent Activities</h4>
@@ -191,42 +213,8 @@ const DashboardHome = () => {
                             </tbody>
                         </table>
                     </div>
-                    {/* Activity Pagination */}
-                    <div className="p-4 bg-background-dark/30 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-2">
-                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                            Showing {recentActivities.length} of {totalActivities} entries
-                        </span>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => handlePageChange(page - 1)}
-                                className="size-8 flex items-center justify-center rounded border border-white/5 bg-white/5 text-gray-500 hover:text-white transition-colors disabled:opacity-30"
-                                disabled={page <= 1}
-                            >
-                                <span className="material-symbols-outlined text-lg">chevron_left</span>
-                            </button>
-                            <div className="flex items-center gap-1">
-                                {[...Array(totalPages)].map((_, i) => (
-                                    <button
-                                        key={i + 1}
-                                        onClick={() => handlePageChange(i + 1)}
-                                        className={`size-8 rounded text-[10px] font-bold transition-all ${page === i + 1 ? 'bg-yellow-400 text-black shadow-[0_0_10px_rgba(250,204,21,0.5)]' : 'bg-white/5 text-gray-500 hover:text-white hover:bg-white/10'}`}
-                                    >
-                                        {i + 1}
-                                    </button>
-                                ))}
-                            </div>
-                            <button
-                                onClick={() => handlePageChange(page + 1)}
-                                className="size-8 flex items-center justify-center rounded border border-white/5 bg-white/5 text-gray-400 hover:text-white transition-colors disabled:opacity-30"
-                                disabled={page >= totalPages}
-                            >
-                                <span className="material-symbols-outlined text-lg">chevron_right</span>
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
-                {/* Active Proposals */}
                 <div className="bg-card-dark rounded-2xl lg:rounded-3xl p-4 lg:p-6 flex flex-col gap-6 lg:gap-8 border border-white/5">
                     <div className="flex items-center justify-between">
                         <h4 className="text-lg lg:text-xl font-black text-white tracking-tight">Active Proposals</h4>
@@ -246,10 +234,6 @@ const DashboardHome = () => {
                                 <div className="w-full bg-white/5 h-1.5 lg:h-2 rounded-full overflow-hidden p-0.5 border border-white/5">
                                     <div className="bg-yellow-400 h-full rounded-full shadow-[0_0_10px_rgba(250,204,21,0.6)]" style={{ width: `${prop.progress}%` }}></div>
                                 </div>
-                                <div className="flex justify-between text-[9px] font-black tracking-widest uppercase">
-                                    <span className="text-yellow-400">{prop.progress}% FOR</span>
-                                    <span className="text-slate-600">{100 - prop.progress}% AGAINST</span>
-                                </div>
                             </div>
                         ))}
                     </div>
@@ -261,18 +245,32 @@ const DashboardHome = () => {
 
 const AdminDashboard = () => {
     return (
-        <Routes>
-            <Route element={<AdminLayout />}>
-                <Route index element={<DashboardHome />} />
-                <Route path="users" element={<UserManagement />} />
-                <Route path="users/:query" element={<UserManagement />} />
-                <Route path="treasury" element={<Treasury />} />
-                <Route path="staking" element={<StakeHistory />} />
-                <Route path="notifications" element={<AdminNotifications />} />
-                <Route path="tickets" element={<AdminTickets />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-        </Routes>
+        <AuthProvider>
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route
+                    path="*"
+                    element={
+                        <ProtectedRoute>
+                            <Routes>
+                                <Route element={<AdminLayout />}>
+                                    <Route index element={<DashboardHome />} />
+                                    <Route path="users" element={<UserManagement />} />
+                                    <Route path="users/:query" element={<UserManagement />} />
+                                    <Route path="users/detail/:userId" element={<UserDetail />} />
+                                    <Route path="treasury" element={<Treasury />} />
+                                    <Route path="staking" element={<StakeHistory />} />
+                                    <Route path="swaps" element={<SwapHistory />} />
+                                    <Route path="notifications" element={<AdminNotifications />} />
+                                    <Route path="tickets" element={<AdminTickets />} />
+                                    <Route path="*" element={<Navigate to="/" replace />} />
+                                </Route>
+                            </Routes>
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
+        </AuthProvider>
     );
 };
 
