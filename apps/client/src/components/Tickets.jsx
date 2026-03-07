@@ -37,11 +37,18 @@ const Tickets = () => {
         try {
             pageNum === 1 ? setLoading(true) : setLoadingMore(true);
             const response = await fetch(`${API_URL}?page=${pageNum}&limit=${PAGE_LIMIT}`);
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
             const data = await response.json();
 
-            setTickets(prev => replace ? data.data : [...prev, ...data.data]);
-            setHasMore(data.hasMore);
-            setTotalCount(data.total);
+            if (data && Array.isArray(data.data)) {
+                setTickets(prev => replace ? data.data : [...prev, ...data.data]);
+                setHasMore(data.hasMore);
+                setTotalCount(data.total);
+            } else {
+                throw new Error('Invalid data format received from server');
+            }
         } catch (error) {
             console.error('Error fetching tickets:', error);
             toast.error('Failed to load tickets', { toastId: 'fetch-tickets-error' });
