@@ -13,7 +13,7 @@ const StakeHistory = () => {
 
     const [searchQuery, setSearchQuery] = useState(search);
 
-    const { data, isLoading } = useQuery({
+    const { data: historyData, isLoading } = useQuery({
         queryKey: ['adminStakeHistory', page, search],
         queryFn: async () => {
             const params = new URLSearchParams({
@@ -46,7 +46,7 @@ const StakeHistory = () => {
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [searchQuery, urlSearch, setSearchParams]);
+    }, [searchQuery, search, setSearchParams]);
 
     const handlePageChange = (newPage) => {
         setSearchParams(prev => {

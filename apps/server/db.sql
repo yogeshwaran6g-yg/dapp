@@ -185,7 +185,8 @@ CREATE TABLE IF NOT EXISTS tickets (
     priority VARCHAR(50) DEFAULT 'Medium' CHECK (
         priority IN ('Low', 'Medium', 'High')
     ),
-    category VARCHAR(50) DEFAULT 'Other',
+        category IN ('Technical', 'Wallet', 'Staking', 'NFT', 'Other')
+    ),
     user_id BIGINT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

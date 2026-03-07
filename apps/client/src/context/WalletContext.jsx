@@ -63,7 +63,7 @@ export const WalletProvider = ({ children }) => {
                 showErrorToast: false // Don't show toast for background refreshes
             });
 
-            if (result.success && result.data) {
+            if (result && result.data) {
                 const rawBalance = result.data.own_token;
                 setOwnBalance(parseFloat(rawBalance || 0).toString());
                 setEnergyBalance(parseFloat(result.data.energy_balance || 0));
@@ -83,7 +83,7 @@ export const WalletProvider = ({ children }) => {
             const result = await api.get(API_ENDPOINTS.WALLET.STAKE_HISTORY, {}, {
                 showErrorToast: false
             });
-            if (result.success) {
+            if (result && result.data) {
                 setStakeHistory(result.data);
             }
         } catch (error) {

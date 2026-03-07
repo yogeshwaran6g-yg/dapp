@@ -11,10 +11,39 @@ const AdminTickets = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalTickets, setTotalTickets] = useState(0);
+    const [loadingMore, setLoadingMore] = useState(false);
 
     useEffect(() => {
         fetchTickets(1);
     }, [filterStatus]);
+
+    const loadMore = async () => {
+        if (loadingMore || loading || page >= totalPages) return;
+
+        setLoadingMore(true);
+        try {
+            const nextPage = page + 1;
+            const res = await fetch(`${API_URL}/admin/all?status=${filterStatus}&page=${nextPage}&limit=10`);
+            if (!res.ok) throw new Error('Failed to fetch tickets');
+            const data = await res.json();
+
+            setTickets(prev => [...prev, ...data.data]);
+            setTotalPages(data.pages);
+            setPage(nextPage);
+        } catch (err) {
+            console.error('Error fetching more tickets:', err);
+            toast.error('Failed to load more tickets');
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
+    const handleScroll = (e) => {
+        const { scrollTop, clientHeight, scrollHeight } = e.target;
+        if (scrollHeight - scrollTop <= clientHeight * 1.5) {
+            loadMore();
+        }
+    };
 
     const fetchTickets = async (pageNum = 1) => {
         setLoading(true);
@@ -77,10 +106,10 @@ const AdminTickets = () => {
     };
 
     return (
-        <div className="flex-1 flex flex-col lg:flex-row h-full overflow-hidden animate-in fade-in duration-500">
+        <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-4rem)] overflow-hidden animate-in fade-in duration-500">
             {/* Ticket List */}
-            <div className={`w-full flex-col h-full bg-background-dark/30 ${selectedTicket ? 'hidden' : 'flex'}`}>
-                <div className="p-6 border-b border-white/5 space-y-4">
+            <div className={`w-full flex flex-col h-full overflow-hidden bg-background-dark/30 ${selectedTicket ? 'hidden' : 'flex'}`}>
+                <div className="p-6 border-b border-white/5 space-y-4 shrink-0">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-black text-white uppercase tracking-tight">Support Tickets</h2>
                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{totalTickets} Total</span>
@@ -99,8 +128,8 @@ const AdminTickets = () => {
                     </select>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
-                    {loading ? (
+                <div className="max-h-[600px] overflow-y-scroll min-h-0 custom-scrollbar relative" onScroll={handleScroll}>
+                    {loading && tickets.length === 0 ? (
                         <div className="py-20 text-center flex flex-col items-center gap-4">
                             <div className="size-6 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
                             <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Loading Tickets</span>
@@ -110,60 +139,57 @@ const AdminTickets = () => {
                             No tickets found
                         </div>
                     ) : (
-                        tickets.map(ticket => (
-                            <button
-                                key={ticket.id}
-                                onClick={() => handleSelectTicket(ticket)}
-                                className={`w-full text-left p-4 rounded-2xl border transition-all hover:bg-white/[0.02] flex flex-col gap-3 group ${selectedTicket?.id === ticket.id
-                                    ? 'bg-yellow-400/5 border-yellow-400/20'
-                                    : 'border-transparent'
-                                    }`}
-                            >
-                                <div className="flex items-start justify-between gap-2">
-                                    <h3 className="text-sm font-bold text-white group-hover:text-yellow-400 transition-colors line-clamp-1">{ticket.subject}</h3>
-                                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md border shrink-0 ${getStatusStyles(ticket.status)}`}>
-                                        {ticket.status}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[9px] font-mono text-slate-500 tracking-tighter">
-                                        ID: {ticket.id}
-                                    </span>
-                                    <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
-                                        {new Date(ticket.created_at).toLocaleDateString()}
-                                    </span>
-                                </div>
-                            </button>
-                        ))
+                        <div className="w-full overflow-x-auto">
+                            <table className="w-full text-left border-collapse min-w-[600px]">
+                                <thead className="sticky top-0 bg-background-dark/95 backdrop-blur-sm z-10 border-b border-white/5">
+                                    <tr>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-24">ID</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Subject</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-32">Status</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right w-32">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tickets.map(ticket => (
+                                        <tr
+                                            key={ticket.id}
+                                            onClick={() => handleSelectTicket(ticket)}
+                                            className={`cursor-pointer transition-all hover:bg-white/[0.02] group border-b border-white/5 last:border-0 ${selectedTicket?.id === ticket.id
+                                                ? 'bg-yellow-400/5'
+                                                : ''
+                                                }`}
+                                        >
+                                            <td className="px-6 py-4 text-[10px] font-mono text-slate-400 tracking-tighter w-24">
+                                                #{ticket.id}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-bold text-white group-hover:text-yellow-400 transition-colors">
+                                                {ticket.subject}
+                                            </td>
+                                            <td className="px-6 py-4 w-32">
+                                                <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md border inline-block whitespace-nowrap ${getStatusStyles(ticket.status)}`}>
+                                                    {ticket.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right text-[10px] font-black text-slate-600 uppercase tracking-widest whitespace-nowrap w-32">
+                                                {new Date(ticket.created_at).toLocaleDateString()}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </div>
 
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                    <div className="p-4 border-t border-white/5 flex items-center justify-between gap-2">
-                        <button
-                            onClick={() => fetchTickets(page - 1)}
-                            disabled={page === 1 || loading}
-                            className="p-2 rounded-lg bg-white/5 text-slate-400 disabled:opacity-20 hover:text-white transition-all"
-                        >
-                            <span className="material-symbols-outlined">chevron_left</span>
-                        </button>
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest">
-                            Page {page} of {totalPages}
-                        </span>
-                        <button
-                            onClick={() => fetchTickets(page + 1)}
-                            disabled={page === totalPages || loading}
-                            className="p-2 rounded-lg bg-white/5 text-slate-400 disabled:opacity-20 hover:text-white transition-all"
-                        >
-                            <span className="material-symbols-outlined">chevron_right</span>
-                        </button>
+                {loadingMore && (
+                    <div className="py-4 text-center flex flex-col items-center gap-2 shrink-0 border-t border-white/5 bg-background-dark/50">
+                        <div className="size-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
                     </div>
                 )}
             </div>
 
             {/* Ticket Content */}
-            <div className={`flex-1 w-full flex-col h-full bg-black/40 relative ${!selectedTicket ? 'hidden' : 'flex'}`}>
+            <div className={`flex-1 w-full flex-col h-full overflow-hidden bg-black/40 relative ${!selectedTicket ? 'hidden' : 'flex'}`}>
                 {selectedTicket && (
                     <>
                         {/* Detail Header */}
@@ -184,7 +210,7 @@ const AdminTickets = () => {
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-x-4 gap-y-2 text-[10px] font-black text-slate-500 uppercase tracking-widest flex-wrap">
-                                        <span className="flex items-center gap-1">User: <span className="text-yellow-400 font-mono tracking-tighter break-all">{selectedTicket.wallet_address}</span></span>
+                                        <span className="flex items-center gap-1">User: <span className="text-yellow-400 font-mono tracking-tighter break-all">{selectedTicket.user_id}</span></span>
                                         <span className="hidden sm:inline-block size-1 rounded-full bg-slate-700"></span>
                                         <span>Cat: {selectedTicket.category}</span>
                                         <span className="hidden sm:inline-block size-1 rounded-full bg-slate-700"></span>
@@ -219,14 +245,14 @@ const AdminTickets = () => {
                                     <div className="flex items-center justify-between">
                                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                                             User
-                                            <span className="text-[8px] opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline">{selectedTicket.wallet_address}</span>
+                                            <span className="text-[8px] opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline">{selectedTicket.user_id}</span>
                                         </span>
                                         <span className="text-[9px] font-black text-slate-700 uppercase tracking-widest">
                                             {new Date(selectedTicket.created_at).toLocaleString()}
                                         </span>
                                     </div>
                                     <div className="bg-white/5 border border-white/5 p-5 rounded-2xl rounded-tl-none">
-                                        <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{selectedTicket.description}</p>
+                                        <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap break-words">{selectedTicket.description}</p>
                                     </div>
                                 </div>
                             </div>

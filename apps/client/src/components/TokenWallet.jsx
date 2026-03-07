@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import PageHeading from './PageHeading';
-import { useWalletBalance, useWalletTransactions } from '../hooks/useWallet';
+import { useWalletTransactions } from '../hooks/useWallet';
 import { walletApiService } from '../services/walletApiService';
+import { useWallet } from '../context/WalletContext';
 
 const transactions = [
     {
@@ -123,7 +124,7 @@ const StatusBadge = ({ status }) =>
     );
 
 const TokenWallet = () => {
-    const { data: walletData, isLoading: isWalletLoading, refetch } = useWalletBalance();
+    const { energyBalance, ownBalance, refreshBalance, isLoading: isWalletLoading } = useWallet();
     const { data: transactionsData, isLoading: isTxLoading } = useWalletTransactions();
 
     const [search, setSearch] = useState('');
@@ -157,13 +158,13 @@ const TokenWallet = () => {
                 minute: '2-digit'
             }),
             status: 'Completed',
-            displayHash: tx.hash.toString().length > 10 ? `0x${tx.hash.slice(0, 6)}...${tx.hash.slice(-4)}` : `#${tx.hash}`
+            displayHash: (tx.hash && tx.hash.toString().length > 10) ? `0x${tx.hash.toString().slice(0, 6)}...${tx.hash.toString().slice(-4)}` : `#${tx.hash || 'unknown'}`
         };
     });
 
     const filtered = mappedTransactions.filter(
         (tx) =>
-            tx.hash.toString().toLowerCase().includes(search.toLowerCase()) ||
+            (tx.hash ? tx.hash.toString().toLowerCase() : '').includes(search.toLowerCase()) ||
             tx.type.toLowerCase().includes(search.toLowerCase()) ||
             (tx.subtype && tx.subtype.toLowerCase().includes(search.toLowerCase()))
     );
@@ -173,7 +174,7 @@ const TokenWallet = () => {
         if (newVal !== null && !isNaN(parseFloat(newVal))) {
             try {
                 await walletApiService.updateBalance(type, parseFloat(newVal));
-                refetch();
+                refreshBalance();
             } catch (error) {
                 console.error('Failed to update balance:', error);
             }
@@ -204,9 +205,9 @@ const TokenWallet = () => {
                     icon="bolt"
                     title="Energy Token"
                     subtitle="NRG / GOVERNANCE"
-                    balance={isWalletLoading ? "..." : formatBalance(walletData?.energyBalance)}
+                    balance={isWalletLoading ? "..." : formatBalance(energyBalance)}
                     change="+5.2%"
-                    onEdit={() => handleEditBalance('NRG', walletData?.energyBalance || 0)}
+                    onEdit={() => handleEditBalance('NRG', energyBalance || 0)}
                     actions={[
                         { label: 'Deposit', icon: 'south_west' },
                         { label: 'Withdraw', icon: 'north_east' },
@@ -217,10 +218,10 @@ const TokenWallet = () => {
                     icon="star"
                     title="OWN Token"
                     subtitle="OWN / UTILITY"
-                    balance={isWalletLoading ? "..." : formatBalance(walletData?.own_token)}
+                    balance={isWalletLoading ? "..." : formatBalance(ownBalance)}
                     change="+12.8%"
                     highlighted
-                    onEdit={() => handleEditBalance('DB', walletData?.own_token || 0)}
+                    onEdit={() => handleEditBalance('DB', ownBalance || 0)}
                     actions={[
                         { label: 'Deposit', icon: 'south_west' },
                         { label: 'Withdraw', icon: 'north_east' },

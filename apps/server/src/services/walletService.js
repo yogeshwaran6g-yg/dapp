@@ -66,17 +66,17 @@ export const stakeInternalToken = async (userId, amount) => {
         return await transactionRunner(async (client) => {
 
             const balanceRes = await client.query(
-                'SELECT own_token FROM user_wallets WHERE user_id = $1',
+                'SELECT own_token_balance FROM user_wallets WHERE user_id = $1',
                 [userId]
             );
 
-            if (balanceRes.rows.length === 0 || parseFloat(balanceRes.rows[0].own_token) < amount) {
+            if (balanceRes.rows.length === 0 || parseFloat(balanceRes.rows[0].own_token_balance) < amount) {
                 return serviceResponse(false, 400, 'Insufficient internal token balance');
             }
 
             await client.query(`
                 UPDATE user_wallets 
-                SET own_token = own_token - $1,
+                SET own_token_balance = own_token_balance - $1,
                     locked_balance = locked_balance + $1,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = $2
@@ -85,7 +85,7 @@ export const stakeInternalToken = async (userId, amount) => {
             // credit admin wallet
             await client.query(`
                 UPDATE user_wallets 
-                SET own_token = own_token + $1,
+                SET own_token_balance = own_token_balance + $1,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = (
                     SELECT id FROM users 
@@ -125,10 +125,10 @@ export const topUpInternalToken = async (userId, amount) => {
     try {
 
         await queryRunner(`
-            INSERT INTO user_wallets (user_id, own_token) 
+            INSERT INTO user_wallets (user_id, own_token_balance) 
             VALUES ($1, $2) 
             ON CONFLICT (user_id) DO UPDATE SET 
-                own_token = user_wallets.own_token + $2,
+                own_token_balance = user_wallets.own_token_balance + $2,
                 updated_at = CURRENT_TIMESTAMP
         `, [userId, amount]);
 
@@ -151,9 +151,9 @@ export const updateWalletBalance = async (userId, type, amount) => {
 
         switch (type.toUpperCase()) {
             case 'NRG': column = 'energy_balance'; break;
-            case 'DB': column = 'own_token'; break;
+            case 'DB': column = 'own_token_balance'; break;
             case 'LOCKED': column = 'locked_balance'; break;
-            default: column = 'own_token';
+            default: column = 'own_token_balance';
         }
 
         await queryRunner(`
@@ -180,21 +180,21 @@ export const getWalletInfo = async (userId) => {
     try {
 
         let walletRes = await queryRunner(
-            'SELECT energy_balance, own_token FROM user_wallets WHERE user_id = $1',
+            'SELECT energy_balance, own_token_balance FROM user_wallets WHERE user_id = $1',
             [userId]
         );
 
         if (walletRes.length === 0) {
 
             await queryRunner(`
-                INSERT INTO user_wallets (user_id, energy_balance, own_token, locked_balance)
+                INSERT INTO user_wallets (user_id, energy_balance, own_token_balance, locked_balance)
                 VALUES ($1, 0, 0, 0)
                 ON CONFLICT (user_id) DO NOTHING
             `, [userId]);
 
             walletRes = [{
                 energy_balance: 0,
-                own_token: 0
+                own_token_balance: 0
             }];
         }
 
@@ -207,7 +207,7 @@ export const getWalletInfo = async (userId) => {
         const wallet = walletRes[0];
 
         const energyBalance = parseFloat(wallet.energy_balance || 0);
-        const ownTokenBalance = parseFloat(wallet.own_token || 0);
+        const ownTokenBalance = parseFloat(wallet.own_token_balance || 0);
         const locked_balance = parseFloat(stakingRes[0]?.locked_balance || 0);
 
         return serviceResponse(true, 200, 'Wallet info fetched successfully', {
