@@ -123,13 +123,13 @@ const WithdrawPortal = () => {
                             <div className="flex justify-between items-center py-3 border-b border-white/5">
                                 <span className="text-silver/60 text-sm">Selected Network</span>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-white text-sm font-semibold">Polygon POS</span>
+                                    <span className="text-white text-sm font-semibold">BNB Smart Chain</span>
                                     <span className="size-2 rounded-full bg-green-500"></span>
                                 </div>
                             </div>
                             <div className="flex justify-between items-center py-3 border-b border-white/5">
                                 <span className="text-silver/60 text-sm">Estimated Gas Fee</span>
-                                <span className="text-white text-sm font-semibold">0.05 POL</span>
+                                <span className="text-white text-sm font-semibold">0.0005 BNB</span>
                             </div>
                             <div className="flex justify-between items-center py-3 border-b border-white/5">
                                 <span className="text-silver/60 text-sm">Processing Time</span>

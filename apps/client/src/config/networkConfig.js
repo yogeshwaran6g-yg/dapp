@@ -1,4 +1,4 @@
-import { mainnet, polygon, arbitrum, polygonAmoy } from "wagmi/chains";
+import { bsc, bscTestnet } from "wagmi/chains";
 
 /**
  * Global Network Configuration
@@ -7,26 +7,26 @@ import { mainnet, polygon, arbitrum, polygonAmoy } from "wagmi/chains";
 
 export const NETWORKS = {
     mainnet: {
-        chain: polygon,
-        additionalChains: [mainnet, arbitrum],
-        usdtAddress: '0xc2132D059Ac9E4cd988EEdC7C9E7978ABbCe48b0',
-        adminWallet: '0x71C21BF1D394539659A722830fF4e2A0', // Updated from constants.js
+        chain: bsc,
+        additionalChains: [],
+        usdtAddress: '0x55d398326f99059fF775485246999027B3197955', // USDT-BEP20
+        adminWallet: '0x71C21BF1D394539659A722830fF4e2A0',
         rpcUrls: [
-            'https://polygon-rpc.com',
-            'https://polygon.llamarpc.com',
-            'https://rpc.ankr.com/polygon'
+            'https://bsc-dataseed.binance.org/',
+            'https://rpc.ankr.com/bsc',
+            'https://binance.llamarpc.com'
         ]
     },
     testnet: {
-        chain: polygonAmoy,
+        chain: bscTestnet,
         additionalChains: [],
-        usdtAddress: '0xAB32EAed1B1c2afa890a354B6D7D8BA730AcA434',
-        adminWallet: '0xc5bbc1fdfc9c88d6253bbd072bf3b8252287faf0', // From server .env
+        usdtAddress: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd', // BSC Testnet USDT
+        slotActivationAddress: '0xd9145CCE52D386f254917e481eB44e9943F39138', // User needs to redeploy this on BSC
+        adminWallet: '0xc5bbc1fdfc9c88d6253bbd072bf3b8252287faf0',
         rpcUrls: [
-            'https://rpc-amoy.polygon.technology',
-            'https://polygon-amoy-bor-rpc.publicnode.com',
-            'https://1rpc.io/amoy',
-            'https://polygon-amoy.drpc.org'
+            'https://data-seed-prebsc-1-s1.binance.org:8545/',
+            'https://bsc-testnet.publicnode.com',
+            'https://data-seed-prebsc-2-s1.binance.org:8545/'
         ]
     }
 };

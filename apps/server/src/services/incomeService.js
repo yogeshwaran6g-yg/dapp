@@ -4,10 +4,11 @@ import { queryRunner } from '../config/db.js';
  * Distributes slot activation income across referrals and system funds
  * @param {number} userId - The user activating the slot
  * @param {number} totalPrice - The total cost of the slot in USDT
+ * @param {string} txHash - The transaction hash for on-chain verification
  */
-export const distributeIncome = async (userId, totalPrice) => {
+export const distributeIncome = async (userId, totalPrice, txHash) => {
     try {
-        console.log(`--- Starting Distribution for User ${userId}, Amount: ${totalPrice} USDT ---`);
+        console.log(`--- Starting Distribution for User ${userId}, Amount: ${totalPrice} USDT, Tx: ${txHash} ---`);
 
         // 1. Fetch Referral Path (Up to 4 levels)
         const referralPath = await getReferralPath(userId, 4);
@@ -32,9 +33,9 @@ export const distributeIncome = async (userId, totalPrice) => {
 
             // Track income in logs
             await queryRunner(`
-                INSERT INTO income_logs (user_id, source_user_id, amount, level, type)
-                VALUES ($1, $2, $3, $4, 'COMMISSION')
-            `, [referrer.id, userId, amount, i + 1]);
+                INSERT INTO income_logs (user_id, source_user_id, amount, level, type, tx_hash)
+                VALUES ($1, $2, $3, $4, 'COMMISSION', $5)
+            `, [referrer.id, userId, amount, i + 1, txHash]);
 
             console.log(`[Distributed] ${amount} (OWN TOKEN) to Referrer L${i + 1} (User ID: ${referrer.id})`);
         }

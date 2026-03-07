@@ -67,8 +67,8 @@ export default function Hero() {
 
                 {/* Coin 2 - Bottom Right */}
                 <motion.img
-                    src="https://cryptologos.cc/logos/polygon-matic-logo.png"
-                    alt="Polygon"
+                    src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png"
+                    alt="BNB"
                     className="absolute w-32 h-32 lg:w-48 lg:h-48 opacity-15 filter blur-[3px]"
                     animate={{
                         y: [30, -30, 30],
@@ -103,8 +103,8 @@ export default function Hero() {
 
                 {/* Coin 4 - Middle Left (hidden on mobile) */}
                 <motion.img
-                    src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png"
-                    alt="BNB"
+                    src="https://cryptologos.cc/logos/ethereum-eth-logo.png"
+                    alt="Ethereum"
                     className="hidden md:block absolute w-20 h-20 opacity-20 filter blur-[2px]"
                     animate={{
                         y: [25, -25, 25],

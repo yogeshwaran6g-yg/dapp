@@ -37,21 +37,21 @@ const NETWORK_TYPE = process.env.NETWORK_TYPE || "testnet";
 const NETWORK_CONFIG = {
   testnet: {
     RPC_URLS: [
-      'https://rpc-amoy.polygon.technology',
-      'https://polygon-amoy-bor-rpc.publicnode.com',
-      'https://1rpc.io/amoy',
-      'https://polygon-amoy.drpc.org'
+      'https://data-seed-prebsc-1-s1.binance.org:8545/',
+      'https://bsc-testnet.publicnode.com',
+      'https://data-seed-prebsc-2-s1.binance.org:8545/'
     ],
-    USDT_ADDRESS: '0xAB32EAed1B1c2afa890a354B6D7D8BA730AcA434',
+    USDT_ADDRESS: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
+    SLOT_ACTIVATION_ADDRESS: '0xd9145CCE52D386f254917e481eB44e9943F39138',
     ADMIN_WALLET: '0xc5bbc1fdfc9c88d6253bbd072bf3b8252287faf0'
   },
   mainnet: {
     RPC_URLS: [
-      'https://polygon-rpc.com',
-      'https://polygon.llamarpc.com',
-      'https://rpc.ankr.com/polygon'
+      'https://bsc-dataseed.binance.org/',
+      'https://rpc.ankr.com/bsc',
+      'https://binance.llamarpc.com'
     ],
-    USDT_ADDRESS: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+    USDT_ADDRESS: '0x55d398326f99059fF775485246999027B3197955',
     ADMIN_WALLET: '0x71C21BF1D394539659A722830fF4e2A0'
   }
 };

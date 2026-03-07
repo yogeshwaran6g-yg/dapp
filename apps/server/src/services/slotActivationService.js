@@ -1,7 +1,7 @@
 import { queryRunner } from '../config/db.js';
 import { serviceResponse } from '../utils/helper.js';
 import { ACTIVE_CONFIG } from '../config/constants.js';
-import { getWalletBalance, calculateEligibleLevel } from './blockchainService.js';
+import { getWalletBalance, calculateEligibleLevel, verifyTransaction } from './blockchainService.js';
 import { distributeIncome } from './incomeService.js';
 
 const SLOT_PRICES = {
@@ -22,7 +22,11 @@ const SLOT_PRICES = {
 export const getSlotActivation = async (userId) => {
     try {
         const result = await queryRunner(
-            'SELECT * FROM levels WHERE id = $1',
+            `SELECT l.*, r.wallet_address as referrer_address 
+             FROM levels l 
+             JOIN users u ON l.id = u.id 
+             LEFT JOIN users r ON u.referred_by = r.id 
+             WHERE l.id = $1`,
             [userId]
         );
 
@@ -73,24 +77,29 @@ export const updateSlotActivation = async (userId, { current_level_id: currentLe
             );
             console.log(`[SlotActivationService] Activation via Internal Token. Deducting ${price} from user ${userId}`);
         } else {
-            // Default USDT Payment
-            if (txHash === 'MOCK_USDT_PAYMENT') {
-                console.log(`[SlotActivationService] Activation via MOCK USDT PAYMENT for demo purposes. User: ${userId}`);
-            } else if (!txHash) {
-                const balances = await getWalletBalance(user.wallet_address);
-                const usdtBalance = parseFloat(balances.usdtBalance || '0');
+            // dynamic USDT Payment via Blockchain Contract
+            if (!txHash) {
+                return serviceResponse(false, 400, 'Blockchain transaction hash (txHash) is required for USDT activation');
+            }
 
-                if (usdtBalance < price) {
-                    return serviceResponse(false, 403, `Insufficient USDT Balance! You need $${price} USDT for this slot. (Current: $${usdtBalance})`);
-                }
-            } else {
-                console.log(`[SlotActivationService] Activation via USDT Received. Hash: ${txHash}`);
+            // Verify the transaction on-chain
+            const isValid = await verifyTransaction(txHash, user.wallet_address, price);
+            if (!isValid) {
+                return serviceResponse(false, 400, 'Invalid blockchain transaction. Verification failed.');
+            }
+
+            console.log(`[SlotActivationService] Processing Dynamic USDT Activation. User: ${userId}, TxHash: ${txHash}`);
+
+            // Check if this txHash has already been used to prevent replay attacks
+            const existingTx = await queryRunner('SELECT id FROM income_logs WHERE tx_hash = $1', [txHash]);
+            if (existingTx.length > 0) {
+                return serviceResponse(false, 400, 'This transaction has already been used for activation');
             }
         }
 
         // 2. Execution & Distribution
         // Distribute income
-        await distributeIncome(userId, price);
+        await distributeIncome(userId, price, txHash);
 
         // Upgrade level
         await queryRunner(
@@ -110,9 +119,9 @@ export const updateSlotActivation = async (userId, { current_level_id: currentLe
 
         // Track energy credit in logs for UI visibility
         await queryRunner(`
-            INSERT INTO income_logs (user_id, source_user_id, amount, level, type)
-            VALUES ($1, $1, $2, $3, 'ENERGY_CREDIT')
-        `, [userId, price, currentLevelId]);
+            INSERT INTO income_logs (user_id, source_user_id, amount, level, type, tx_hash)
+            VALUES ($1, $1, $2, $3, 'ENERGY_CREDIT', $4)
+        `, [userId, price, currentLevelId, txHash]);
 
         console.log(`[SlotActivationService] Credited ${price} Energy Tokens to user ${userId} (Slot ${currentLevelId})`);
 

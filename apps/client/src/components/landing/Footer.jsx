@@ -18,7 +18,7 @@ export default function Footer() {
                 >
                     <div className="col-span-1 md:col-span-2">
                         <div className="flex items-center gap-2 mb-6">
-                            <div className="w-8 h-8 bg-gradient-to-br from-gold to-gold-dark rounded-lg flex items-center justify-center">
+                            <div className="w-8 h-8 bg-linear-to-br from-gold to-gold-dark rounded-lg flex items-center justify-center">
                                 <span className="text-black font-bold text-sm font-display">B</span>
                             </div>
                             <span className="text-white font-display font-bold text-xl uppercase tracking-tighter">
@@ -64,7 +64,7 @@ export default function Footer() {
 
                 <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-gray-600 text-xs">
-                        © 2026 BMIN Token Ecosystem. All rights reserved. Built on Polygon.
+                        © 2026 BMIN Token Ecosystem. All rights reserved. Built on BNB Smart Chain.
                     </p>
                     <div className="flex space-x-6 text-gray-600 text-xs">
                         <a href="#" className="hover:text-gray-400 transition-colors">Privacy Policy</a>

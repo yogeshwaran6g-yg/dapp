@@ -159,83 +159,83 @@ const Header = ({ onMenuClick }) => {
                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                 className="absolute right-0 mt-3 w-72 bg-[#0b0b0f]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
                             >
-                                    <div className="p-5 space-y-4">
-                                        {/* Wallet header row */}
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-accent-gold/10 flex items-center justify-center border border-accent-gold/20">
-                                                    <Wallet size={18} className="text-accent-gold" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-xs font-black text-white uppercase tracking-wider">Connected Wallet</h4>
-                                                    <p className="text-[10px] text-gray-500 font-medium">Polygon Network</p>
-                                                </div>
+                                <div className="p-5 space-y-4">
+                                    {/* Wallet header row */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-accent-gold/10 flex items-center justify-center border border-accent-gold/20">
+                                                <Wallet size={18} className="text-accent-gold" />
                                             </div>
-                                            <button
-                                                onClick={copyAddress}
-                                                className="p-1.5 rounded-lg bg-white/5 text-gray-400 hover:text-accent-gold transition-colors"
-                                            >
-                                                {copied ? <Check size={14} /> : <Copy size={14} />}
-                                            </button>
-                                        </div>
-
-                                        {/* Balance block */}
-                                        <div className="bg-white/5 rounded-xl p-4 border border-white/5 space-y-3">
-                                            {/* POL */}
                                             <div>
-                                                <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest block mb-1">
-                                                    Native Balance
-                                                </span>
-                                                <div className="flex items-baseline gap-2">
-                                                    <span className="text-xl font-black text-white">
-                                                        {balanceData?.polBalance || '0.00'}
-                                                    </span>
-                                                    <span className="text-xs font-bold text-accent-gold uppercase">POL</span>
-                                                </div>
+                                                <h4 className="text-xs font-black text-white uppercase tracking-wider">Connected Wallet</h4>
+                                                <p className="text-[10px] text-gray-500 font-medium">BNB Smart Chain</p>
                                             </div>
-
-                                            {/* USDT */}
-                                            <div className="pt-2 border-t border-white/5">
-                                                <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest block mb-1">
-                                                    Asset Balance
-                                                </span>
-                                                <div className="flex items-baseline gap-2">
-                                                    <span className="text-xl font-black text-white">
-                                                        {balanceData?.usdtBalance || '0.00'}
-                                                    </span>
-                                                    <span className="text-xs font-bold text-green-500 uppercase">USDT</span>
-                                                </div>
-                                            </div>
-
-
-                                            {/* Full address */}
-                                            <p className="text-[10px] text-gray-500 font-mono break-all opacity-60 pt-1">
-                                                {address}
-                                            </p>
                                         </div>
-
-                                        {/* Actions */}
-                                        <div className="space-y-2">
-                                            <a
-                                                href={`https://polygonscan.com/address/${address}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-white transition-all border border-white/5 hover:border-white/10 group"
-                                            >
-                                                <span className="font-bold uppercase tracking-wider">View on Scan</span>
-                                                <ExternalLink size={14} className="text-gray-500 group-hover:text-accent-gold transition-colors" />
-                                            </a>
-
-                                            <button
-                                                onClick={() => { setShowDropdown(false); logout(); }}
-                                                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-all border border-red-500/10 hover:border-red-500/20 group"
-                                            >
-                                                <span className="font-black uppercase tracking-wider text-[10px]">Disconnect Wallet</span>
-                                                <LogOut size={14} className="group-hover:translate-x-1 transition-transform" />
-                                            </button>
-                                        </div>
+                                        <button
+                                            onClick={copyAddress}
+                                            className="p-1.5 rounded-lg bg-white/5 text-gray-400 hover:text-accent-gold transition-colors"
+                                        >
+                                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                                        </button>
                                     </div>
-                                </motion.div>
+
+                                    {/* Balance block */}
+                                    <div className="bg-white/5 rounded-xl p-4 border border-white/5 space-y-3">
+                                        {/* POL */}
+                                        <div>
+                                            <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest block mb-1">
+                                                Native Balance
+                                            </span>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-xl font-black text-white">
+                                                    {balanceData?.bnbBalance || '0.00'}
+                                                </span>
+                                                <span className="text-xs font-bold text-[#F3BA2F] uppercase">BNB</span>
+                                            </div>
+                                        </div>
+
+                                        {/* USDT */}
+                                        <div className="pt-2 border-t border-white/5">
+                                            <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest block mb-1">
+                                                Asset Balance
+                                            </span>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-xl font-black text-white">
+                                                    {balanceData?.usdtBalance || '0.00'}
+                                                </span>
+                                                <span className="text-xs font-bold text-green-500 uppercase">USDT</span>
+                                            </div>
+                                        </div>
+
+
+                                        {/* Full address */}
+                                        <p className="text-[10px] text-gray-500 font-mono break-all opacity-60 pt-1">
+                                            {address}
+                                        </p>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="space-y-2">
+                                        <a
+                                            href={`https://bscscan.com/address/${address}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-white transition-all border border-white/5 hover:border-white/10 group"
+                                        >
+                                            <span className="font-bold uppercase tracking-wider">View on Scan</span>
+                                            <ExternalLink size={14} className="text-gray-500 group-hover:text-accent-gold transition-colors" />
+                                        </a>
+
+                                        <button
+                                            onClick={() => { setShowDropdown(false); logout(); }}
+                                            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-all border border-red-500/10 hover:border-red-500/20 group"
+                                        >
+                                            <span className="font-black uppercase tracking-wider text-[10px]">Disconnect Wallet</span>
+                                            <LogOut size={14} className="group-hover:translate-x-1 transition-transform" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
                         )}
                     </AnimatePresence>
                 </div>

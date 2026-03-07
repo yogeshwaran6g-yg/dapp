@@ -48,16 +48,16 @@ const getBestProvider = async () => {
 
 export const getWalletBalance = async (address) => {
     try {
-        if (!address) return { polBalance: '0.00', usdtBalance: '0.00' };
+        if (!address) return { bnbBalance: '0.00', usdtBalance: '0.00' };
 
         const activeProvider = await getBestProvider();
         console.log(`[BlockchainService] Scanning balances for ${address} on ${NETWORK_TYPE}...`);
 
-        // Native POL
-        let polBalance = '0.00';
+        // Native BNB
+        let bnbBalance = '0.00';
         try {
             const nativeBalance = await activeProvider.getBalance(address);
-            polBalance = parseFloat(ethers.formatEther(nativeBalance)).toFixed(4);
+            bnbBalance = parseFloat(ethers.formatEther(nativeBalance)).toFixed(4);
         } catch (e) {
             console.error(`[BlockchainService] Native balance error: ${e.message}`);
         }
@@ -90,11 +90,11 @@ export const getWalletBalance = async (address) => {
             }
         }
 
-        console.log(`[BlockchainService] Final: ${polBalance} POL, ${usdtBalance} USDT`);
-        return { polBalance, usdtBalance };
+        console.log(`[BlockchainService] Final: ${bnbBalance} BNB, ${usdtBalance} USDT`);
+        return { bnbBalance, usdtBalance };
     } catch (err) {
         console.error(`[BlockchainService] Error: ${err.message}`);
-        return { polBalance: '0.00', usdtBalance: '0.00' };
+        return { bnbBalance: '0.00', usdtBalance: '0.00' };
     }
 };
 
@@ -111,4 +111,40 @@ export const calculateEligibleLevel = (balance) => {
     if (balance >= 80) return 3;
     if (balance >= 40) return 2;
     return 1;
+};
+
+/**
+ * Verify a transaction on-chain
+ * @param {string} txHash 
+ * @param {string} expectedUserAddress 
+ * @param {number} expectedAmount 
+ * @returns {Promise<boolean>}
+ */
+export const verifyTransaction = async (txHash, expectedUserAddress, expectedAmount) => {
+    try {
+        const activeProvider = await getBestProvider();
+        console.log(`[BlockchainService] Verifying transaction: ${txHash}`);
+
+        // Wait for at least 1 confirmation
+        const receipt = await activeProvider.waitForTransaction(txHash, 1, 15000); // 15s timeout
+        if (!receipt || receipt.status !== 1) return false;
+
+        // Verify it was sent to the SlotActivation contract
+        const contractAddress = ACTIVE_CONFIG.SLOT_ACTIVATION_ADDRESS.toLowerCase();
+        if (receipt.to.toLowerCase() !== contractAddress) {
+            console.warn(`[BlockchainService] Transaction target mismatch. Target: ${receipt.to}, Expected: ${contractAddress}`);
+            return false;
+        }
+
+        // Verify the sender
+        if (receipt.from.toLowerCase() !== expectedUserAddress.toLowerCase()) {
+            console.warn(`[BlockchainService] Transaction sender mismatch. Sender: ${receipt.from}, Expected: ${expectedUserAddress}`);
+            return false;
+        }
+
+        return true;
+    } catch (err) {
+        console.error(`[BlockchainService] Transaction verification failed: ${err.message}`);
+        return false;
+    }
 };

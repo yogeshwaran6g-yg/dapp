@@ -19,7 +19,7 @@ const ERC20_ABI = [
 
 export const WalletProvider = ({ children }) => {
     const { address, isConnected } = useAccount();
-    const [polBalance, setPolBalance] = useState('0.00');
+    const [bnbBalance, setBnbBalance] = useState('0.00');
     const [usdtBalance, setUsdtBalance] = useState('0.00');
     const [energyBalance, setEnergyBalance] = useState(0);
     const [ownBalance, setOwnBalance] = useState('0.00');
@@ -31,7 +31,7 @@ export const WalletProvider = ({ children }) => {
 
     const fetchBalance = useCallback(async () => {
         if (!isConnected || !address) {
-            setPolBalance('0.00');
+            setBnbBalance('0.00');
             setUsdtBalance('0.00');
             return;
         }
@@ -186,7 +186,7 @@ export const WalletProvider = ({ children }) => {
     return (
         <WalletContext.Provider
             value={{
-                polBalance,
+                bnbBalance,
                 usdtBalance,
                 energyBalance,
                 ownBalance,

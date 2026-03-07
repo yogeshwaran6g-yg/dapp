@@ -7,6 +7,10 @@ import SlotLevelCard from './SlotActivation/SlotLevelCard';
 import ActivationModal from './SlotActivation/ActivationModal';
 import { walletApiService } from '../services/walletApiService';
 import { LEVEL_THRESHOLDS, LEVELS_DATA } from './SlotActivation/constants';
+import { useAccount, useWriteContract, useReadContract } from 'wagmi';
+import { parseUnits } from 'viem';
+import { getActiveNetwork } from '../config/networkConfig';
+import { SLOT_ABI, USDT_ABI } from '../abis/SlotActivation';
 
 const SlotActivation = () => {
     let user = null;
@@ -22,7 +26,20 @@ const SlotActivation = () => {
     const { mutate: updateSlotActivation, isPending: isUpdatingBackend, variables } = useUpdateSlotActivation(userId || '');
     const { data: walletData, refetch: refetchBalance } = useWalletBalance();
 
+    const { address: userWalletAddress } = useAccount();
+    const network = getActiveNetwork();
+    const { writeContractAsync } = useWriteContract();
+
+    // Check USDT allowance
+    const { data: allowance, refetch: refetchAllowance } = useReadContract({
+        address: network.usdtAddress,
+        abi: USDT_ABI,
+        functionName: 'allowance',
+        args: [userWalletAddress, network.slotActivationAddress],
+    });
+
     const currentActiveLevel = slotActivation?.data?.current_level_id ?? slotActivation?.current_level_id ?? 1;
+    const referrerAddress = slotActivation?.data?.referrer_address || slotActivation?.referrer_address || '0x0000000000000000000000000000000000000000';
     const [pendingLevel, setPendingLevel] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalLevel, setModalLevel] = useState(null);
@@ -35,27 +52,65 @@ const SlotActivation = () => {
         setIsModalOpen(true);
     };
 
-    const handleConfirmActivation = (method) => {
+    const handleConfirmActivation = async (method) => {
         const level = modalLevel;
+        const cost = modalCost;
         setPendingLevel(level);
         setIsModalOpen(false);
 
-        // Directly update backend instead of waiting for on-chain transaction
-        updateSlotActivation({
-            current_level_id: level,
-            payment_type: method,
-            tx_hash: method === 'USDT' ? 'MOCK_USDT_PAYMENT' : null
-        }, {
-            onSuccess: () => {
-                toast.success(`Level ${level} Activation successful!`);
-                setPendingLevel(null);
-                refetchBalance();
-            },
-            onError: (error) => {
-                toast.error(`Activation failed: ${error.message}`);
-                setPendingLevel(null);
+        try {
+            let txHash = null;
+
+            if (method === 'USDT') {
+                const amountUnits = parseUnits(cost.toString(), 6); // USDT usually 6 decimals
+
+                // 1. Check & Handle Allowance
+                if (!allowance || allowance < amountUnits) {
+                    toast.info("Approving USDT for activation...");
+                    const approveTx = await writeContractAsync({
+                        address: network.usdtAddress,
+                        abi: USDT_ABI,
+                        functionName: 'approve',
+                        args: [network.slotActivationAddress, amountUnits * BigInt(10)], // Approve more to avoid repeat
+                    });
+                    // Wait a bit for approval (Ideally use useWaitForTransactionReceipt)
+                    await new Promise(resolve => setTimeout(resolve, 4000));
+                    refetchAllowance();
+                }
+
+                // 2. On-chain Activation
+                toast.info("Submitting activation request to blockchain...");
+                const activateTx = await writeContractAsync({
+                    address: network.slotActivationAddress,
+                    abi: SLOT_ABI,
+                    functionName: 'activateSlot',
+                    args: [referrerAddress, amountUnits]
+                });
+                txHash = activateTx;
+                toast.success("Blockchain transaction confirmed! Syncing with platform...");
             }
-        });
+
+            // 3. Update backend
+            updateSlotActivation({
+                current_level_id: level,
+                payment_type: method,
+                tx_hash: txHash || (method === 'USDT' ? 'MOCK_USDT_PAYMENT' : null)
+            }, {
+                onSuccess: () => {
+                    toast.success(`Level ${level} Activation successful!`);
+                    setPendingLevel(null);
+                    refetchBalance();
+                },
+                onError: (error) => {
+                    toast.error(`Backend sync failed: ${error.message}`);
+                    setPendingLevel(null);
+                }
+            });
+        } catch (err) {
+            console.error(err);
+            toast.error(err.shortMessage || err.message || "Transaction failed");
+            setPendingLevel(null);
+        }
     };
 
     const handleTopUp = async () => {

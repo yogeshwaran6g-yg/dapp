@@ -1,0 +1,93 @@
+Status:           SUCCESS ✅
+Contract Address: 0xd9145CCE52D386f254917e481eB44e9943F39138
+Transaction Hash: 0x539423df...caa8d
+Gas Used:         1,079,901
+All 5 Wallets:    0x329Eace5...13B84
+
+
+
+
+
+
+
+
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+contract SlotActivation is ReentrancyGuard {
+
+    uint256 public slotPrice = 0.1 ether;
+
+    address public royaltyWallet;
+    address public productWallet;
+    address public devWallet;
+    address public expenseWallet;
+    address public developmentWallet;
+
+    mapping(address => address) public referrer;
+    mapping(address => bool) public activated;
+
+    event SlotActivated(address indexed user, address indexed referrer, uint256 amount);
+
+    constructor(
+        address _royaltyWallet,
+        address _productWallet,
+        address _devWallet,
+        address _expenseWallet,
+        address _developmentWallet
+    ) {
+        royaltyWallet     = _royaltyWallet;
+        productWallet     = _productWallet;
+        devWallet         = _devWallet;
+        expenseWallet     = _expenseWallet;
+        developmentWallet = _developmentWallet;
+    }
+
+    function activateSlot(address _referrer) external payable nonReentrant {
+        require(!activated[msg.sender], "Slot already activated");
+        require(_referrer != msg.sender, "Cannot refer yourself");
+        require(msg.value == slotPrice, "Incorrect BNB amount");
+
+        activated[msg.sender] = true;
+        referrer[msg.sender]  = _referrer;
+
+        uint256 systemAmount   = slotPrice / 2;
+        uint256 referralAmount = slotPrice / 2;
+
+        distributeSystem(systemAmount);
+        distributeReferral(msg.sender, referralAmount);
+
+        emit SlotActivated(msg.sender, _referrer, slotPrice);
+    }
+
+    function distributeSystem(uint256 amount) internal {
+        _send(royaltyWallet,     (amount * 40) / 100);
+        _send(productWallet,     (amount * 20) / 100);
+        _send(devWallet,         (amount * 20) / 100);
+        _send(expenseWallet,     (amount * 10) / 100);
+        _send(developmentWallet, (amount * 10) / 100);
+    }
+
+    function distributeReferral(address user, uint256 amount) internal {
+        address l1 = referrer[user];
+        address l2 = referrer[l1];
+        address l3 = referrer[l2];
+        address l4 = referrer[l3];
+
+        if (l1 != address(0)) _send(l1, (amount * 50) / 100);
+        if (l2 != address(0)) _send(l2, (amount * 30) / 100);
+        if (l3 != address(0)) _send(l3, (amount * 10) / 100);
+        if (l4 != address(0)) _send(l4, (amount * 10) / 100);
+    }
+
+    function _send(address to, uint256 amount) internal {
+        (bool success, ) = payable(to).call{value: amount}("");
+        require(success, "BNB transfer failed");
+    }
+
+    receive() external payable {}
+}

@@ -68,27 +68,58 @@ const ActivationModal = ({ isOpen, onClose, onConfirm, level, cost, usdtBalance,
                             </div>
 
                             {!canActivate ? (
-                                <div className="space-y-4 text-center py-4 px-6 bg-red-500/10 border border-red-500/20 rounded-2xl">
-                                    <div className="flex justify-center text-red-500 mb-2">
-                                        <AlertCircle size={48} />
+                                <div className="space-y-4">
+                                    <div className="space-y-4 text-center py-4 px-6 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                                        <div className="flex justify-center text-red-500 mb-2">
+                                            <AlertCircle size={48} />
+                                        </div>
+                                        <h3 className="text-red-500 font-bold uppercase tracking-widest text-sm">Insufficient Token</h3>
+                                        <p className="text-white/60 text-xs leading-relaxed">
+                                            You don't have enough funds in either wallet to activate this level.
+                                            Please top up your USDT or internal OWN TOKEN balance.
+                                        </p>
+                                        <div className="flex flex-col gap-2 pt-2">
+                                            <div className="flex justify-between text-[10px] uppercase font-black tracking-widest">
+                                                <span className="text-white/40">Required:</span>
+                                                <span className="text-white">{cost} USDT / OWN</span>
+                                            </div>
+                                            <div className="flex justify-between text-[10px] uppercase font-black tracking-widest">
+                                                <span className="text-white/40">USDT Wallet:</span>
+                                                <span className="text-red-400">{usdtBalance} USDT</span>
+                                            </div>
+                                            <div className="flex justify-between text-[10px] uppercase font-black tracking-widest">
+                                                <span className="text-white/40">OWN Internal:</span>
+                                                <span className="text-red-400">{dbBalance} OWN</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <h3 className="text-red-500 font-bold uppercase tracking-widest text-sm">Insufficient Token</h3>
-                                    <p className="text-white/60 text-xs leading-relaxed">
-                                        You don't have enough funds in either wallet to activate this level.
-                                        Please top up your USDT or internal OWN TOKEN balance.
-                                    </p>
-                                    <div className="flex flex-col gap-2 pt-2">
-                                        <div className="flex justify-between text-[10px] uppercase font-black tracking-widest">
-                                            <span className="text-white/40">Required:</span>
-                                            <span className="text-white">{cost} USDT / OWN</span>
-                                        </div>
-                                        <div className="flex justify-between text-[10px] uppercase font-black tracking-widest">
-                                            <span className="text-white/40">USDT Wallet:</span>
-                                            <span className="text-red-400">{usdtBalance} USDT</span>
-                                        </div>
-                                        <div className="flex justify-between text-[10px] uppercase font-black tracking-widest">
-                                            <span className="text-white/40">OWN Internal:</span>
-                                            <span className="text-red-400">{dbBalance} OWN</span>
+
+                                    {/* Testnet USDT Instructions */}
+                                    <div className="p-4 bg-gold/5 border border-gold/20 rounded-2xl space-y-3">
+                                        <h4 className="text-gold text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                            <AlertCircle size={14} /> Need Testnet USDT?
+                                        </h4>
+                                        <p className="text-[10px] text-white/50 leading-relaxed">
+                                            To test on BNB Smart Chain Testnet, you can get free test tokens from the official faucet.
+                                        </p>
+                                        <div className="grid grid-cols-1 gap-2">
+                                            <a
+                                                href="https://testnet.bnbchain.org/faucet-smart"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="block text-center py-2 bg-gold/10 hover:bg-gold/20 text-gold text-[9px] font-black uppercase rounded-lg border border-gold/20 transition-all no-underline"
+                                            >
+                                                1. Get BNB / USDT (Official Faucet)
+                                            </a>
+                                            <button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText('0x337610d27c682E347C9cD60BD4b3b107C9d34dDd');
+                                                    alert('USDT Contract Address copied to clipboard!');
+                                                }}
+                                                className="block text-center py-2 bg-white/5 hover:bg-white/10 text-white text-[9px] font-black uppercase rounded-lg border border-white/10 transition-all"
+                                            >
+                                                2. Copy USDT Contract Address
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

@@ -17,7 +17,7 @@ export const getWalletBalance = async (req, res) => {
 
         const responseData = {
             address,
-            polBalance: balances.polBalance,
+            bnbBalance: balances.bnbBalance,
             usdtBalance: balances.usdtBalance,
             own_token: internalInfo.data?.own_token || 0,
             energyBalance: internalInfo.data?.energy_balance || 0,
@@ -34,7 +34,7 @@ export const getWalletBalance = async (req, res) => {
 
 export const getFaucet = async (req, res) => {
     try {
-        return rtnRes(res, 200, "The internal faucet is currently disabled. Please use an official Polygon Amoy faucet for testnet POL/USDT.");
+        return rtnRes(res, 200, "The internal faucet is currently disabled. Please use an official BNB Smart Chain faucet for testnet BNB/USDT.");
     } catch (err) {
         console.error("Error from getFaucet controller:", err);
         return rtnRes(res, 500, "Internal Error in faucet");
